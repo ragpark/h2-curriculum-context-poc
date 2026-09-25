@@ -1,0 +1,99 @@
+# Synthetic teacher materials. Class 10X (Ms Okafor) is currently in week 4 of the scheme of work.
+# Each "## " section becomes one semantic unit that the aligner tags.
+classes:
+  - {id: "10X", teacher: "Ms Okafor (fictional)", current_week: 4, scheme: "Year 10 Foundation — Algebra: equations"}
+  - {id: "10Y", teacher: "Mr Hale (fictional)", current_week: 4, scheme: "Year 10 Higher — Algebra: equations"}
+
+materials:
+  - id: mat:10x-w1-function-machines
+    class: "10X"
+    week: 1
+    title: "Week 1 — Function machines and inverse operations"
+    body: |
+      ## Starter: work backwards through the machine
+      A number goes into a function machine: × 4 then + 3. The output is 23.
+      Work backwards using the inverse of each operation: − 3 then ÷ 4. The input was 5.
+      Remember: undo the last thing that was done first.
+
+      ## Writing the machine as an equation
+      The machine × 4, + 3 with output 23 is the same as the equation 4x + 3 = 23.
+      Solve one-step equations like x + 9 = 14 by using the inverse operation.
+
+  - id: mat:10x-w2-two-step-balance
+    class: "10X"
+    week: 2
+    title: "Week 2 — Two-step equations with the balance"
+    body: |
+      ## The equation is a balance
+      Think of 2x + 3 = 11 as balance scales. Both sides weigh the same.
+      Whatever we do to one side we must do to the other side to keep it balanced.
+
+      ## Using a bar model
+      Draw a bar model: two x bars and a 3 bar make 11 altogether.
+      Take away 3 from both sides: two x bars make 8, so one bar is 4. Solve 3x − 4 = 17 the same way.
+
+  - id: mat:10x-w3-like-terms-tiles
+    class: "10X"
+    week: 3
+    title: "Week 3 — Collecting like terms with algebra tiles"
+    body: |
+      ## Modelling expressions with tiles
+      Use algebra tiles: x tiles and unit tiles. 5x + 3 − 2x + 4 — collect the like terms by grouping the x tiles and the unit tiles.
+      Simplify to 3x + 7. The letter x stands for a number, not an object.
+
+  - id: mat:10x-w4-both-sides
+    class: "10X"
+    week: 4
+    title: "Week 4, lesson 2 — Unknowns on both sides: keep it balanced"
+    body: |
+      ## Worked example: x on both sides
+      Solve 5x + 3 = 2x + 12. Draw the bar model for each side of the balance.
+      Subtract 2x from both sides: 3x + 3 = 12. Subtract 3 from both sides: 3x = 9, so x = 3.
+
+      ## Common mistake: why the sign changes
+      Some pupils write 7x = 15 because they move the 2x across the equals sign without changing it — a sign error when moving a term.
+      We never 'move' a term: we do the same to both sides to keep it balanced, so the 2x is subtracted from both sides.
+
+      ## Practice: unknowns on both sides
+      Solve 7x − 2 = 3x + 10 and 4x + 5 = x − 7. Check each answer by substituting back — both sides should have the same value.
+
+  - id: mat:10x-w4-homework
+    class: "10X"
+    week: 4
+    title: "Week 4 homework — Mixed practice: both sides"
+    body: |
+      ## Homework: solve and check
+      Solve equations with the unknown on both sides using the balance method. Show the same step on both sides every time.
+      Is x = 2 a solution of 3x + 1 = x + 5? Explain why both sides are equal.
+
+  - id: mat:10x-w5-brackets
+    class: "10X"
+    week: 5
+    title: "Week 5 — Brackets first, then balance (planned)"
+    body: |
+      ## Expanding with the grid method
+      Use the grid method to expand 3(x + 2): multiply every term inside the bracket by 3 to get 3x + 6, not 3x + 2.
+      Expand −2(x − 3) carefully: a negative times a negative is positive, so −2x + 6.
+
+      ## Solving equations with brackets
+      Solve 3(x + 2) = 21. Expand the bracket, then keep it balanced: 3x + 6 = 21, so 3x = 15 and x = 5.
+
+  - id: mat:10x-w6-inequalities
+    class: "10X"
+    week: 6
+    title: "Week 6 — Inequalities on a number line (planned)"
+    body: |
+      ## Showing inequalities
+      Represent x > −3 on a number line with an open circle. Use a closed circle for ≥ or ≤.
+
+      ## Solving inequalities
+      Solve linear inequalities with the balance method. When dividing by a negative, reverse the inequality: −2x < 6 gives x > −3.
+
+  - id: mat:10y-w4-change-sign
+    class: "10Y"
+    week: 4
+    title: "10Y Week 4 — Equations: change side, change sign"
+    body: |
+      ## Quick method for both sides
+      For 5x + 3 = 2x + 12 use change side, change sign: move the 2x over so it becomes −2x, and move the +3 over so it becomes −3.
+      So 3x = 9 and x = 3.

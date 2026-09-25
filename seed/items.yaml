@@ -1,0 +1,144 @@
+# Item bank — each item is aligned to concepts; each distractor is aligned to the misconception it reveals.
+items:
+  - id: item:inv-1
+    prompt: "A number is multiplied by 4, then 3 is added. The result is 23. What was the number?"
+    concepts: [cc:maths/alg/inverse-ops]
+    answer: "5"
+    distractors:
+      - {response: "6.5", misconception: mc:maths/alg/inverse-order}
+  - id: item:inv-2
+    prompt: "What is the inverse of 'subtract 7'?"
+    concepts: [cc:maths/alg/inverse-ops]
+    answer: "add 7"
+    distractors: []
+  - id: item:dir-1
+    prompt: "Work out −2 × −3"
+    concepts: [cc:maths/num/directed-numbers]
+    answer: "6"
+    distractors:
+      - {response: "−6", misconception: mc:maths/num/neg-times-neg}
+  - id: item:dir-2
+    prompt: "Work out 4 − (−5)"
+    concepts: [cc:maths/num/directed-numbers]
+    answer: "9"
+    distractors:
+      - {response: "−1", misconception: null}
+  - id: item:clt-1
+    prompt: "Simplify 5x + 3 − 2x + 4"
+    concepts: [cc:maths/alg/collect-like-terms]
+    answer: "3x + 7"
+    distractors:
+      - {response: "10x", misconception: mc:maths/alg/letter-as-object}
+  - id: item:one-1
+    prompt: "Solve x + 9 = 14"
+    concepts: [cc:maths/alg/lin-eq-one-step]
+    answer: "x = 5"
+    distractors:
+      - {response: "x = 23", misconception: mc:maths/alg/equals-as-answer}
+  - id: item:two-1
+    prompt: "Solve 2x + 3 = 11"
+    concepts: [cc:maths/alg/lin-eq-two-step]
+    answer: "x = 4"
+    distractors:
+      - {response: "x = 2.5", misconception: mc:maths/alg/inverse-order}
+      - {response: "x = 7", misconception: mc:maths/alg/sign-transfer}
+  - id: item:two-2
+    prompt: "Solve 3x − 4 = 17"
+    concepts: [cc:maths/alg/lin-eq-two-step]
+    answer: "x = 7"
+    distractors:
+      - {response: "x = 13/3", misconception: mc:maths/alg/sign-transfer}
+  - id: item:bs-1
+    prompt: "Solve 5x + 3 = 2x + 12"
+    concepts: [cc:maths/alg/lin-eq-both-sides]
+    answer: "x = 3"
+    distractors:
+      - {response: "x = 9/7", misconception: mc:maths/alg/sign-transfer}
+      - {response: "x = 5", misconception: mc:maths/alg/sign-transfer}
+  - id: item:bs-2
+    prompt: "Solve 7x − 2 = 3x + 10"
+    concepts: [cc:maths/alg/lin-eq-both-sides]
+    answer: "x = 3"
+    distractors:
+      - {response: "x = 1.2", misconception: mc:maths/alg/sign-transfer}
+  - id: item:bs-3
+    prompt: "Solve 4x + 5 = x − 7"
+    concepts: [cc:maths/alg/lin-eq-both-sides, cc:maths/num/directed-numbers]
+    answer: "x = −4"
+    distractors:
+      - {response: "x = 4", misconception: mc:maths/alg/sign-transfer}
+      - {response: "x = −2.4", misconception: mc:maths/alg/sign-transfer}
+  - id: item:bs-4
+    prompt: "Is x = 2 a solution of 3x + 1 = x + 5? Explain."
+    concepts: [cc:maths/alg/lin-eq-both-sides]
+    answer: "Yes — both sides equal 7"
+    distractors:
+      - {response: "No — the answer should be 7", misconception: mc:maths/alg/equals-as-answer}
+  - id: item:exp-1
+    prompt: "Expand 3(x + 2)"
+    concepts: [cc:maths/alg/expand-single]
+    answer: "3x + 6"
+    distractors:
+      - {response: "3x + 2", misconception: mc:maths/alg/partial-expansion}
+  - id: item:exp-2
+    prompt: "Expand −2(x − 3)"
+    concepts: [cc:maths/alg/expand-single, cc:maths/num/directed-numbers]
+    answer: "−2x + 6"
+    distractors:
+      - {response: "−2x − 6", misconception: mc:maths/num/neg-times-neg}
+  - id: item:br-1
+    prompt: "Solve 3(x + 2) = 21"
+    concepts: [cc:maths/alg/lin-eq-brackets]
+    answer: "x = 5"
+    distractors:
+      - {response: "x = 19/3", misconception: mc:maths/alg/partial-expansion}
+  - id: item:ineq-1
+    prompt: "Solve −2x < 6"
+    concepts: [cc:maths/alg/lin-inequalities]
+    answer: "x > −3"
+    distractors:
+      - {response: "x < −3", misconception: mc:maths/alg/inequality-flip}
+
+# Synthetic pupils (no real data). Class 10X is taught by the fictional Ms Okafor.
+pupils:
+  - {id: pupil:amara, name: "Amara (synthetic)", class: "10X"}
+  - {id: pupil:ben, name: "Ben (synthetic)", class: "10X"}
+  - {id: pupil:chloe, name: "Chloe (synthetic)", class: "10X"}
+
+# Preset evidence scenarios. 'item' evidence carries concept IDs (aligned source);
+# 'activity' evidence is an untagged markbook entry the aligner must interpret.
+scenarios:
+  - id: sign-transfer
+    title: "Sign-transfer pattern on both-sides equations"
+    pupil: pupil:amara
+    story: "Secure on inverse operations and two-step equations, but repeatedly moves terms across the equals sign without changing the operation."
+    events:
+      - {source: "Homework platform", item: item:inv-1, response: "5"}
+      - {source: "Homework platform", item: item:inv-2, response: "add 7"}
+      - {source: "Homework platform", item: item:one-1, response: "x = 5"}
+      - {source: "Homework platform", item: item:two-1, response: "x = 4"}
+      - {source: "Homework platform", item: item:two-2, response: "x = 7"}
+      - {source: "Homework platform", item: item:clt-1, response: "3x + 7"}
+      - {source: "Vendor X tutor", item: item:bs-1, response: "x = 5"}
+      - {source: "Vendor X tutor", item: item:bs-2, response: "x = 1.2"}
+      - {source: "Vendor X tutor", item: item:bs-1, response: "x = 9/7"}
+      - {source: "Vendor X tutor", item: item:bs-3, response: "x = 4"}
+      - {source: "Teacher markbook", activity: "Algebra 3 homework — solving equations with x on both sides", score: 0.45}
+  - id: brackets-gap
+    title: "Secure on equations, gap in expanding brackets"
+    pupil: pupil:ben
+    story: "Solves equations well but only multiplies the first term in a bracket and struggles with negatives."
+    events:
+      - {source: "Homework platform", item: item:two-1, response: "x = 4"}
+      - {source: "Homework platform", item: item:bs-1, response: "x = 3"}
+      - {source: "Homework platform", item: item:bs-2, response: "x = 3"}
+      - {source: "Vendor X tutor", item: item:exp-1, response: "3x + 2"}
+      - {source: "Vendor X tutor", item: item:exp-2, response: "−2x − 6"}
+      - {source: "Vendor X tutor", item: item:dir-1, response: "−6"}
+      - {source: "Vendor X tutor", item: item:br-1, response: "x = 19/3"}
+  - id: new-starter
+    title: "New to the strand"
+    pupil: pupil:chloe
+    story: "Only a single markbook entry so far — the aligner has to interpret an untagged activity title."
+    events:
+      - {source: "Teacher markbook", activity: "Starter quiz: inverse operations and one-step equations", score: 0.8}

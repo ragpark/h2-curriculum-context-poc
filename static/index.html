@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H2 Curriculum Context Layer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">H2</div>
+    <div><h1>Curriculum Context Layer</h1><p>Proof of concept · KS3–4 linear equations · synthetic data only</p></div>
+  </div>
+  <div class="status-chips" id="chips"></div>
+</header>
+
+<div class="layout">
+  <nav class="nav" id="nav">
+    <button data-page="overview"><span class="num">0</span>Overview</button>
+    <button data-page="graph"><span class="num">1</span>Reference graph<span class="ntag">H2</span></button>
+    <button data-page="materials"><span class="num">2</span>Teacher materials<span class="ntag">H3</span></button>
+    <button data-page="evidence"><span class="num">3</span>Learner evidence<span class="ntag">H1</span></button>
+    <button data-page="context"><span class="num">4</span>Tutor context<span class="ntag">all</span></button>
+    <button data-page="evaluate"><span class="num">5</span>Evaluate</button>
+    <div class="sep"></div>
+    <button data-page="connect"><span class="num">⌁</span>Connect a tutor</button>
+    <div class="foot">No real pupil data. Pupils, classes and teachers are fictional.</div>
+  </nav>
+
+  <main>
+    <!-- OVERVIEW -->
+    <section class="page" id="page-overview">
+      <div class="page-head">
+        <div class="eyebrow">How the arrangement works</div>
+        <h2>One shared model of the curriculum, three things pointing at it</h2>
+        <p>H2 is a governed curriculum graph with services around it. Teacher materials (H3) and learner evidence (H1) are both aligned to the same concept IDs, so a tutor can reason across them in a single context call. Click any box to see that part in action.</p>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <svg class="arch" id="arch" viewBox="0 0 980 490" role="img" aria-label="Architecture: reference graph, alignment service, content index, evidence store, learner state, context assembly"></svg>
+      </div>
+      <div class="grid g2">
+          <div class="card">
+            <h3>Walk through it</h3>
+            <p class="sub">Each step builds on the last. Or run everything in one go.</p>
+            <div class="steps" id="steps"></div>
+            <div class="row" style="margin-top:12px">
+              <button class="btn primary" id="btn-prepare">Run the whole demo</button>
+              <button class="btn" id="btn-reset">Reset</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Four layers, kept separate</h3>
+            <p class="sub">This separation is what lets the graph be shared publicly while alignments and learner state stay private to each school.</p>
+            <table class="t">
+              <tr><td><b>Reference graph</b></td><td>Shared, versioned, governed</td></tr>
+              <tr><td><b>Alignments</b></td><td>Machine-generated, with provenance and confidence</td></tr>
+              <tr><td><b>Evidence</b></td><td>Append-only, never rewritten</td></tr>
+              <tr><td><b>Learner state</b></td><td>Derived projection, rebuildable</td></tr>
+            </table>
+          </div>
+      </div>
+    </section>
+
+    <!-- GRAPH -->
+    <section class="page" id="page-graph">
+      <div class="page-head">
+        <div class="eyebrow">H2 · Reference graph</div>
+        <h2>The shared curriculum model</h2>
+        <p>Concepts laid out left to right by prerequisite depth. Misconceptions, methods and representations are first-class nodes linked to concepts. Select a concept to see its neighbourhood, crosswalks and how much is aligned to it. Use the overlay to see a class's coverage or a pupil's mastery on the same graph.</p>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head">
+          <div><h3>Concept graph <span class="badge" id="g-version"></span></h3><p class="sub" id="g-counts"></p></div>
+          <div class="actions">
+            <select class="input" id="g-overlay" style="width:auto"></select>
+          </div>
+        </div>
+        <div class="graph-wrap"><svg id="g-svg"></svg></div>
+        <div class="legend" id="g-legend"></div>
+      </div>
+      <div class="grid g-side">
+        <div class="stack">
+          <div class="card">
+            <h3>Other node types</h3>
+            <p class="sub">These make the graph useful for teaching, not just sequencing.</p>
+            <div id="g-others"></div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div><h3>Versioning: simulate a graph release</h3>
+              <p class="sub">Release 2026.3 merges “one-step” and “two-step” equations into one concept. Watch what happens to each layer.</p></div>
+              <div class="actions"><button class="btn" id="btn-release">Release 2026.3</button></div>
+            </div>
+            <div id="release-out" class="note">Concepts are never deleted. They are deprecated with a <code>replacedBy</code> link. Alignments are migrated, evidence is left untouched, and learner state is rebuilt from the evidence.</div>
+          </div>
+        </div>
+        <div><div class="card inspector" id="g-inspector" style="position:sticky;top:76px"><div class="empty">Select a concept in the graph</div></div></div>
+      </div>
+    </section>
+
+    <!-- MATERIALS -->
+    <section class="page" id="page-materials">
+      <div class="page-head">
+        <div class="eyebrow">H3 · Teacher materials</div>
+        <h2>Align the teacher's own materials to the graph, with no teacher effort</h2>
+        <p>Each material is split into teaching units. The alignment service tags every unit with concepts, the teaching method, the representation and any misconceptions it addresses. The dated tags then give the class's <em>taught-so-far</em> set and the teacher's preferred method. Tags below 0.5 confidence go to an optional review queue (dashed outline).</p>
+      </div>
+      <div class="grid g-side">
+        <div class="card">
+          <div class="card-head">
+            <div><h3>Materials</h3><p class="sub" id="m-sub"></p></div>
+            <div class="actions">
+              <div class="seg" id="m-class"></div>
+              <button class="btn primary" id="btn-ingest-all">Ingest &amp; align all</button>
+            </div>
+          </div>
+          <div id="m-list"></div>
+        </div>
+        <div class="stack">
+          <div class="card">
+            <h3>Class coverage</h3>
+            <p class="sub">Derived from aligned, dated materials. The tutor uses this to stay within what's been taught.</p>
+            <div id="m-coverage"></div>
+          </div>
+          <div class="card">
+            <h3>Try the aligner</h3>
+            <p class="sub">Paste any teaching text. You can add it to the class as a new material.</p>
+            <textarea class="input" id="try-text">Use the balance to solve 6x − 4 = 2x + 8. Subtract 2x from both sides, then add 4 to both sides. Watch out for pupils who move the 2x across the equals sign and forget to change the operation.</textarea>
+            <div class="row" style="margin-top:8px">
+              <button class="btn primary" id="btn-try">Align</button>
+              <button class="btn" id="btn-add-mat">Add to class as week 4 material</button>
+            </div>
+            <div id="try-out" style="margin-top:10px"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EVIDENCE -->
+    <section class="page" id="page-evidence">
+      <div class="page-head">
+        <div class="eyebrow">H1 · Learner evidence</div>
+        <h2>Turn activity into a learner model the tutor can reason with</h2>
+        <p>Evidence arrives from several sources. Items already carry concept IDs. Untagged markbook entries are interpreted by the alignment service. Everything goes into an append-only store. The learner model is then rebuilt, and the graph spreads the evidence: success counts as weak evidence for prerequisites, and wrong answers are traced to the misconception that caused them.</p>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="pupils" id="e-pupils"></div>
+      </div>
+      <div class="grid g-side">
+        <div class="stack">
+          <div class="card">
+            <div class="card-head"><div><h3>Learner model</h3><p class="sub" id="e-sub"></p></div>
+              <div class="actions"><button class="btn sm" id="btn-e-clear">Clear evidence</button></div></div>
+            <div id="e-explain"></div>
+            <div class="graph-wrap" style="margin-top:12px"><svg id="e-svg"></svg></div>
+            <div class="legend" id="e-legend"></div>
+          </div>
+          <div class="grid g2">
+            <div class="card"><h3>Concept states</h3><p class="sub">Mastery estimates, from direct and inferred evidence</p><div id="e-states"></div></div>
+            <div class="card"><h3>Misconceptions</h3><p class="sub">Strength builds with each diagnosed error and fades with later successes</p><div id="e-mcs"></div></div>
+          </div>
+          <div class="card"><h3>Evidence log</h3><p class="sub">Append-only. Every row records its source, how it was aligned and the graph version.</p><div class="tbl-wrap" id="e-log"></div></div>
+        </div>
+        <div class="stack">
+          <div class="card" id="e-scenario"></div>
+          <div class="card">
+            <h3>Record an answer</h3>
+            <p class="sub">An aligned item. Wrong answers that match a known distractor are diagnosed as a misconception.</p>
+            <div class="field"><label>Item</label><select class="input" id="e-item"></select></div>
+            <div class="field" style="margin-top:8px"><label>Pupil's response</label><select class="input" id="e-resp"></select></div>
+            <div class="field" style="margin-top:8px"><label>Source</label><select class="input" id="e-src"><option>Vendor X tutor</option><option>Homework platform</option><option>Classroom quiz</option></select></div>
+            <button class="btn primary" style="margin-top:10px" id="btn-e-item">Record answer</button>
+          </div>
+          <div class="card">
+            <h3>Record a markbook entry</h3>
+            <p class="sub">No concept IDs, just an activity title and a score. The alignment service works out what it covered.</p>
+            <div class="field"><label>Activity</label><input class="input" id="e-act" value="Quiz: expanding brackets and simplifying"></div>
+            <div class="field" style="margin-top:8px"><label>Score <span id="e-score-v">60%</span></label><input type="range" id="e-score" min="0" max="100" value="60"></div>
+            <button class="btn" style="margin-top:10px" id="btn-e-act">Record entry</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTEXT -->
+    <section class="page" id="page-context">
+      <div class="page-head">
+        <div class="eyebrow">H1 + H2 + H3 · Context assembly</div>
+        <h2>What a tutor gets for one turn: without H2 vs with H2</h2>
+        <p>The same pupil and the same message. On the left is what a tutor can gather without a shared model: raw activity and text-similarity search. On the right is the H2 context pack, where the pupil's learner model, the teacher's method and materials, and the curriculum graph are joined on the same concept IDs. With an Anthropic key set, the same tutor prompt answers from each context.</p>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="row">
+          <div class="field" style="flex:0 1 200px"><label>Pupil</label><select class="input" id="c-pupil"></select></div>
+          <div class="field" style="flex:3 1 320px"><label>Pupil's message</label><input class="input" id="c-msg"></div>
+          <div class="field" style="flex:1 1 220px"><label>Focus concept (optional)</label><select class="input" id="c-concept"></select></div>
+          <button class="btn primary" id="btn-ctx">Assemble &amp; ask tutor</button>
+        </div>
+        <div class="suggest" id="c-suggest"></div>
+        <div id="c-warn" style="margin-top:10px"></div>
+      </div>
+      <div class="grid g2" id="c-out"><div class="empty" style="grid-column:1/-1">Choose a pupil and message, then assemble the context.</div></div>
+    </section>
+
+    <!-- EVALUATE -->
+    <section class="page" id="page-evaluate">
+      <div class="page-head">
+        <div class="eyebrow">Evidence for the hypotheses</div>
+        <h2>Evaluate</h2>
+        <p>Two measures. First, how accurately the alignment service tags content, checked against a hand-aligned gold set. Second, a blind A/B test of tutor replies with and without H2 context, scored by an LLM judge against the classroom ground truth. Treat the judge as indicative; confirm with teacher review.</p>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <div class="card-head">
+            <div><h3>Alignment quality</h3><p class="sub">14 hand-aligned teaching units, scored per facet</p></div>
+            <div class="actions"><div class="seg" id="ev-mode"></div><button class="btn primary" id="btn-ev-align">Run</button></div>
+          </div>
+          <div id="ev-align"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div><h3>Tutor A/B: without H2 vs with H2</h3><p class="sub">5 scripted pupil turns · 4 criteria scored 0–2 · replies shown to the judge in random order</p></div>
+            <div class="actions"><button class="btn primary" id="btn-ev-tutor">Run</button></div>
+          </div>
+          <div id="ev-tutor"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONNECT -->
+    <section class="page" id="page-connect">
+      <div class="page-head">
+        <div class="eyebrow">Integration surface</div>
+        <h2>Connect a tutor</h2>
+        <p>Any MCP-capable AI tutor can use H2 without a bespoke integration. Every capability is also available as REST.</p>
+      </div>
+      <div class="grid g2">
+        <div class="card">
+          <h3>MCP endpoint</h3>
+          <p class="sub">Streamable HTTP, stateless. Add it as a custom connector in Claude, or in any MCP client.</p>
+          <div class="row"><input class="input mono" id="mcp-url" readonly><button class="btn" id="btn-copy">Copy</button></div>
+          <h4 style="margin:16px 0 6px;font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Tools</h4>
+          <table class="t">
+            <tr><td><code>get_learning_context</code></td><td>The full H2 context pack for a tutor turn</td></tr>
+            <tr><td><code>get_prerequisites</code></td><td>A concept's neighbourhood, misconceptions and crosswalks</td></tr>
+            <tr><td><code>find_teacher_materials</code></td><td>The teacher's own materials for a concept, boosted by method</td></tr>
+            <tr><td><code>align_text</code></td><td>Tag any text against the graph</td></tr>
+            <tr><td><code>record_evidence</code></td><td>Write evidence back and update the learner model</td></tr>
+          </table>
+          <p class="sub" style="margin-top:12px">Try it: connect it in Claude, then say “I'm pupil:amara, help me with 5x + 3 = 2x + 12”.</p>
+        </div>
+        <div class="card">
+          <h3>REST API</h3>
+          <p class="sub">OpenAPI docs are at <a href="/docs" target="_blank">/docs</a>.</p>
+          <pre class="json" id="curl-ex"></pre>
+          <h4 style="margin:16px 0 6px;font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Configuration</h4>
+          <table class="t">
+            <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Turns on the Claude aligner, live tutor replies and the A/B evaluation</td></tr>
+            <tr><td><code>ANTHROPIC_MODEL</code></td><td>Optional. Defaults to <code>claude-sonnet-5</code></td></tr>
+            <tr><td><code>ALIGNER_MODE</code></td><td><code>auto</code> (default), <code>heuristic</code> or <code>claude</code></td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+# H2 reference graph — KS3–4 algebra: linear equations strand (illustrative seed).
+# Layers: this file is the REFERENCE GRAPH (instances). The SCHEMA (node/edge types)
+# is fixed in app/schema.py. Alignments and learner state are derived at runtime.
+graph_version: "2026.2"
+subject: Mathematics
+strand: "Algebra — linear equations (KS3–KS4)"
+
+concepts:
+  - id: cc:maths/alg/notation
+    label: Use and interpret algebraic notation
+    key_stage: [KS3]
+    keywords: [notation, "algebraic notation", "3x means", "letter represents", variable]
+  - id: cc:maths/num/directed-numbers
+    label: Calculate with negative numbers
+    key_stage: [KS3]
+    keywords: [negative, directed, "negative number", "negative numbers", "subtract a negative"]
+  - id: cc:maths/alg/substitution
+    label: Substitute numbers into expressions
+    key_stage: [KS3]
+    keywords: [substitute, substitution, "evaluate", "when x ="]
+  - id: cc:maths/alg/inverse-ops
+    label: Use inverse operations
+    key_stage: [KS3]
+    keywords: [inverse, "inverse operation", undo, opposite, reverse, "function machine"]
+  - id: cc:maths/alg/collect-like-terms
+    label: Simplify expressions by collecting like terms
+    key_stage: [KS3]
+    keywords: [collect, "like terms", simplify, "collecting like terms", group]
+  - id: cc:maths/alg/expand-single
+    label: Expand a single bracket
+    key_stage: [KS3]
+    keywords: [expand, bracket, brackets, "multiply out", "expanding brackets", "single bracket"]
+  - id: cc:maths/alg/factorise-single
+    label: Factorise into a single bracket
+    key_stage: [KS3]
+    keywords: [factorise, "common factor", "highest common factor"]
+  - id: cc:maths/alg/lin-eq-one-step
+    label: Solve one-step linear equations
+    key_stage: [KS3]
+    keywords: [solve, equation, "one-step", "one step", "one-step equations"]
+  - id: cc:maths/alg/lin-eq-two-step
+    label: Solve two-step linear equations
+    key_stage: [KS3]
+    keywords: [solve, equation, "two-step", "two step", "two-step equations", "2x + 3 = 11", "4x + 3 = 23"]
+  - id: cc:maths/alg/lin-eq-both-sides
+    label: Solve linear equations with the unknown on both sides
+    key_stage: [KS3, KS4]
+    keywords: [solve, equation, "unknown on both sides", "x on both sides", "unknowns on both sides", "5x + 3 = 2x + 12"]
+  - id: cc:maths/alg/lin-eq-brackets
+    label: Solve linear equations involving brackets
+    key_stage: [KS3, KS4]
+    keywords: [solve, equation, brackets, bracket, "3(x + 2)", "expand then solve"]
+  - id: cc:maths/alg/lin-eq-fractions
+    label: Solve linear equations involving fractions
+    key_stage: [KS4]
+    keywords: [solve, equation, fraction, fractions, denominator, "x/3", "multiply through"]
+  - id: cc:maths/alg/form-equations
+    label: Form and solve equations from a context
+    key_stage: [KS3, KS4]
+    keywords: [form, "word problem", context, "form an equation", perimeter, "think of a number", "write an equation"]
+  - id: cc:maths/alg/rearrange-formulae
+    label: Change the subject of a formula
+    key_stage: [KS4]
+    keywords: [rearrange, subject, formula, "change the subject", "make x the subject"]
+  - id: cc:maths/alg/lin-inequalities
+    label: Solve linear inequalities
+    key_stage: [KS4]
+    keywords: [inequality, inequalities, "less than", "greater than", "integer values", "solve the inequality"]
+  - id: cc:maths/alg/inequality-number-line
+    label: Represent inequalities on a number line
+    key_stage: [KS3]
+    keywords: ["number line", "open circle", "closed circle", inequality, represent]
+  - id: cc:maths/alg/coordinates
+    label: Plot coordinates in four quadrants
+    key_stage: [KS3]
+    keywords: [coordinates, quadrant, axes, plot, point]
+  - id: cc:maths/alg/straight-line-graphs
+    label: Plot straight-line graphs
+    key_stage: [KS3]
+    keywords: [graph, "straight line", "table of values", plot, "y ="]
+  - id: cc:maths/alg/gradient-intercept
+    label: Identify gradient and intercept (y = mx + c)
+    key_stage: [KS4]
+    keywords: [gradient, intercept, "y = mx + c", slope, steepness]
+  - id: cc:maths/alg/solve-graphically
+    label: Solve equations graphically
+    key_stage: [KS4]
+    keywords: [graphically, "intersection", "where the lines cross", "read off"]
+  - id: cc:maths/alg/simultaneous-linear
+    label: Solve simultaneous linear equations
+    key_stage: [KS4]
+    keywords: [simultaneous, elimination, "two equations", "pair of equations"]
+  - id: cc:maths/alg/expand-double
+    label: Expand double brackets
+    key_stage: [KS4]
+    keywords: ["double brackets", "(x + 2)(x + 3)", FOIL, "expand double", "product of two brackets"]
+  - id: cc:maths/alg/quadratic-factorise
+    label: Solve quadratic equations by factorising
+    key_stage: [KS4]
+    keywords: [quadratic, "x squared", "factorise the quadratic", "x²"]
+
+# prerequisiteOf: A is a prerequisite of B (strength 0–1)
+prerequisites:
+  - [cc:maths/alg/notation, cc:maths/alg/substitution, 0.8]
+  - [cc:maths/alg/notation, cc:maths/alg/collect-like-terms, 0.9]
+  - [cc:maths/alg/notation, cc:maths/alg/lin-eq-one-step, 0.8]
+  - [cc:maths/alg/inverse-ops, cc:maths/alg/lin-eq-one-step, 1.0]
+  - [cc:maths/alg/lin-eq-one-step, cc:maths/alg/lin-eq-two-step, 1.0]
+  - [cc:maths/alg/inverse-ops, cc:maths/alg/lin-eq-two-step, 0.9]
+  - [cc:maths/alg/lin-eq-two-step, cc:maths/alg/lin-eq-both-sides, 1.0]
+  - [cc:maths/alg/collect-like-terms, cc:maths/alg/lin-eq-both-sides, 0.8]
+  - [cc:maths/num/directed-numbers, cc:maths/alg/lin-eq-both-sides, 0.7]
+  - [cc:maths/num/directed-numbers, cc:maths/alg/expand-single, 0.7]
+  - [cc:maths/alg/collect-like-terms, cc:maths/alg/expand-single, 0.7]
+  - [cc:maths/alg/expand-single, cc:maths/alg/factorise-single, 0.9]
+  - [cc:maths/alg/expand-single, cc:maths/alg/lin-eq-brackets, 1.0]
+  - [cc:maths/alg/lin-eq-both-sides, cc:maths/alg/lin-eq-brackets, 0.9]
+  - [cc:maths/alg/lin-eq-brackets, cc:maths/alg/lin-eq-fractions, 0.8]
+  - [cc:maths/alg/lin-eq-two-step, cc:maths/alg/form-equations, 0.9]
+  - [cc:maths/alg/lin-eq-both-sides, cc:maths/alg/form-equations, 0.6]
+  - [cc:maths/alg/lin-eq-two-step, cc:maths/alg/rearrange-formulae, 0.8]
+  - [cc:maths/alg/substitution, cc:maths/alg/rearrange-formulae, 0.6]
+  - [cc:maths/alg/lin-eq-both-sides, cc:maths/alg/lin-inequalities, 0.9]
+  - [cc:maths/alg/inequality-number-line, cc:maths/alg/lin-inequalities, 0.7]
+  - [cc:maths/alg/substitution, cc:maths/alg/straight-line-graphs, 0.8]
+  - [cc:maths/alg/coordinates, cc:maths/alg/straight-line-graphs, 1.0]
+  - [cc:maths/alg/straight-line-graphs, cc:maths/alg/gradient-intercept, 1.0]
+  - [cc:maths/alg/rearrange-formulae, cc:maths/alg/gradient-intercept, 0.6]
+  - [cc:maths/alg/straight-line-graphs, cc:maths/alg/solve-graphically, 0.9]
+  - [cc:maths/alg/lin-eq-both-sides, cc:maths/alg/simultaneous-linear, 0.9]
+  - [cc:maths/alg/solve-graphically, cc:maths/alg/simultaneous-linear, 0.5]
+  - [cc:maths/alg/expand-single, cc:maths/alg/expand-double, 1.0]
+  - [cc:maths/alg/expand-double, cc:maths/alg/quadratic-factorise, 0.9]
+  - [cc:maths/alg/factorise-single, cc:maths/alg/quadratic-factorise, 0.7]
+
+misconceptions:
+  - id: mc:maths/alg/sign-transfer
+    label: Sign error when moving a term across the equals sign
+    description: Moves a term to the other side without changing the operation (e.g. 5x + 3 = 2x + 12 → 7x = 15).
+    affects: [cc:maths/alg/lin-eq-both-sides, cc:maths/alg/lin-eq-brackets, cc:maths/alg/rearrange-formulae, cc:maths/alg/lin-inequalities]
+    keywords: ["sign error", "moving a term", "wrong sign", "across the equals sign", "why the sign changes"]
+  - id: mc:maths/alg/inverse-order
+    label: Undoes operations in the wrong order
+    description: Divides before subtracting when solving 2x + 3 = 11, giving x = 11/2 − 3.
+    affects: [cc:maths/alg/lin-eq-two-step, cc:maths/alg/rearrange-formulae]
+    keywords: ["wrong order", "reverse order", "last thing that was done first", "undo the last"]
+  - id: mc:maths/alg/partial-expansion
+    label: Multiplies only the first term inside a bracket
+    description: Writes 3(x + 2) as 3x + 2.
+    affects: [cc:maths/alg/expand-single, cc:maths/alg/lin-eq-brackets]
+    keywords: ["every term", "each term inside", "both terms", "only the first term", "3x + 2"]
+  - id: mc:maths/num/neg-times-neg
+    label: Believes a negative multiplied by a negative is negative
+    description: Writes −2 × −3 = −6, so −2(x − 3) becomes −2x − 6.
+    affects: [cc:maths/num/directed-numbers, cc:maths/alg/expand-single]
+    keywords: ["negative times a negative", "two negatives", "-2(x - 3)", "minus times minus"]
+  - id: mc:maths/alg/inequality-flip
+    label: Does not reverse the inequality when multiplying or dividing by a negative
+    description: Solves −2x < 6 as x < −3.
+    affects: [cc:maths/alg/lin-inequalities]
+    keywords: ["reverse the inequality", "flip the sign", "dividing by a negative"]
+  - id: mc:maths/alg/letter-as-object
+    label: Treats letters as objects or labels rather than numbers
+    description: Reads 3a as "three apples".
+    affects: [cc:maths/alg/notation, cc:maths/alg/form-equations]
+    keywords: ["apples", "fruit salad", "stands for a number", "not an object"]
+  - id: mc:maths/alg/equals-as-answer
+    label: Reads "=" as "the answer is" rather than equivalence
+    description: Struggles to accept an expression on the right-hand side of an equation.
+    affects: [cc:maths/alg/lin-eq-one-step, cc:maths/alg/lin-eq-both-sides]
+    keywords: ["equals means", "equivalence", "balance means equal", "both sides are equal"]
+  - id: mc:maths/alg/fraction-partial
+    label: Multiplies only one term by the denominator
+    description: From x/3 + 2 = 5 writes x + 2 = 15.
+    affects: [cc:maths/alg/lin-eq-fractions]
+    keywords: ["every term by the denominator", "clear the fraction", "only one term by the denominator"]
+
+methods:
+  - id: md:maths/alg/balance
+    label: Balance method — do the same to both sides
+    teaches: [cc:maths/alg/lin-eq-one-step, cc:maths/alg/lin-eq-two-step, cc:maths/alg/lin-eq-both-sides, cc:maths/alg/lin-eq-brackets, cc:maths/alg/lin-eq-fractions, cc:maths/alg/lin-inequalities, cc:maths/alg/rearrange-formulae]
+    keywords: [balance, balanced, scales, "same to both sides", "keep it balanced", "do the same", "balance method"]
+  - id: md:maths/alg/change-side-change-sign
+    label: "“Change side, change sign” rule"
+    teaches: [cc:maths/alg/lin-eq-two-step, cc:maths/alg/lin-eq-both-sides, cc:maths/alg/lin-eq-brackets, cc:maths/alg/rearrange-formulae]
+    keywords: ["change side change sign", "change side, change sign", "move it over", "swap the sign", "hop over"]
+  - id: md:maths/alg/function-machine
+    label: Function machines and inverse operations
+    teaches: [cc:maths/alg/inverse-ops, cc:maths/alg/lin-eq-one-step, cc:maths/alg/lin-eq-two-step, cc:maths/alg/rearrange-formulae]
+    keywords: ["function machine", "machine", "input", "output", "work backwards"]
+  - id: md:maths/alg/grid-method
+    label: Grid method for expanding brackets
+    teaches: [cc:maths/alg/expand-single, cc:maths/alg/expand-double]
+    keywords: ["grid method", grid, "box method"]
+  - id: md:maths/alg/elimination
+    label: Elimination method
+    teaches: [cc:maths/alg/simultaneous-linear]
+    keywords: [elimination, eliminate, "add the equations", "subtract the equations"]
+
+representations:
+  - id: rp:bar-model
+    label: Bar model
+    keywords: ["bar model", bars, "bar diagram", "bar"]
+  - id: rp:algebra-tiles
+    label: Algebra tiles
+    keywords: ["algebra tiles", tiles, tile]
+  - id: rp:number-line
+    label: Number line
+    keywords: ["number line"]
+  - id: rp:function-machine-diagram
+    label: Function machine diagram
+    keywords: ["function machine", machine, "input", "output"]
+  - id: rp:balance-scales
+    label: Balance scales picture
+    keywords: [scales, "balance scales", "weighing"]
+  - id: rp:graph
+    label: Cartesian graph
+    keywords: [graph, axes, plot]
+
+# Crosswalks — illustrative mappings to external schemes.
+# "shared-layer" IDs are placeholders for whatever shared public curriculum layer the programme adopts.
+crosswalk:
+  - [cc:maths/alg/lin-eq-both-sides, dfe-gcse-maths, A17, closeMatch]
+  - [cc:maths/alg/lin-eq-brackets, dfe-gcse-maths, A17, closeMatch]
+  - [cc:maths/alg/lin-eq-fractions, dfe-gcse-maths, A17, closeMatch]
+  - [cc:maths/alg/lin-eq-two-step, dfe-gcse-maths, A17, broadMatch]
+  - [cc:maths/alg/expand-single, dfe-gcse-maths, A4, broadMatch]
+  - [cc:maths/alg/expand-double, dfe-gcse-maths, A4, broadMatch]
+  - [cc:maths/alg/collect-like-terms, dfe-gcse-maths, A4, broadMatch]
+  - [cc:maths/alg/factorise-single, dfe-gcse-maths, A4, broadMatch]
+  - [cc:maths/alg/rearrange-formulae, dfe-gcse-maths, A5, closeMatch]
+  - [cc:maths/alg/coordinates, dfe-gcse-maths, A8, exactMatch]
+  - [cc:maths/alg/straight-line-graphs, dfe-gcse-maths, A9, closeMatch]
+  - [cc:maths/alg/gradient-intercept, dfe-gcse-maths, A10, closeMatch]
+  - [cc:maths/alg/simultaneous-linear, dfe-gcse-maths, A19, closeMatch]
+  - [cc:maths/alg/form-equations, dfe-gcse-maths, A21, closeMatch]
+  - [cc:maths/alg/lin-inequalities, dfe-gcse-maths, A22, closeMatch]
+  - [cc:maths/alg/quadratic-factorise, dfe-gcse-maths, A18, broadMatch]
+  - [cc:maths/alg/lin-eq-both-sides, shared-layer, "shared:ks3/algebra/solving-equations/unknown-both-sides", exactMatch]
+  - [cc:maths/alg/lin-eq-brackets, shared-layer, "shared:ks3/algebra/solving-equations/brackets", exactMatch]
+  - [cc:maths/alg/lin-eq-two-step, shared-layer, "shared:ks3/algebra/solving-equations/two-step", exactMatch]
+  - [cc:maths/alg/expand-single, shared-layer, "shared:ks3/algebra/expressions/expanding", exactMatch]
+  - [cc:maths/alg/inverse-ops, shared-layer, "shared:ks3/algebra/solving-equations/inverse-operations", exactMatch]

@@ -1,0 +1,17 @@
+# Hand-aligned gold set used to measure alignment precision/recall per facet.
+# Unit IDs are <material id>#<section index>.
+gold:
+  "mat:10x-w1-function-machines#0": {concepts: [cc:maths/alg/inverse-ops], method: md:maths/alg/function-machine, representation: rp:function-machine-diagram, misconceptions: [mc:maths/alg/inverse-order]}
+  "mat:10x-w1-function-machines#1": {concepts: [cc:maths/alg/lin-eq-two-step, cc:maths/alg/lin-eq-one-step], method: md:maths/alg/function-machine, representation: rp:function-machine-diagram, misconceptions: []}
+  "mat:10x-w2-two-step-balance#0": {concepts: [cc:maths/alg/lin-eq-two-step], method: md:maths/alg/balance, representation: rp:balance-scales, misconceptions: []}
+  "mat:10x-w2-two-step-balance#1": {concepts: [cc:maths/alg/lin-eq-two-step], method: md:maths/alg/balance, representation: rp:bar-model, misconceptions: []}
+  "mat:10x-w3-like-terms-tiles#0": {concepts: [cc:maths/alg/collect-like-terms], method: null, representation: rp:algebra-tiles, misconceptions: [mc:maths/alg/letter-as-object]}
+  "mat:10x-w4-both-sides#0": {concepts: [cc:maths/alg/lin-eq-both-sides], method: md:maths/alg/balance, representation: rp:bar-model, misconceptions: []}
+  "mat:10x-w4-both-sides#1": {concepts: [cc:maths/alg/lin-eq-both-sides], method: md:maths/alg/balance, representation: null, misconceptions: [mc:maths/alg/sign-transfer]}
+  "mat:10x-w4-both-sides#2": {concepts: [cc:maths/alg/lin-eq-both-sides], method: null, representation: null, misconceptions: []}
+  "mat:10x-w4-homework#0": {concepts: [cc:maths/alg/lin-eq-both-sides], method: md:maths/alg/balance, representation: null, misconceptions: [mc:maths/alg/equals-as-answer]}
+  "mat:10x-w5-brackets#0": {concepts: [cc:maths/alg/expand-single], method: md:maths/alg/grid-method, representation: null, misconceptions: [mc:maths/alg/partial-expansion, mc:maths/num/neg-times-neg]}
+  "mat:10x-w5-brackets#1": {concepts: [cc:maths/alg/lin-eq-brackets], method: md:maths/alg/balance, representation: null, misconceptions: []}
+  "mat:10x-w6-inequalities#0": {concepts: [cc:maths/alg/inequality-number-line], method: null, representation: rp:number-line, misconceptions: []}
+  "mat:10x-w6-inequalities#1": {concepts: [cc:maths/alg/lin-inequalities], method: md:maths/alg/balance, representation: null, misconceptions: [mc:maths/alg/inequality-flip]}
+  "mat:10y-w4-change-sign#0": {concepts: [cc:maths/alg/lin-eq-both-sides], method: md:maths/alg/change-side-change-sign, representation: null, misconceptions: []}

@@ -1,4 +1,4 @@
-/* H2 POC UI — plain JS, no build step. */
+/* Curriculum Map for AI Tutors — POC UI, plain JS, no build step. */
 const S = { status: null, graph: null, labels: {}, page: "overview", pupil: "pupil:amara", cls: "10X", mode: null,
   sel: null, overlay: "none", visited: new Set(), items: [], pupils: [], scenarios: [], lastExplain: null, ctxDone: false, evalDone: false };
 
@@ -53,10 +53,10 @@ async function refreshStatus() {
   S.status = await api("/api/status");
   const st = S.status, c = st.counts;
   $("#chips").innerHTML = [
-    `<span class="chip ok"><span class="dot"></span>Graph ${esc(st.graph_version)}</span>`,
-    `<span class="chip ${st.llm_available ? "ok" : "warn"}"><span class="dot"></span>Aligner: ${st.aligner_mode === "claude" ? "Claude" : "heuristic"}</span>`,
+    `<span class="chip ok"><span class="dot"></span>Map ${esc(st.graph_version)}</span>`,
+    `<span class="chip ${st.llm_available ? "ok" : "warn"}"><span class="dot"></span>Tagger: ${st.aligner_mode === "claude" ? "Claude" : "keyword"}</span>`,
     `<span class="chip ${st.llm_available ? "ok" : "warn"}"><span class="dot"></span>${st.llm_available ? "Tutor: " + esc(st.model) : "No Anthropic key"}</span>`,
-    `<span class="chip"><span class="dot"></span>${c.alignment} alignments · ${c.evidence} evidence</span>`,
+    `<span class="chip"><span class="dot"></span>${c.alignment} tags · ${c.evidence} pupil answers</span>`,
   ].join("");
   renderArch(); renderSteps();
 }
@@ -74,10 +74,10 @@ function renderOverview() { renderArch(); renderSteps(); }
 function renderSteps() {
   const c = S.status?.counts || {};
   const steps = [
-    ["graph", "Explore the reference graph", "Concepts, misconceptions, methods, crosswalks", S.visited.has("graph")],
-    ["materials", "Ingest teacher materials (H3)", "Align them to the graph and derive class coverage", c.content_unit > 0],
-    ["evidence", "Record learner evidence (H1)", "Build a learner model tied to the same concepts", c.evidence > 0],
-    ["context", "Compare tutor contexts", "Without H2 vs with H2, for the same pupil turn", S.ctxDone],
+    ["graph", "Explore the curriculum map", "Topics, misconceptions, teaching methods, links to other curricula", S.visited.has("graph")],
+    ["materials", "Tag the teacher's materials", "Tag them against the map and work out what the class has covered", c.content_unit > 0],
+    ["evidence", "Record pupil progress", "Build a picture of each pupil's progress on the same topics", c.evidence > 0],
+    ["context", "Compare tutor briefings", "Raw classroom data vs organised by the map, for the same pupil question", S.ctxDone],
     ["evaluate", "Evaluate", "Alignment accuracy and the tutor A/B test", S.evalDone],
   ];
   $("#steps").innerHTML = steps.map(([p, t, d, done], i) => `<div class="step ${done ? "done" : ""}" data-go="${p}"><div class="n">${done ? "✓" : i + 1}</div><div><div class="t">${t}</div><div class="d">${d}</div></div></div>`).join("");
@@ -103,28 +103,28 @@ function renderArch() {
     <marker id="ah-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"/></marker>
   </defs>
   <rect class="frame" x="222" y="14" width="268" height="284" rx="14"/>
-  <text class="t-group" x="238" y="36">H2 CAPABILITY</text>
+  <text class="t-group" x="238" y="36">SHARED CURRICULUM MAP</text>
   ${box(16, 50, 170, 64, "Curriculum teams", "+ shared public layer", "")}
-  ${box(16, 202, 170, 64, "Teacher materials", "school LMS / drive", "", "", "materials")}
-  ${box(16, 330, 170, 64, "Learner evidence", "tutors · homework · markbook", "", "", "evidence")}
-  ${box(236, 50, 240, 88, "Reference graph", `version ${st.graph_version} · governed releases`, `${c.concepts} concepts · ${c.crosswalk} crosswalks`, "h2", "graph")}
-  ${box(236, 190, 240, 88, "Alignment service", `mode: ${st.aligner_mode}`, `${c.alignment} alignments stored`, "h2", "materials")}
-  ${box(540, 120, 200, 72, "Content index  (H3)", "vector + graph facets", `${c.content_unit} units`, "", "materials")}
-  ${box(540, 310, 200, 64, "Evidence store  (H1)", "append-only", `${c.evidence} rows`, "", "evidence")}
-  ${box(540, 404, 200, 64, "Learner state  (H1)", "projection, rebuildable", `${c.learner_state} concept states`, "", "evidence")}
-  ${box(790, 200, 172, 88, "Context assembly", "one call per tutor turn", "REST + MCP", "h2", "context")}
+  ${box(16, 202, 170, 64, "Teacher's materials", "school LMS / drive", "", "", "materials")}
+  ${box(16, 330, 170, 64, "Pupils' answers", "tutors · homework · markbook", "", "", "evidence")}
+  ${box(236, 50, 240, 88, "Curriculum map", `version ${st.graph_version} · published releases`, `${c.concepts} topics · ${c.crosswalk} curriculum links`, "h2", "graph")}
+  ${box(236, 190, 240, 88, "Tagging service", `tagger: ${st.aligner_mode === "claude" ? "Claude" : "keyword"}`, `${c.alignment} tags stored`, "h2", "materials")}
+  ${box(540, 120, 200, 72, "Tagged materials", "searchable by text and topic", `${c.content_unit} teaching units`, "", "materials")}
+  ${box(540, 310, 200, 64, "Pupil answers log", "only ever added to", `${c.evidence} answers`, "", "evidence")}
+  ${box(540, 404, 200, 64, "Pupil progress", "rebuilt from the log", `${c.learner_state} topic estimates`, "", "evidence")}
+  ${box(790, 200, 172, 88, "Tutor briefing", "one per pupil question", "REST + MCP", "h2", "context")}
   ${box(790, 362, 172, 64, "AI tutor(s)", "any vendor", "", "", "connect")}
   ${arr(186, 82, 236, 94)}
   <path class="flow" d="M356,138 L356,190" marker-end="url(#ah)"/>${lbl(364, 168, "constrains")}
   ${arr(186, 234, 236, 234)}
-  ${arr(476, 212, 540, 156)}${lbl(496, 150, "tag units", "end")}
-  ${arr(186, 362, 540, 342)}${lbl(300, 346, "items tagged at source", "middle")}
-  ${arr(476, 256, 540, 326)}${lbl(420, 318, "untagged entries aligned", "middle")}
-  <path class="flow" d="M640,374 L640,404" marker-end="url(#ah)"/>${lbl(648, 394, "project")}
+  ${arr(476, 212, 540, 156)}${lbl(496, 150, "tag", "end")}
+  ${arr(186, 362, 540, 342)}${lbl(300, 346, "questions already tagged", "middle")}
+  ${arr(476, 256, 540, 326)}${lbl(420, 318, "untagged entries tagged", "middle")}
+  <path class="flow" d="M640,374 L640,404" marker-end="url(#ah)"/>${lbl(648, 394, "rebuild")}
   <path class="flow read" d="M476,70 C700,40 876,90 876,200" marker-end="url(#ah-r)"/>
   ${arr(740, 156, 790, 244, "read")}
   ${arr(740, 436, 790, 268, "read")}
-  <path class="flow read" d="M876,288 L876,362" marker-end="url(#ah-r)"/>${lbl(884, 330, "context pack")}
+  <path class="flow read" d="M876,288 L876,362" marker-end="url(#ah-r)"/>${lbl(884, 330, "briefing")}
   <text class="t-sub" x="16" y="484">Solid arrows: write paths. Dashed: read path for one tutor turn. Click a box to open that part.</text>`;
   const el = $("#arch"); el.innerHTML = svg;
   el.querySelectorAll("[data-go]").forEach((g) => (g.onclick = () => show(g.dataset.go)));
@@ -197,7 +197,7 @@ async function overlayData(key) {
   if (key.startsWith("class:")) {
     const cov = await api(`/api/classes/${key.slice(6)}/coverage`);
     const t = new Set(cov.taught.map((c) => c.id)), p = new Set(cov.planned.map((c) => c.id));
-    return { classFor: (id) => (t.has(id) ? "taught" : p.has(id) ? "planned" : ""), legend: LEGEND_COVER, empty: !cov.taught.length && !cov.planned.length ? "Ingest materials first to see coverage." : "" };
+    return { classFor: (id) => (t.has(id) ? "taught" : p.has(id) ? "planned" : ""), legend: LEGEND_COVER, empty: !cov.taught.length && !cov.planned.length ? "Tag materials first to see coverage." : "" };
   }
   if (key.startsWith("pupil:")) {
     const lv = await api(`/api/learners/${key}`);
@@ -218,7 +218,7 @@ async function renderGraphPage() {
   $("#g-counts").textContent = `${active.length} concepts · ${g.prerequisites.length} prerequisite edges · ${g.misconceptions.length} misconceptions · ${g.methods.length} methods · ${g.representations.length} representations${dep.length ? ` · ${dep.length} deprecated` : ""}`;
   const ov = $("#g-overlay");
   ov.innerHTML = `<option value="none">Overlay: none</option><option value="class:10X">Overlay: class 10X coverage</option><option value="class:10Y">Overlay: class 10Y coverage</option>` +
-    S.pupils.map((p) => `<option value="${p.id}">Overlay: ${esc(p.name)} mastery</option>`).join("");
+    S.pupils.map((p) => `<option value="${p.id}">Overlay: ${esc(p.name)} progress</option>`).join("");
   ov.value = S.overlay;
   ov.onchange = () => { S.overlay = ov.value; drawMain(); };
   await drawMain();
@@ -251,10 +251,10 @@ async function inspect(id) {
       <h4>Leads to</h4>${chips(d.leads_to)}
       <h4>Misconceptions that affect it</h4>${d.misconceptions.length ? d.misconceptions.map((m) => `<div style="margin-bottom:6px">${tag("misconception", m.id)}<div class="sub" style="margin:3px 0 0">${esc(m.description || "")}</div></div>`).join("") : `<div class="sub">None</div>`}
       <h4>Methods that teach it</h4>${chips(d.methods, "method")}
-      <h4>Crosswalks</h4>${d.crosswalk.length ? `<table class="t">${d.crosswalk.map((x) => `<tr><td>${esc(x.scheme)}</td><td class="mono">${esc(x.id)}</td><td>${esc(x.match)}</td></tr>`).join("")}</table><div class="sub" style="margin-top:6px">Illustrative mappings. “shared-layer” IDs are placeholders for whichever shared public layer is adopted.</div>` : `<div class="sub">None</div>`}
+      <h4>Links to other curricula</h4>${d.crosswalk.length ? `<table class="t">${d.crosswalk.map((x) => `<tr><td>${esc(x.scheme)}</td><td class="mono">${esc(x.id)}</td><td>${esc(x.match)}</td></tr>`).join("")}</table><div class="sub" style="margin-top:6px">Illustrative mappings. “shared-layer” IDs are placeholders for whichever shared public layer is adopted.</div>` : `<div class="sub">None</div>`}
       <h4>Full prerequisite chain</h4><div class="sub">${d.ancestors.length} ancestor concepts, up to ${Math.max(0, ...d.ancestors.map((a) => a.depth))} steps back</div>` : ""}
     ${d.affects ? `<h4>Affects</h4>${chips(d.affects)}` : ""}${d.teaches ? `<h4>Teaches</h4>${chips(d.teaches)}` : ""}
-    <h4>Usage</h4><dl class="kv"><dt>Alignments pointing here</dt><dd>${d.usage.alignments}</dd><dt>Evidence rows tagged</dt><dd>${d.usage.evidence}</dd></dl>`;
+    <h4>Usage</h4><dl class="kv"><dt>Tags pointing here</dt><dd>${d.usage.alignments}</dd><dt>Pupil answers tagged</dt><dd>${d.usage.evidence}</dd></dl>`;
 }
 
 /* ------------------------------------------------------------------ materials (H3) */
@@ -279,13 +279,13 @@ async function renderMaterials() {
   $("#m-list").innerHTML = mats.map((m) => `
     <div class="mat ${S.open.has(m.id) ? "open" : ""}" data-m="${esc(m.id)}">
       <div class="mat-head"><span class="w">W${m.week}</span><span class="ttl">${esc(m.title)}</span>
-        ${badge(m.status)} ${m.ingested ? `<span class="badge secure">aligned</span>` : `<span class="badge">not ingested</span>`}
-        <button class="btn sm" data-ingest="${esc(m.id)}">${m.ingested ? "Re-align" : "Ingest"}</button></div>
+        ${badge(m.status)} ${m.ingested ? `<span class="badge secure">tagged</span>` : `<span class="badge">not tagged yet</span>`}
+        <button class="btn sm" data-ingest="${esc(m.id)}">${m.ingested ? "Re-tag" : "Read & tag"}</button></div>
       <div class="mat-body">${m.units.length ? m.units.map((u) => `
         <div class="unit"><div class="h">${esc(u.heading)} <span class="mono sub">#${u.idx}</span></div><div class="b">${esc(u.body)}</div>
           <div class="tags">${u.alignments.length ? ["concept", "method", "representation", "misconception"].flatMap((f) => u.alignments.filter((a) => a.facet === f).map((a) => tag(f, a.id, a.confidence))).join("") : `<span class="sub">No tags above threshold</span>`}</div>
-          ${u.alignments[0] ? `<div class="sub" style="margin-top:4px">provenance ${esc(u.alignments[0].provenance)} · graph v${esc(u.alignments[0].graph_version)}</div>` : ""}</div>`).join("")
-        : `<div class="b" style="white-space:pre-wrap;color:var(--text-2);font-size:12.5px">${esc(m.body)}</div><div class="note" style="margin-top:8px">Not ingested yet. Click <b>Ingest</b> to split it into units and align each one.</div>`}</div>
+          ${u.alignments[0] ? `<div class="sub" style="margin-top:4px">tagged by ${esc(u.alignments[0].provenance)} · map v${esc(u.alignments[0].graph_version)}</div>` : ""}</div>`).join("")
+        : `<div class="b" style="white-space:pre-wrap;color:var(--text-2);font-size:12.5px">${esc(m.body)}</div><div class="note" style="margin-top:8px">Not tagged yet. Click <b>Read & tag</b> to split it into units and align each one.</div>`}</div>
     </div>`).join("");
   document.querySelectorAll(".mat-head").forEach((h) => (h.onclick = (e) => {
     if (e.target.closest("[data-ingest]")) return;
@@ -293,13 +293,13 @@ async function renderMaterials() {
   }));
   document.querySelectorAll("[data-ingest]").forEach((b) => (b.onclick = () => busy(b, async () => {
     await api("/api/materials/ingest", { method: "POST", body: { material_id: b.dataset.ingest, mode: S.mode } });
-    S.open.add(b.dataset.ingest); await refreshStatus(); await renderMaterials(); toast("Aligned");
+    S.open.add(b.dataset.ingest); await refreshStatus(); await renderMaterials(); toast("Tagged");
   })));
   // coverage
   const cov = await api(`/api/classes/${S.cls}/coverage`);
   const methods = {};
   mats.filter((m) => m.status === "taught").forEach((m) => m.units.forEach((u) => u.alignments.filter((a) => a.facet === "method" && a.confidence >= 0.5).forEach((a) => (methods[a.id] = (methods[a.id] || 0) + 1))));
-  $("#m-coverage").innerHTML = !cov.taught.length && !cov.planned.length ? `<div class="empty">Ingest materials to derive coverage</div>` : `
+  $("#m-coverage").innerHTML = !cov.taught.length && !cov.planned.length ? `<div class="empty">Tag materials to see what the class has covered</div>` : `
     <div class="sub" style="margin:0 0 6px"><b>Taught so far</b> (weeks 1–${cov.class.current_week})</div>
     <div class="tags">${cov.taught.map((c) => tag("concept", c.id, null, { label: `W${c.week} · ${c.label}` })).join("") || '<span class="sub">none</span>'}</div>
     <div class="sub" style="margin:12px 0 6px"><b>Planned</b></div>
@@ -312,10 +312,10 @@ async function renderMaterials() {
 function renderAlignResult(r) {
   const tags = [...r.concepts.map((c) => tag("concept", c.id, c.confidence)), r.method ? tag("method", r.method.id, r.method.confidence) : "", r.representation ? tag("representation", r.representation.id, r.representation.confidence) : "", ...r.misconceptions.map((m) => tag("misconception", m.id, m.confidence))].join("");
   return `<div class="tags">${tags || '<span class="sub">No tags above threshold</span>'}</div>
-    <div class="sub" style="margin-top:6px">${esc(r.provenance)} · graph v${esc(r.graph_version)}${r.candidates_considered ? ` · ${r.candidates_considered} candidate concepts retrieved from the graph` : ""}</div>
+    <div class="sub" style="margin-top:6px">tagged by ${esc(r.provenance)} · map v${esc(r.graph_version)}${r.candidates_considered ? ` · ${r.candidates_considered} candidate topics considered from the graph` : ""}</div>
     ${r.rationale ? `<div class="note" style="margin-top:6px">${esc(r.rationale)}</div>` : ""}
     ${r.fallback_reason ? `<div class="note warn" style="margin-top:6px">${esc(r.fallback_reason)}</div>` : ""}
-    ${r.rejected_ids && r.rejected_ids.length ? `<div class="note warn" style="margin-top:6px">Rejected ${r.rejected_ids.length} ID(s) not in the graph. The ontology constrains the model.</div>` : ""}`;
+    ${r.rejected_ids && r.rejected_ids.length ? `<div class="note warn" style="margin-top:6px">Rejected ${r.rejected_ids.length} label(s) not on the map. The map constrains the model.</div>` : ""}`;
 }
 
 /* ------------------------------------------------------------------ evidence (H1) */
@@ -332,7 +332,7 @@ async function renderEvidence() {
     const diag = r.recorded.filter((x) => x.misconception).length;
     const acts = sc.events.map((ev, i) => [ev, r.recorded[i]]).filter(([ev]) => ev.activity);
     const actTxt = acts.map(([ev, rec]) => `“${esc(ev.activity)}” as ${rec.concepts.map((c) => `<b>${esc(c.label)}</b>`).join(", ") || "nothing recognisable"} (confidence ${rec.confidence})`).join("; ");
-    S.lastExplain = `<b>Replayed ${r.recorded.length} events</b><ul><li>${nItem} item answers arrived already tagged with concept IDs</li>${nAct ? `<li>${nAct} markbook entr${nAct > 1 ? "ies" : "y"} had no IDs. The aligner interpreted ${actTxt}. Those entries count for less, in proportion to the confidence</li>` : ""}<li>${diag} wrong answers matched a known distractor, so a misconception was diagnosed</li><li>The learner model was rebuilt from the whole log, spreading evidence across the graph</li></ul>`;
+    S.lastExplain = `<b>Recorded ${r.recorded.length} answers</b><ul><li>${nItem} answers were to questions already tagged to the map</li>${nAct ? `<li>${nAct} markbook entr${nAct > 1 ? "ies" : "y"} had no IDs. The aligner interpreted ${actTxt}. Those entries count for less, in proportion to the confidence</li>` : ""}<li>${diag} wrong answers matched a known distractor, so a misconception was diagnosed</li><li>The learner model was rebuilt from the whole log, spreading evidence across the graph</li></ul>`;
     await refreshStatus(); await renderEvidence();
   });
   // item form
@@ -343,7 +343,7 @@ async function renderEvidence() {
     $("#e-score").oninput = () => ($("#e-score-v").textContent = $("#e-score").value + "%");
   }
   const lv = await api(`/api/learners/${S.pupil}`);
-  $("#e-sub").textContent = `${lv.pupil.name} · ${lv.evidence.length} evidence rows · ${lv.state.length} concepts with estimates`;
+  $("#e-sub").textContent = `${lv.pupil.name} · ${lv.evidence.length} answers recorded · ${lv.state.length} topics with an estimate`;
   $("#e-explain").innerHTML = S.lastExplain ? `<div class="explain">${S.lastExplain}</div>` : lv.evidence.length ? "" : `<div class="note">No evidence yet. Run the preset scenario or record answers on the right.</div>`;
   const od = await overlayData(S.pupil);
   drawGraph($("#e-svg"), { ...od, onClick: (id) => { S.sel = id; S.overlay = S.pupil; show("graph"); } });
@@ -368,7 +368,7 @@ function explainRecord(r, prompt) {
   g.prerequisites.forEach((e) => (pre[e.dst] ??= []).push(e.src));
   const parts = [];
   if (r.concept_provenance === "source") parts.push(`The item arrived tagged with ${r.concepts.map((c) => `<b>${esc(c.label)}</b>`).join(", ")}`);
-  else parts.push(`No concept IDs were supplied. The aligner (${esc(r.concept_provenance)}) interpreted “${esc(prompt)}” as ${r.concepts.map((c) => `<b>${esc(c.label)}</b>`).join(", ") || "<b>nothing recognisable</b>"} with confidence ${r.confidence}. The evidence is weighted by that confidence`);
+  else parts.push(`No topics were supplied. The tagger (${esc(r.concept_provenance)}) interpreted “${esc(prompt)}” as ${r.concepts.map((c) => `<b>${esc(c.label)}</b>`).join(", ") || "<b>nothing recognisable</b>"} with confidence ${r.confidence}. The evidence is weighted by that confidence`);
   if (r.outcome >= 0.5) {
     const ps = [...new Set(r.concepts.flatMap((c) => pre[c.id] || []))];
     parts.push(`Outcome ${r.concept_provenance === "source" ? "correct" : pct(r.outcome)}. Because the graph knows the prerequisites, it added weak evidence to ${ps.map((p) => `<b>${esc(lab(p))}</b>`).join(", ") || "none"}`);
@@ -376,7 +376,7 @@ function explainRecord(r, prompt) {
     parts.push(`Wrong answer matched a known distractor, so it was diagnosed as <b>${esc(r.misconception.label)}</b>. Only concepts that misconception affects were marked down (graph-based credit assignment)`);
   } else parts.push(`Outcome ${pct(r.outcome)}`);
   parts.push("The learner state was rebuilt from the full evidence log");
-  return `<b>What H2 did with this evidence</b><ul>${parts.map((p) => `<li>${p}</li>`).join("")}</ul>`;
+  return `<b>What the map did with this answer</b><ul>${parts.map((p) => `<li>${p}</li>`).join("")}</ul>`;
 }
 
 /* ------------------------------------------------------------------ context & tutor */
@@ -399,8 +399,8 @@ function renderContextPage() {
   sugg();
   const c = S.status.counts;
   const warns = [];
-  if (!c.content_unit || !c.evidence) warns.push(`<div class="note warn">This works best once materials are ingested and scenario evidence exists. <button class="btn sm" id="btn-c-prep">Prepare demo data</button></div>`);
-  if (!S.status.llm_available) warns.push(`<div class="note" style="margin-top:8px">No <code>ANTHROPIC_API_KEY</code> set, so both context packs are shown without live tutor replies. Add the key in Railway to generate replies from each context.</div>`);
+  if (!c.content_unit || !c.evidence) warns.push(`<div class="note warn">This works best once materials are tagged and the pupils have some answers recorded. <button class="btn sm" id="btn-c-prep">Prepare demo data</button></div>`);
+  if (!S.status.llm_available) warns.push(`<div class="note" style="margin-top:8px">No <code>ANTHROPIC_API_KEY</code> set, so both briefings are shown without live tutor replies. Add the key in Railway to generate a tutor reply from each.</div>`);
   $("#c-warn").innerHTML = warns.join("");
   const pb = $("#btn-c-prep"); if (pb) pb.onclick = () => busy(pb, async () => { await api("/api/demo/prepare", { method: "POST" }); await refreshStatus(); renderContextPage(); toast("Demo data ready"); });
 }
@@ -409,26 +409,26 @@ function renderCompare(r) {
   const a = r.without_h2.context, b = r.with_h2.context;
   const reply = (x) => x.response ? `<div class="sec"><div class="st">Tutor reply (${esc(r.model)})</div><div class="reply">${esc(x.response)}</div></div>` : x.error ? `<div class="note warn">${esc(x.error)}</div>` : r.llm ? "" : `<div class="sec"><div class="st">Tutor reply</div><div class="sub">Needs ANTHROPIC_API_KEY</div></div>`;
   const left = `<div class="cmp-col">
-    <div class="cmp-title"><span class="pill no">WITHOUT H2</span><span class="sub">~${a.approx_tokens} tokens of context</span></div>
+    <div class="cmp-title"><span class="pill no">RAW CLASSROOM DATA</span><span class="sub">~${a.approx_tokens} tokens of context</span></div>
     ${reply(r.without_h2)}
     <div class="sec"><div class="st">Recent activity (raw log)</div>${a.recent_activity.length ? `<ul>${a.recent_activity.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>` : '<div class="sub">No activity</div>'}</div>
     <div class="sec"><div class="st">Materials by text similarity</div>${a.materials.length ? `<ul>${a.materials.map((m) => `<li><b>${esc(m.heading)}</b> <span class="sub">W${m.week} · ${esc(m.why)}</span></li>`).join("")}</ul>` : '<div class="sub">None (ingest materials first)</div>'}</div>
     <div class="note">${esc(a.note)}</div>
     <details><summary>Raw context JSON</summary><pre class="json">${esc(JSON.stringify(a, null, 2))}</pre></details></div>`;
   let right;
-  if (b.error) right = `<div class="cmp-col"><div class="cmp-title"><span class="pill yes">WITH H2</span></div><div class="note warn">${esc(b.error)}</div></div>`;
+  if (b.error) right = `<div class="cmp-col"><div class="cmp-title"><span class="pill yes">ORGANISED BY THE MAP</span></div><div class="note warn">${esc(b.error)}</div></div>`;
   else {
     const L = b.learner, C = b.class, G = b.guidance;
     right = `<div class="cmp-col">
-    <div class="cmp-title"><span class="pill yes">WITH H2</span><span class="sub">~${b.approx_tokens} tokens · graph v${esc(b.graph_version)}</span></div>
+    <div class="cmp-title"><span class="pill yes">ORGANISED BY THE MAP</span><span class="sub">~${b.approx_tokens} tokens · map v${esc(b.graph_version)}</span></div>
     ${reply(r.with_h2)}
-    <div class="sec"><div class="st">Focus concept</div>${tag("concept", b.focus.id, null, { label: b.focus.label })}
+    <div class="sec"><div class="st">Focus topic</div>${tag("concept", b.focus.id, null, { label: b.focus.label })}
       <div class="sub" style="margin-top:4px">Request read as <b>${esc((b.request.intent || "other").replace("_", " "))}</b>${b.request.message_topic ? ` about ${esc(b.request.message_topic)}` : ""}. Focus chosen because: ${esc(b.focus.chosen_because.how)}</div>
       <div class="tags" style="margin-top:6px">${b.focus.crosswalk.map((x) => `<span class="tag plain">${esc(x.scheme)}: ${esc(x.id)}</span>`).join("")}</div></div>
-    <div class="sec"><div class="st">Learner (H1)</div>${badge(L.status)} <span class="sub">mastery ${pct(L.mastery)} · learning edge: ${esc(L.learning_edge)}</span>
+    <div class="sec"><div class="st">Pupil progress</div>${badge(L.status)} <span class="sub">mastery ${pct(L.mastery)} · learning edge: ${esc(L.learning_edge)}</span>
       ${L.active_misconceptions.length ? `<div style="margin-top:8px">${L.active_misconceptions.map((m) => `${tag("misconception", m.id)}<div class="sub" style="margin:3px 0 0">${esc(m.description)}</div>`).join("")}</div>` : '<div class="sub" style="margin-top:6px">No active misconception on this concept</div>'}
       <div class="sub" style="margin:8px 0 4px">Overview</div><div class="tags">${L.overview.map((o) => `<span class="tag plain">${esc(o.topic)} ${badge(o.status)}</span>`).join("")}</div></div>
-    <div class="sec"><div class="st">Class ${esc(C.id)} (H3)</div>${C.focus_taught ? `Focus taught in week ${C.focus_week}` : `<b>Focus not yet taught to this class</b>${C.focus_week ? ` (planned week ${C.focus_week})` : ""}`} · ${esc(C.teacher)}
+    <div class="sec"><div class="st">Class ${esc(C.id)}</div>${C.focus_taught ? `Focus taught in week ${C.focus_week}` : `<b>Focus not yet taught to this class</b>${C.focus_week ? ` (planned week ${C.focus_week})` : ""}`} · ${esc(C.teacher)}
       <div class="tags" style="margin-top:6px">${C.preferred_method ? tag("method", C.preferred_method.id) : ""}${C.preferred_representation ? tag("representation", C.preferred_representation.id) : ""}</div>
       <div class="sub" style="margin-top:6px">Taught: ${esc(C.taught_so_far.join(" · "))}</div><div class="sub">Not yet: ${esc(C.not_yet_taught.join(" · ") || "none")}</div></div>
     <div class="sec"><div class="st">Teacher's materials (filtered by concept, ranked by method + misconception)</div>${b.materials.length ? `<ul>${b.materials.map((m) => `<li><b>${esc(m.heading)}</b> <span class="sub">W${m.week}: ${esc(m.why)}</span></li>`).join("")}</ul>` : '<div class="sub">No aligned materials for this concept in taught weeks</div>'}</div>
@@ -480,7 +480,7 @@ function renderAlignEval(d) {
     ${d.rows.map((r) => `<tr><td><b>${esc(r.heading)}</b><div class="mono sub">${esc(r.unit)}</div>${r.rationale ? `<div class="sub" style="margin-top:4px"><i>${esc(r.rationale)}</i></div>` : ""}</td>${cell(r.concepts, true)}${cell(r.method)}${cell(r.representation)}${cell(r.misconceptions, true)}</tr>`).join("")}</table></div></details>`;
 }
 const ARM_COL = { none: "var(--text-3)", raw: "var(--developing)", h2: "var(--accent)" };
-const ARM_SHORT = { none: "No context", raw: "Raw data", h2: "H2 pack" };
+const ARM_SHORT = { none: "No context", raw: "Raw data", h2: "Map" };
 const CAT = { method_conflict: "Teacher uses a different method (class 10Y)", non_revealing: "Request doesn't reveal the problem", jump_ahead: "Temptation to jump ahead", control: "Controls" };
 const CRIT = { diagnosis: "Diagnosis", method: "Teacher's method", scope: "Respects what's been taught", next_step: "Next step", grounding: "True to pupil & class" };
 function renderTutorEval(d) {
@@ -489,7 +489,7 @@ function renderTutorEval(d) {
   const tiles = arms.map((a) => `<div class="kpi"><div class="v" style="color:${ARM_COL[a]}">${sm.by_arm[a].total}<span class="sub" style="font-size:13px"> / ${max}</span></div><div class="l">${esc(d.arms[a])}</div></div>`).join("");
   const crit = `<table class="t"><tr><th>Criterion (0–3)</th>${arms.map((a) => `<th>${ARM_SHORT[a]}</th>`).join("")}</tr>${d.criteria.map((c) => `<tr><td>${CRIT[c]}</td>${arms.map((a) => `<td style="width:22%">${bar(sm.by_arm[a][c] / 3, ARM_COL[a])}<span class="sub">${sm.by_arm[a][c]}</span></td>`).join("")}</tr>`).join("")}</table>`;
   const bf = d.before_fix;
-  const cats = `<table class="t"><tr><th>Scenario group</th><th>n</th>${arms.map((a) => `<th>${ARM_SHORT[a]}</th>`).join("")}${bf ? "<th>H2 before fix</th>" : ""}<th>H2 − raw</th></tr>${Object.entries(sm.by_category).map(([c, v]) => { const dlt = +(v.h2 - v.raw).toFixed(2); return `<tr><td>${CAT[c] || c}</td><td>${v.n}</td>${arms.map((a) => `<td>${v[a]}</td>`).join("")}${bf ? `<td class="sub">${bf.by_category[c] ? bf.by_category[c].h2 : "–"}</td>` : ""}<td class="${dlt > 0.25 ? "ok" : dlt < -0.25 ? "bad" : ""}"><b>${dlt > 0 ? "+" : ""}${dlt}</b></td></tr>`; }).join("")}</table>`;
+  const cats = `<table class="t"><tr><th>Scenario group</th><th>n</th>${arms.map((a) => `<th>${ARM_SHORT[a]}</th>`).join("")}${bf ? "<th>Map before fix</th>" : ""}<th>Map − raw</th></tr>${Object.entries(sm.by_category).map(([c, v]) => { const dlt = +(v.h2 - v.raw).toFixed(2); return `<tr><td>${CAT[c] || c}</td><td>${v.n}</td>${arms.map((a) => `<td>${v[a]}</td>`).join("")}${bf ? `<td class="sub">${bf.by_category[c] ? bf.by_category[c].h2 : "–"}</td>` : ""}<td class="${dlt > 0.25 ? "ok" : dlt < -0.25 ? "bad" : ""}"><b>${dlt > 0 ? "+" : ""}${dlt}</b></td></tr>`; }).join("")}</table>`;
   const h = sm.head_to_head.h2_vs_raw;
   const rows = d.results.map((r) => {
     if (arms.some((a) => !r.arms[a] || r.arms[a].error)) return `<div class="note warn">${esc(r.id)}: ${esc(arms.map((a) => r.arms[a]?.error).filter(Boolean).join("; "))}</div>`;
@@ -497,9 +497,9 @@ function renderTutorEval(d) {
       <div class="sub" style="margin:8px 0"><b>Actual need (hand-written):</b> ${esc(r.need)}</div>
       <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">${arms.map((a) => `<div><div class="sub"><b style="color:${ARM_COL[a]}">${esc(d.arms[a])}</b> · ${r.arms[a].total}/15 · ${Object.entries(r.arms[a].scores).map(([k, v]) => `${CRIT[k].split(" ")[0]} ${v}`).join(", ")}</div><div class="reply" style="margin-top:6px;font-size:12.5px">${esc(r.arms[a].reply)}</div><div class="sub" style="margin-top:6px"><i>Judge: ${esc(r.arms[a].why[0])}</i></div></div>`).join("")}</div></details>`;
   }).join("");
-  $("#ev-tutor").innerHTML = `<div class="sub" style="margin-bottom:8px"><b>${esc(d.suite_label || "Development scenarios")}</b> · last run ${esc(d.finished)} · ${esc(d.model)} · ${d.seconds}s · ${sm.scored_scenarios} scenarios${bf ? ` · H2 on the same scenarios before the fix: <b>${bf.by_arm.h2.total}</b> / ${max}` : ""}</div>
+  $("#ev-tutor").innerHTML = `<div class="sub" style="margin-bottom:8px"><b>${esc(d.suite_label || "Development scenarios")}</b> · last run ${esc(d.finished)} · ${esc(d.model)} · ${d.seconds}s · ${sm.scored_scenarios} scenarios${bf ? ` · the map on the same scenarios before the fix: <b>${bf.by_arm.h2.total}</b> / ${max}` : ""}</div>
     <div class="note" style="margin-bottom:10px">Scores vary by about ±1 point between identical runs, so differences smaller than that are noise.</div>
-    <div class="kpis" style="margin-bottom:12px">${tiles}<div class="kpi"><div class="v">${h.win}–${h.tie}–${h.loss}</div><div class="l">H2 vs raw: wins–ties–losses</div></div></div>
+    <div class="kpis" style="margin-bottom:12px">${tiles}<div class="kpi"><div class="v">${h.win}–${h.tie}–${h.loss}</div><div class="l">Map vs raw data: wins–ties–losses</div></div></div>
     <div class="grid g2"><div>${crit}</div><div>${cats}</div></div>
     <h4 style="margin:16px 0 4px;font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Every scenario, with all three replies</h4>${rows}`;
 }
@@ -533,17 +533,17 @@ function renderConnect() {
 
 /* ------------------------------------------------------------------ static bindings */
 function bindStatic() {
-  $("#btn-prepare").onclick = (e) => busy(e.currentTarget, async () => { await api("/api/demo/prepare", { method: "POST" }); await refreshStatus(); toast("Materials ingested and scenarios recorded"); show("context"); });
+  $("#btn-prepare").onclick = (e) => busy(e.currentTarget, async () => { await api("/api/demo/prepare", { method: "POST" }); await refreshStatus(); toast("Materials tagged and scenarios recorded"); show("context"); });
   $("#btn-reset").onclick = (e) => busy(e.currentTarget, async () => { await api("/api/admin/reset", { method: "POST" }); await loadGraph(); S.sel = null; S.overlay = "none"; S.lastExplain = null; S.ctxDone = S.evalDone = false; await refreshStatus(); toast("Demo reset to graph 2026.2 with no alignments or evidence"); show("overview"); });
   $("#btn-release").onclick = (e) => busy(e.currentTarget, async () => {
     const r = await api("/api/admin/release", { method: "POST" });
     await loadGraph(); await refreshStatus();
     $("#release-out").className = "explain";
     $("#release-out").innerHTML = `<b>Released ${esc(r.from)} → ${esc(r.to)}</b><ul>
-      <li><b>Reference graph:</b> ${r.graph_changes.map(esc).join("; ")}</li>
-      <li><b>Alignments:</b> ${r.alignments_migrated} migrated to the new ID and re-stamped v${esc(r.to)}</li>
-      <li><b>Evidence:</b> ${r.evidence_rows_referencing_deprecated_ids} rows reference deprecated IDs; <b>${r.evidence_rows_modified} modified</b></li>
-      <li><b>Learner state:</b> ${r.learners_reprojected} learners rebuilt. On the new concept: ${r.learner_state_new_concept.map((s) => `${esc(s.learner)} ${esc(s.status)} (${pct(s.mastery)})`).join(", ") || "no evidence yet"}</li></ul>
+      <li><b>Curriculum map:</b> ${r.graph_changes.map(esc).join("; ")}</li>
+      <li><b>Tags:</b> ${r.alignments_migrated} moved to the new topic and marked v${esc(r.to)}</li>
+      <li><b>Pupil answers log:</b> ${r.evidence_rows_referencing_deprecated_ids} answers refer to retired topics; <b>${r.evidence_rows_modified} changed</b></li>
+      <li><b>Pupil progress:</b> rebuilt for ${r.learners_reprojected} pupils. On the new topic: ${r.learner_state_new_concept.map((s) => `${esc(s.learner)} ${esc(s.status)} (${pct(s.mastery)})`).join(", ") || "no evidence yet"}</li></ul>
       <div class="sub" style="margin-top:6px">${esc(r.note)} Use Reset on the Overview to return to 2026.2.</div>`;
     S.sel = "cc:maths/alg/lin-eq-simple"; renderGraphPage();
   });
@@ -553,7 +553,7 @@ function bindStatic() {
     const t = $("#try-text").value.trim(); if (!t) return;
     const cls = (await api("/api/classes")).find((c) => c.id === S.cls);
     const r = await api("/api/materials", { method: "POST", body: { class_id: S.cls, week: cls.current_week, title: "Added: " + t.slice(0, 48) + (t.length > 48 ? "…" : ""), body: "## Added unit\n" + t, mode: S.mode } });
-    S.open.add(r.material); await refreshStatus(); await renderMaterials(); toast("Added and aligned");
+    S.open.add(r.material); await refreshStatus(); await renderMaterials(); toast("Added and tagged");
   });
   $("#btn-e-item").onclick = (e) => busy(e.currentTarget, async () => {
     const i = S.items.find((x) => x.id === $("#e-item").value);

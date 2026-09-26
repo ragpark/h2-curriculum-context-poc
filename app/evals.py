@@ -81,7 +81,7 @@ def eval_alignment(mode: str | None = None, which: str = "tuning") -> dict:
 
 # ================================================================== hard tutor suite
 ARMS = ("none", "raw", "h2")
-ARM_LABELS = {"none": "No classroom context", "raw": "Raw classroom data (no H2)", "h2": "H2 context pack"}
+ARM_LABELS = {"none": "No classroom context", "raw": "Raw classroom data", "h2": "Organised by the map"}
 CRITERIA = ("diagnosis", "method", "scope", "next_step", "grounding")
 
 RUBRIC = """Score the TUTOR REPLY on five criteria, each 0–3, using ONLY the ground truth below. Be strict: 3 is rare and must be earned.

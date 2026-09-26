@@ -4,8 +4,8 @@
  "model": "claude-sonnet-5",
  "arms": {
   "none": "No classroom context",
-  "raw": "Raw classroom data (no H2)",
-  "h2": "H2 context pack"
+  "raw": "Raw classroom data",
+  "h2": "Organised by the map"
  },
  "criteria": [
   "diagnosis",

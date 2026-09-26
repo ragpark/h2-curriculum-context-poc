@@ -52,7 +52,7 @@ def _without_h2(p, cls, concept, message, mode):
         "pupil": {"name": p["name"], "class": p["class"]},
         "recent_activity": log,
         "materials": C.search(cls["id"], query, k=3),
-        "note": "No shared concept IDs: topic, misconceptions, prerequisites and the teacher's method must be inferred from raw text.",
+        "note": "No shared map: the topic, misconceptions, earlier topics and the teacher's method must be worked out from raw text.",
     }
     pack["approx_tokens"] = len(json.dumps(pack)) // 4
     return pack

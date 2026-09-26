@@ -30,8 +30,8 @@ async def lifespan(app):
         yield
 
 
-app = FastAPI(title="H2 Curriculum Context Layer — POC", version="0.1", lifespan=lifespan,
-              description="Shared curriculum context layer (H2) and how it improves learner data (H1) and teacher materials (H3).")
+app = FastAPI(title="Curriculum Map for AI Tutors — POC", version="0.2", lifespan=lifespan,
+              description="A shared curriculum map (H2), with pupil progress (H1) and teachers' materials (H3) tagged against it, assembled into a briefing for AI tutors.")
 app.mount("/mcp", mcp.streamable_http_app())
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 

@@ -7,13 +7,13 @@ from . import context as X
 from . import graph as G
 from . import learner as L
 
-mcp = FastMCP("h2-curriculum-context", stateless_http=True, json_response=True)
+mcp = FastMCP("curriculum-map", stateless_http=True, json_response=True)
 mcp.settings.streamable_http_path = "/"
 
 
 @mcp.tool()
 def get_learning_context(learner_id: str, message: str = "", concept_id: str = "") -> dict:
-    """Assemble the H2 context pack for a tutor turn: focus concept, learner state and misconceptions,
+    """Assemble the tutor briefing for one pupil question: focus topic, the pupil's progress and misconceptions,
     the class teacher's method and representation, relevant teacher materials, and next-step guidance.
     learner_id e.g. 'pupil:amara'. Provide the pupil's message and/or a concept ID."""
     return X.assemble(learner_id, concept=concept_id or None, message=message or None, facets=True)

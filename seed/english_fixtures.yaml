@@ -107,6 +107,9 @@ pupils:
   - {id: pupil:priya, name: "Priya (synthetic)", class: "11E"}
   - {id: pupil:tom, name: "Tom (synthetic)", class: "11E"}
   - {id: pupil:zainab, name: "Zainab (synthetic)", class: "11F"}
+  # added with the fresh held-out English test (written before the scope fix)
+  - {id: pupil:leah, name: "Leah (synthetic)", class: "11E"}
+  - {id: pupil:owen, name: "Owen (synthetic)", class: "11F"}
 
 # Evidence is teacher-marked work: a task, the topics it covered, a mark (0–1) and, where the teacher saw one, a misconception.
 scenarios:
@@ -140,3 +143,22 @@ scenarios:
       - {source: "Teacher marking", activity: "PETAL paragraph: 'Macbeth does murder sleep'", concepts: [lf-sleep, th-guilt, sk-language], score: 0.75}
       - {source: "Teacher marking", activity: "Paragraph: how is Lady Macbeth presented as powerful?", concepts: [ch-lady, th-ambition], score: 0.5, misconception: mc:english/single-reading}
       - {source: "Teacher marking", activity: "Extract essay: Lady Macbeth in Act 1 Scene 5 and in the play as a whole", concepts: [sk-extract-whole, ch-lady], score: 0.45, misconception: mc:english/extract-only}
+  - id: long-quotes
+    title: "Strong arguments, but long quotations and technique-spotting"
+    pupil: pupil:leah
+    story: "Plans a clear line of argument, but copies out whole lines as evidence and names techniques without saying what they do."
+    events:
+      - {source: "Teacher marking", activity: "Essay plan: How far is Macbeth responsible for his downfall?", concepts: [sk-argument, th-fate], score: 0.8}
+      - {source: "Class quiz", activity: "Context quiz: James I, the Gunpowder Plot and witchcraft", concepts: [ctx-james, ctx-gunpowder, ctx-witchcraft], score: 0.8}
+      - {source: "Teacher marking", activity: "Paragraph: Lady Macbeth in Act 1 Scene 5", concepts: [ch-lady, sk-quotation], score: 0.4, misconception: mc:english/long-quotes}
+      - {source: "Teacher marking", activity: "Paragraph: the witches' language in Act 1 Scene 1", concepts: [ch-witches, lf-verse, sk-language], score: 0.45, misconception: mc:english/feature-spotting}
+      - {source: "Teacher marking", activity: "Paragraph: blood imagery after the murder", concepts: [lf-blood, th-guilt, sk-quotation], score: 0.45, misconception: mc:english/long-quotes}
+  - id: modern-values
+    title: "Tidy PETAL paragraphs, but judges the play by modern values"
+    pupil: pupil:owen
+    story: "Writes well-structured PETAL paragraphs with good word analysis, but calls Jacobean attitudes 'sexist' or 'stupid' instead of asking how the original audience would respond."
+    events:
+      - {source: "Teacher marking", activity: "PETAL paragraph: 'Macbeth does murder sleep'", concepts: [lf-sleep, th-guilt, sk-language], score: 0.8}
+      - {source: "Class quiz", activity: "Quotation retrieval quiz: Acts 1–2", concepts: [sk-quotation], score: 0.75}
+      - {source: "Teacher marking", activity: "PETAL paragraph: Lady Macbeth and Jacobean ideas about women", concepts: [ch-lady, ctx-gender, sk-context], score: 0.4, misconception: mc:english/presentism}
+      - {source: "Teacher marking", activity: "PETAL paragraph: why Duncan's murder shocks the audience", concepts: [ctx-gunpowder, th-kingship, sk-context], score: 0.45, misconception: mc:english/presentism}

@@ -58,7 +58,7 @@ async function loadSubject() {
   if (!S.pupils.some((p) => p.id === S.pupil)) S.pupil = S.pupils[0].id;
   if (!S.classes.some((c) => c.id === S.cls)) S.cls = S.classes[0].id;
   S.sel = null; S.overlay = "none"; S.lastExplain = null; S.suiteLoaded = false;
-  if (sub === "english") { S.evSet = "english"; S.suite = "english"; } else if (S.suite === "english") { S.evSet = "heldout2"; S.suite = "heldout"; }
+  if (sub === "english") { S.evSet = "english"; S.suite = "english_heldout"; } else if (S.suite.startsWith("english")) { S.evSet = "heldout2"; S.suite = "heldout"; }
   const cp = $("#c-pupil"); if (cp) cp.innerHTML = ""; const cm = $("#c-msg"); if (cm) cm.value = "";
   $("#subtitle").textContent = SUBTITLE[sub] || "";
   document.body.dataset.subject = sub;
@@ -504,6 +504,8 @@ const SUGGEST = {
   "pupil:hana": ["I don't get why there are x's on both sides.", "Give me a quick quiz.", "Can you help with my homework?"],
   "pupil:priya": ["Can you look at my paragraph on 'Out, damned spot'? I said it shows she feels guilty.", "How can I get a higher grade?", "What does 'vaulting ambition' mean?"],
   "pupil:tom": ["Why does Macbeth kill Duncan?", "What should I say about the witches?", "What happens to Lady Macbeth at the end?"],
+  "pupil:leah": ["Can you check my quotation for the blood imagery paragraph?", "How do I get my essay to a grade 7?", "What does 'full of scorpions is my mind' show?"],
+  "pupil:owen": ["Why do people in the play care so much about the king?", "Is Macbeth a good tragic hero?", "Can you check my PETAL paragraph on Lady Macbeth?"],
   "pupil:zainab": ["Is Lady Macbeth a villain?", "Can you help me plan an essay on ambition?", "What should I work on?"],
   "pupil:farah": ["I've finished all my homework. What's next?", "Is x = 4 right for 4x + 5 = x − 7?", "Can we do something harder?"],
 };
@@ -579,7 +581,7 @@ function renderEvaluate() {
     el.querySelectorAll("button").forEach((b) => (b.onclick = () => { S[key] = b.dataset.v; renderEvaluate(); }));
   };
   seg($("#ev-set"), S.subject === "english" ? [["english", "English: Macbeth (12)"]] : [["heldout2", "Held-out 2 (12)"], ["heldout", "Held-out 1 (14)"], ["tuning", "Tuning (14)"]], "evSet");
-  seg($("#ev-suite"), S.subject === "english" ? [["english", "English: Macbeth (10)"]] : [["heldout", "Fresh held-out"], ["dev", "Development"], ["behaviour", "Learning behaviour"]], "suite");
+  seg($("#ev-suite"), S.subject === "english" ? [["english_heldout", "Fresh held-out (10)"], ["english", "First set (10)"]] : [["heldout", "Fresh held-out"], ["dev", "Development"], ["behaviour", "Learning behaviour"]], "suite");
   $("#ev-suite").querySelectorAll("button").forEach((btn) => btn.addEventListener("click", () => { S.suiteLoaded = false; renderEvaluate(); }));
   seg($("#ev-mode"), [["heuristic", "Keyword tagger"], ["claude", "Claude tagger", !llm]], "evMode");
   $("#ev-align-sub").textContent = { heldout2: "Held-out 2: written before the latest tagger change and never used to adjust it — the honest figure.", heldout: "Held-out 1: its misses were used to diagnose the latest tagger change, so it is no longer clean.", tuning: "Tuning set: the 14 units the tagger was adjusted against. Expect flattering numbers.", english: "English (Macbeth): 12 units written before any English tagging was run, including two that are not about Macbeth and should get no topics. Never used to adjust anything." }[S.evSet];

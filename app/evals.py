@@ -154,10 +154,11 @@ _lock = threading.Lock()
 
 
 SUITES = {"dev": "tutor_suite.yaml", "heldout": "tutor_suite_heldout.yaml", "behaviour": "tutor_suite_behaviour.yaml",
-          "english": "tutor_suite_english.yaml"}
+          "english": "tutor_suite_english.yaml", "english_heldout": "tutor_suite_english_heldout.yaml"}
 SUITE_LABELS = {"dev": "Development scenarios (used to build the fix)", "heldout": "Fresh held-out scenarios (never used to build the fix)",
                 "behaviour": "Learning behaviour: same answers, different behaviour",
-                "english": "English (Macbeth): fresh scenarios in a web-shaped subject"}
+                "english": "English (Macbeth): first scenarios (used to diagnose the scope fix)",
+                "english_heldout": "English (Macbeth): fresh held-out scenarios (never used to build the fix)"}
 
 
 def suite(name: str = "dev"):

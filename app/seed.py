@@ -139,7 +139,7 @@ def subject_of_pupil(pupil_id: str) -> str:
     return r["subject"] if r else "maths"
 
 
-SEED_VERSION = "5"  # bump when fixtures change; the database is reseeded on next start
+SEED_VERSION = "6"  # bump when fixtures change; the database is reseeded on next start
 
 
 def reset():

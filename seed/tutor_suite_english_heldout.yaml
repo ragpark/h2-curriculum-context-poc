@@ -1,0 +1,77 @@
+# FRESH held-out English (Macbeth) tutor test. Written BEFORE the English scope fix and never used to build it.
+# Two new pupils (Leah, Owen) plus new messages for Priya, Tom and Zainab. Ground truth written by hand from the class facts.
+classes:
+  "11E":
+    teacher: "Ms Adeyemi"
+    method: "Thesis-first essay planning, with zoom-in word analysis (what, how, why)"
+    avoid: "Formulaic paragraph templates that replace a line of argument"
+    taught: "Wk1 context (James I, Gunpowder Plot, witchcraft); Wk2 Act 1 ambition and Lady Macbeth (zoom-in, hot-seating); Wk3 Act 2 guilt, blood and sleep imagery; Wk4 Acts 3–4 appearance and reality, are the witches to blame?; Wk5 thesis-led writing, extract to whole play, purposeful context"
+    not_yet_taught: "Wk6 Act 5 sleepwalking scene; Wk7 the ending ('dead butcher'). Pupils may have read ahead; a good tutor can discuss it but should say it is coming up in class"
+  "11F":
+    teacher: "Mr Doyle"
+    method: "PETAL paragraphs (Point, Evidence, Technique, Analysis, Link)"
+    avoid: "Abandoning the PETAL structure the class has been taught"
+    taught: "Wk2 PETAL paragraphs on Lady Macbeth; Wk3 PETAL on guilt"
+    not_yet_taught: "Wk6 Act 5. Pupils may have read ahead; a good tutor can discuss it but should say it is coming up in class"
+
+scenarios:
+  - id: enh-leah-quote
+    category: specific
+    pupil: pupil:leah
+    message: "Is this good evidence? 'Will all great Neptune's ocean wash this blood clean from my hand? No, this my hand will rather the multitudinous seas incarnadine, making the green one red.'"
+    need: "Uses whole lines as evidence (long quotations) and tends to name techniques without their effect"
+    good_next: "Choose two or three key words (e.g. 'all great Neptune's ocean' or 'incarnadine'), embed them in her own sentence, and zoom in on their effect"
+  - id: enh-leah-depth
+    category: non_revealing
+    pupil: pupil:leah
+    message: "My teacher says my paragraphs need more depth. What should I do?"
+    need: "Her arguments are strong; depth is lost to long quotations and naming techniques without effect"
+    good_next: "Shorter embedded quotations, then zoom in on one word and explain its effect (what, how, why)"
+  - id: enh-leah-tomorrow
+    category: jump_ahead
+    pupil: pupil:leah
+    message: "What does Macbeth mean in the 'Tomorrow, and tomorrow, and tomorrow' speech?"
+    need: "Act 5 is coming up in class (weeks 6–7). Her need is short quotations and analysis of effect"
+    good_next: "Answer briefly, say it is coming up in class, and model zooming in on a short phrase rather than the whole speech"
+  - id: enh-owen-unsex
+    category: specific
+    pupil: pupil:owen
+    message: "Lady Macbeth saying 'unsex me here' is really sexist, isn't it?"
+    need: "Judges the play by modern values; needs to consider Jacobean expectations of women and how the 1606 audience would react. Class uses PETAL"
+    good_next: "Ask how a Jacobean audience would react, and build a PETAL paragraph that links 'unsex me' to Jacobean ideas about women"
+  - id: enh-owen-duncan
+    category: method_conflict
+    pupil: pupil:owen
+    message: "How do I write a paragraph about Duncan's murder?"
+    need: "Good PETAL writer; context is weak because he judges by modern values rather than linking to the Jacobean audience"
+    good_next: "A PETAL paragraph in which the Link step connects regicide, Divine Right or the Gunpowder Plot to the original audience's shock"
+  - id: enh-owen-mock
+    category: non_revealing
+    pupil: pupil:owen
+    message: "What should I work on before the mock?"
+    need: "Context: replace modern judgements with how the original audience would respond"
+    good_next: "Practise one PETAL paragraph where the Link explains a Jacobean audience's reaction, not a modern opinion"
+  - id: enh-priya-fair
+    category: specific
+    pupil: pupil:priya
+    message: "What does 'Fair is foul, and foul is fair' mean?"
+    need: "She will know the meaning; her weakness is analysis (retelling, naming techniques without effect)"
+    good_next: "Briefly explain, then zoom in on the paradox or the word 'foul' and ask her to explain its effect (what, how, why)"
+  - id: enh-tom-intro
+    category: specific
+    pupil: pupil:tom
+    message: "Can you mark my intro? 'Macbeth should never have listened to the witches. He was stupid to trust them.'"
+    need: "Treats Macbeth as a real person; needs to write about what Shakespeare uses Macbeth and the witches to show, as a thesis"
+    good_next: "Rewrite the opening as a thesis about Shakespeare's purpose (e.g. how he presents choice and temptation)"
+  - id: enh-tom-template
+    category: method_conflict
+    pupil: pupil:tom
+    message: "Can you give me a PETAL paragraph I can copy the structure of?"
+    need: "His class does not use PETAL; it builds thesis-led arguments with zoom-in analysis. His weaknesses are bolted-on context and treating characters as real"
+    good_next: "Steer away from a copied template: start from a one-sentence argument, then zoom in, folding context into the analysis"
+  - id: enh-zainab-guilt
+    category: jump_ahead
+    pupil: pupil:zainab
+    message: "Does Lady Macbeth feel guilty at the end?"
+    need: "Act 5 is coming up in class (week 6). She reads Lady Macbeth only as evil, so this is a chance to open a second reading. Class uses PETAL"
+    good_next: "Answer briefly, flag it is coming up, and use it to seed an alternative reading, linked to scenes already studied, in PETAL form"

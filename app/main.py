@@ -209,19 +209,19 @@ def tutor(c: ContextIn):
 # ---------------------------------------------------------------- evaluation & admin
 @app.post("/api/eval/alignment")
 def eval_alignment(mode: str | None = None, set: str = "tuning"):
-    if set not in ("tuning", "heldout"):
-        raise HTTPException(400, "set must be tuning or heldout")
+    if set not in ("tuning", "heldout", "heldout2"):
+        raise HTTPException(400, "set must be tuning, heldout or heldout2")
     return E.eval_alignment(mode, set)
 
 
 @app.post("/api/eval/tutor")
-def eval_tutor_start():
-    return E.start_tutor_suite()
+def eval_tutor_start(suite: str = "heldout"):
+    return E.start_tutor_suite(suite)
 
 
 @app.get("/api/eval/tutor/latest")
-def eval_tutor_latest():
-    return E.last_tutor_suite() or {}
+def eval_tutor_latest(suite: str = "heldout"):
+    return E.last_tutor_suite(suite) or {}
 
 
 @app.get("/api/eval/tutor/{jid}")
@@ -230,8 +230,8 @@ def eval_tutor_job(jid: str):
 
 
 @app.get("/api/eval/tutor-suite")
-def eval_tutor_suite_def():
-    return E.suite()
+def eval_tutor_suite_def(suite: str = "heldout"):
+    return E.suite(suite)
 
 
 @app.post("/api/demo/prepare")

@@ -423,28 +423,29 @@ function renderCompare(r) {
     <div class="cmp-title"><span class="pill yes">WITH H2</span><span class="sub">~${b.approx_tokens} tokens · graph v${esc(b.graph_version)}</span></div>
     ${reply(r.with_h2)}
     <div class="sec"><div class="st">Focus concept</div>${tag("concept", b.focus.id, null, { label: b.focus.label })}
-      <div class="sub" style="margin-top:4px">${esc(b.focus.resolved.how)}${b.focus.resolved.confidence ? " · confidence " + b.focus.resolved.confidence : ""}</div>
+      <div class="sub" style="margin-top:4px">Request read as <b>${esc((b.request.intent || "other").replace("_", " "))}</b>${b.request.message_topic ? ` about ${esc(b.request.message_topic)}` : ""}. Focus chosen because: ${esc(b.focus.chosen_because.how)}</div>
       <div class="tags" style="margin-top:6px">${b.focus.crosswalk.map((x) => `<span class="tag plain">${esc(x.scheme)}: ${esc(x.id)}</span>`).join("")}</div></div>
-    <div class="sec"><div class="st">Learner (H1)</div>${badge(L.status)} <span class="sub">mastery ${pct(L.mastery)}</span>
+    <div class="sec"><div class="st">Learner (H1)</div>${badge(L.status)} <span class="sub">mastery ${pct(L.mastery)} · learning edge: ${esc(L.learning_edge)}</span>
       ${L.active_misconceptions.length ? `<div style="margin-top:8px">${L.active_misconceptions.map((m) => `${tag("misconception", m.id)}<div class="sub" style="margin:3px 0 0">${esc(m.description)}</div>`).join("")}</div>` : '<div class="sub" style="margin-top:6px">No active misconception on this concept</div>'}
-      <div class="sub" style="margin:8px 0 4px">Prerequisites</div><ul>${L.prerequisites.map((p) => `<li>${esc(p.label)} ${badge(p.status)}</li>`).join("")}</ul></div>
-    <div class="sec"><div class="st">Class ${esc(C.id)} (H3)</div>${C.focus_taught ? `Taught in week ${C.focus_taught_week}` : "<b>Not yet taught to this class</b>"} · ${esc(C.teacher)}
+      <div class="sub" style="margin:8px 0 4px">Overview</div><div class="tags">${L.overview.map((o) => `<span class="tag plain">${esc(o.topic)} ${badge(o.status)}</span>`).join("")}</div></div>
+    <div class="sec"><div class="st">Class ${esc(C.id)} (H3)</div>${C.focus_taught ? `Focus taught in week ${C.focus_week}` : `<b>Focus not yet taught to this class</b>${C.focus_week ? ` (planned week ${C.focus_week})` : ""}`} · ${esc(C.teacher)}
       <div class="tags" style="margin-top:6px">${C.preferred_method ? tag("method", C.preferred_method.id) : ""}${C.preferred_representation ? tag("representation", C.preferred_representation.id) : ""}</div>
-      <div class="sub" style="margin-top:4px">Teacher's preference, from aligned materials (${esc(C.preference_scope || "n/a")} level)</div></div>
+      <div class="sub" style="margin-top:6px">Taught: ${esc(C.taught_so_far.join(" · "))}</div><div class="sub">Not yet: ${esc(C.not_yet_taught.join(" · ") || "none")}</div></div>
     <div class="sec"><div class="st">Teacher's materials (filtered by concept, ranked by method + misconception)</div>${b.materials.length ? `<ul>${b.materials.map((m) => `<li><b>${esc(m.heading)}</b> <span class="sub">W${m.week}: ${esc(m.why)}</span></li>`).join("")}</ul>` : '<div class="sub">No aligned materials for this concept in taught weeks</div>'}</div>
     <div class="sec guidance"><div class="st">Guidance for the tutor</div><ul>
-      ${G.target_misconception ? `<li>Target: <b>${esc(G.target_misconception.label)}</b></li>` : ""}
-      ${G.reteach_with.method ? `<li>Reteach with <b>${esc(G.reteach_with.method.label)}</b>${G.reteach_with.representation ? ` using a <b>${esc(G.reteach_with.representation.label)}</b>` : ""}</li>` : ""}
+      <li>${esc(G.diagnosis)}</li>
+      ${G.teach_with.method ? `<li>Teach with <b>${esc(G.teach_with.method.label)}</b>${G.teach_with.representation ? ` using a <b>${esc(G.teach_with.representation.label)}</b>` : ""}</li>` : ""}
       ${G.avoid_methods.length ? `<li>Avoid: ${G.avoid_methods.map((m) => esc(m.label)).join(", ")}</li>` : ""}
-      ${G.check_prerequisites.length ? `<li>Check prerequisites first: ${G.check_prerequisites.map((p) => `${esc(p.label)} (${esc(p.status)})`).join(", ")}</li>` : ""}
-      ${G.next_step ? `<li>Next step: <b>${esc(G.next_step.label)}</b>, ${esc(G.next_step_note)}</li>` : ""}</ul></div>
+      ${G.check_prerequisites_first.length ? `<li>Check first: ${G.check_prerequisites_first.map((p) => `${esc(p.label)} (${esc(p.status)})`).join(", ")}</li>` : ""}
+      ${G.next_step ? `<li>Next step: <b>${esc(G.next_step.action.replace("_", " "))}</b>, ${esc(G.next_step.concept.label)}: ${esc(G.next_step.why)}${(G.next_step.check_first || []).length ? `. Check first: ${G.next_step.check_first.map((x) => esc(x.label)).join(", ")}` : ""}</li>` : ""}
+      <li>${esc(G.scope_rule)}</li></ul></div>
     <details><summary>Raw context JSON</summary><pre class="json">${esc(JSON.stringify(b, null, 2))}</pre></details></div>`;
   }
   $("#c-out").innerHTML = left + right;
 }
 
 /* ------------------------------------------------------------------ evaluate */
-S.evMode = "claude"; S.evSet = "heldout";
+S.evMode = "claude"; S.evSet = "heldout2"; S.suite = "heldout";
 function renderEvaluate() {
   const llm = S.status.llm_available;
   if (!llm && S.evMode === "claude") S.evMode = "heuristic";
@@ -452,13 +453,15 @@ function renderEvaluate() {
     el.innerHTML = opts.map(([v, l, dis]) => `<button data-v="${v}" class="${S[key] === v ? "on" : ""}" ${dis ? 'disabled title="Set ANTHROPIC_API_KEY to enable"' : ""}>${l}</button>`).join("");
     el.querySelectorAll("button").forEach((b) => (b.onclick = () => { S[key] = b.dataset.v; renderEvaluate(); }));
   };
-  seg($("#ev-set"), [["heldout", "Held-out (14)"], ["tuning", "Tuning set (14)"]], "evSet");
+  seg($("#ev-set"), [["heldout2", "Held-out 2 (12)"], ["heldout", "Held-out 1 (14)"], ["tuning", "Tuning (14)"]], "evSet");
+  seg($("#ev-suite"), [["heldout", "Fresh held-out scenarios"], ["dev", "Development scenarios"]], "suite");
+  $("#ev-suite").querySelectorAll("button").forEach((btn) => btn.addEventListener("click", () => { S.suiteLoaded = false; renderEvaluate(); }));
   seg($("#ev-mode"), [["heuristic", "Keyword tagger"], ["claude", "Claude tagger", !llm]], "evMode");
-  $("#ev-align-sub").textContent = S.evSet === "heldout" ? "Held-out: new units, different wording, 2 off-topic units that should get no tags. Never used for tuning." : "Tuning set: the 14 units the tagger was adjusted against. Expect flattering numbers.";
+  $("#ev-align-sub").textContent = { heldout2: "Held-out 2: written before the latest tagger change and never used to adjust it — the honest figure.", heldout: "Held-out 1: its misses were used to diagnose the latest tagger change, so it is no longer clean.", tuning: "Tuning set: the 14 units the tagger was adjusted against. Expect flattering numbers." }[S.evSet];
   $("#btn-ev-tutor").disabled = !llm;
   if (!S.suiteLoaded) {
     S.suiteLoaded = true;
-    api("/api/eval/tutor/latest").then((d) => { if (d && d.summary) renderTutorEval(d); else if (!llm) $("#ev-tutor").innerHTML = `<div class="note">Needs <code>ANTHROPIC_API_KEY</code>.</div>`; else $("#ev-tutor").innerHTML = `<div class="empty">No run yet. Click Run.</div>`; });
+    api(`/api/eval/tutor/latest?suite=${S.suite}`).then((d) => { if (d && d.summary) renderTutorEval(d); else if (!llm) $("#ev-tutor").innerHTML = `<div class="note">Needs <code>ANTHROPIC_API_KEY</code>.</div>`; else $("#ev-tutor").innerHTML = `<div class="empty">No run yet for this set. Click Run.</div>`; });
   }
 }
 function renderAlignEval(d) {
@@ -485,7 +488,8 @@ function renderTutorEval(d) {
   const sm = d.summary, arms = ["none", "raw", "h2"], max = sm.max_total;
   const tiles = arms.map((a) => `<div class="kpi"><div class="v" style="color:${ARM_COL[a]}">${sm.by_arm[a].total}<span class="sub" style="font-size:13px"> / ${max}</span></div><div class="l">${esc(d.arms[a])}</div></div>`).join("");
   const crit = `<table class="t"><tr><th>Criterion (0–3)</th>${arms.map((a) => `<th>${ARM_SHORT[a]}</th>`).join("")}</tr>${d.criteria.map((c) => `<tr><td>${CRIT[c]}</td>${arms.map((a) => `<td style="width:22%">${bar(sm.by_arm[a][c] / 3, ARM_COL[a])}<span class="sub">${sm.by_arm[a][c]}</span></td>`).join("")}</tr>`).join("")}</table>`;
-  const cats = `<table class="t"><tr><th>Scenario group</th><th>n</th>${arms.map((a) => `<th>${ARM_SHORT[a]}</th>`).join("")}<th>H2 − raw</th></tr>${Object.entries(sm.by_category).map(([c, v]) => { const dlt = +(v.h2 - v.raw).toFixed(2); return `<tr><td>${CAT[c] || c}</td><td>${v.n}</td>${arms.map((a) => `<td>${v[a]}</td>`).join("")}<td class="${dlt > 0.25 ? "ok" : dlt < -0.25 ? "bad" : ""}"><b>${dlt > 0 ? "+" : ""}${dlt}</b></td></tr>`; }).join("")}</table>`;
+  const bf = d.before_fix;
+  const cats = `<table class="t"><tr><th>Scenario group</th><th>n</th>${arms.map((a) => `<th>${ARM_SHORT[a]}</th>`).join("")}${bf ? "<th>H2 before fix</th>" : ""}<th>H2 − raw</th></tr>${Object.entries(sm.by_category).map(([c, v]) => { const dlt = +(v.h2 - v.raw).toFixed(2); return `<tr><td>${CAT[c] || c}</td><td>${v.n}</td>${arms.map((a) => `<td>${v[a]}</td>`).join("")}${bf ? `<td class="sub">${bf.by_category[c] ? bf.by_category[c].h2 : "–"}</td>` : ""}<td class="${dlt > 0.25 ? "ok" : dlt < -0.25 ? "bad" : ""}"><b>${dlt > 0 ? "+" : ""}${dlt}</b></td></tr>`; }).join("")}</table>`;
   const h = sm.head_to_head.h2_vs_raw;
   const rows = d.results.map((r) => {
     if (arms.some((a) => !r.arms[a] || r.arms[a].error)) return `<div class="note warn">${esc(r.id)}: ${esc(arms.map((a) => r.arms[a]?.error).filter(Boolean).join("; "))}</div>`;
@@ -493,7 +497,8 @@ function renderTutorEval(d) {
       <div class="sub" style="margin:8px 0"><b>Actual need (hand-written):</b> ${esc(r.need)}</div>
       <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">${arms.map((a) => `<div><div class="sub"><b style="color:${ARM_COL[a]}">${esc(d.arms[a])}</b> · ${r.arms[a].total}/15 · ${Object.entries(r.arms[a].scores).map(([k, v]) => `${CRIT[k].split(" ")[0]} ${v}`).join(", ")}</div><div class="reply" style="margin-top:6px;font-size:12.5px">${esc(r.arms[a].reply)}</div><div class="sub" style="margin-top:6px"><i>Judge: ${esc(r.arms[a].why[0])}</i></div></div>`).join("")}</div></details>`;
   }).join("");
-  $("#ev-tutor").innerHTML = `<div class="sub" style="margin-bottom:8px">Last run ${esc(d.finished)} · ${esc(d.model)} · ${d.seconds}s · ${sm.scored_scenarios} scenarios</div>
+  $("#ev-tutor").innerHTML = `<div class="sub" style="margin-bottom:8px"><b>${esc(d.suite_label || "Development scenarios")}</b> · last run ${esc(d.finished)} · ${esc(d.model)} · ${d.seconds}s · ${sm.scored_scenarios} scenarios${bf ? ` · H2 on the same scenarios before the fix: <b>${bf.by_arm.h2.total}</b> / ${max}` : ""}</div>
+    <div class="note" style="margin-bottom:10px">Scores vary by about ±1 point between identical runs, so differences smaller than that are noise.</div>
     <div class="kpis" style="margin-bottom:12px">${tiles}<div class="kpi"><div class="v">${h.win}–${h.tie}–${h.loss}</div><div class="l">H2 vs raw: wins–ties–losses</div></div></div>
     <div class="grid g2"><div>${crit}</div><div>${cats}</div></div>
     <h4 style="margin:16px 0 4px;font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Every scenario, with all three replies</h4>${rows}`;
@@ -502,7 +507,7 @@ async function runTutorSuite(btn) {
   btn.disabled = true;
   const prog = $("#ev-tutor-progress");
   try {
-    let j = await api("/api/eval/tutor", { method: "POST" });
+    let j = await api(`/api/eval/tutor?suite=${S.suite}`, { method: "POST" });
     while (j.status === "running") {
       prog.innerHTML = `<div class="note accent" style="margin-bottom:10px"><span class="spin" style="display:inline-block;width:10px;height:10px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-1px"></span> Running… ${j.done}/${j.total || 12} scenarios (3 replies and 6 judgements each)</div>`;
       await new Promise((r) => setTimeout(r, 4000));
@@ -510,7 +515,7 @@ async function runTutorSuite(btn) {
     }
     prog.innerHTML = "";
     if (j.status === "error") throw new Error(j.error);
-    renderTutorEval(j.result); S.evalDone = true; renderSteps();
+    S.suiteLoaded = false; renderEvaluate(); S.evalDone = true; renderSteps();
   } catch (e) { prog.innerHTML = `<div class="note warn">${esc(e.message)}</div>`; }
   finally { btn.disabled = false; }
 }

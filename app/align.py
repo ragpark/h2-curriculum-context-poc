@@ -98,7 +98,7 @@ def claude(text: str) -> dict:
     # 1) candidate retrieval from the graph (heuristic scores first, then the rest of the strand)
     ranked = [i for i, _, _ in _scores(text, "concept")]
     rest = [n["id"] for n in g.of_type("concept") if n["id"] not in ranked]
-    cands = (ranked + rest)[:14]
+    cands = ranked + rest if len(ranked) + len(rest) <= 60 else (ranked + rest)[:30]  # small graph: show the model every concept
     fmt = lambda ids: "\n".join(f"- {i}: {g.label(i)}" for i in ids)
     prompt = PROMPT.format(
         concepts=fmt(cands),

@@ -210,7 +210,7 @@
       <div class="page-head">
         <div class="eyebrow">Evidence for the hypotheses</div>
         <h2>Evaluate</h2>
-        <p>Two measures. First, tagging accuracy: on the 14 units the tagger was tuned against (optimistic), and on a <b>held-out</b> set written afterwards and never used for tuning (the honest figure). Second, a hard tutor test: 12 pupil turns, three versions of the tutor's context, each reply scored blind on five 0–3 criteria against ground truth written by hand. The judge is an AI model, so treat its scores as indicative and confirm them with teacher review.</p>
+        <p>Two measures. First, tagging accuracy on three sets: the units the tagger was tuned against (optimistic), and two <b>held-out</b> sets. Held-out 2 is the honest figure, because it was written before the latest tagger change. Second, a hard tutor test: 12 pupil turns, three versions of the tutor's context, each reply scored blind on five 0–3 criteria against ground truth written by hand. The judge is an AI model, so treat its scores as indicative and confirm them with teacher review.</p>
       </div>
       <div class="stack">
         <div class="card">
@@ -222,8 +222,8 @@
         </div>
         <div class="card">
           <div class="card-head">
-            <div><h3>Hard tutor test: no context vs raw data vs H2</h3><p class="sub">12 scenarios in 4 groups · 5 criteria scored 0–3 (max 15) · each reply judged blind, twice · takes about 4 minutes</p></div>
-            <div class="actions"><button class="btn primary" id="btn-ev-tutor">Run</button></div>
+            <div><h3>Hard tutor test: no context vs raw data vs H2</h3><p class="sub">Fresh held-out scenarios were locked before the briefing fix; development scenarios were used to build it · 12 scenarios in 4 groups · 5 criteria scored 0–3 (max 15) · each reply judged blind, twice · takes about 4 minutes</p></div>
+            <div class="actions"><div class="seg" id="ev-suite"></div><button class="btn primary" id="btn-ev-tutor">Run</button></div>
           </div>
           <div id="ev-tutor-progress"></div>
           <div id="ev-tutor"></div>

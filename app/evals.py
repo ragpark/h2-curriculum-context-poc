@@ -29,8 +29,8 @@ SEED = Path(__file__).resolve().parent.parent / "seed"
 
 # ================================================================== tagging accuracy
 def _units(which: str):
-    if which == "heldout":
-        d = yaml.safe_load((SEED / "heldout_alignment.yaml").read_text())
+    if which in ("heldout", "heldout2"):
+        d = yaml.safe_load((SEED / ("heldout_alignment.yaml" if which == "heldout" else "heldout_alignment_2.yaml")).read_text())
         return [(u["id"], u["title"], f"{u['title']}\n{u['text']}", u["gold"]) for u in d["units"]]
     mats = {m["id"]: m for m in db.q("select * from material")}
     out = []
@@ -133,8 +133,12 @@ _jobs: dict[str, dict] = {}
 _lock = threading.Lock()
 
 
-def suite():
-    return yaml.safe_load((SEED / "tutor_suite.yaml").read_text())
+SUITES = {"dev": "tutor_suite.yaml", "heldout": "tutor_suite_heldout.yaml"}
+SUITE_LABELS = {"dev": "Development scenarios (used to build the fix)", "heldout": "Fresh held-out scenarios (never used to build the fix)"}
+
+
+def suite(name: str = "dev"):
+    return yaml.safe_load((SEED / SUITES[name]).read_text())
 
 
 def _context(arm: str, pupil: dict, message: str) -> dict:
@@ -185,7 +189,7 @@ def _aggregate(results):
     return {"by_arm": agg, "by_category": by_cat, "head_to_head": wins, "scored_scenarios": len(ok), "max_total": 3 * len(CRITERIA)}
 
 
-def start_tutor_suite() -> dict:
+def start_tutor_suite(name: str = "dev") -> dict:
     if not llm.available():
         raise ValueError("Set ANTHROPIC_API_KEY on the service to run the tutor suite.")
     with _lock:
@@ -193,13 +197,15 @@ def start_tutor_suite() -> dict:
         if running:
             return running[0]
         jid = uuid.uuid4().hex[:8]
-        job = {"id": jid, "status": "running", "done": 0, "total": 0, "started": time.time(), "model": llm.model()}
+        if name not in SUITES:
+            raise ValueError("unknown suite")
+        job = {"id": jid, "status": "running", "done": 0, "total": 0, "started": time.time(), "model": llm.model(), "suite": name}
         _jobs[jid] = job
 
     def work():
         try:
             T.ensure_demo_state()
-            s = suite()
+            s = suite(name)
             pupils = {p["id"]: p for p in db.q("select * from pupil")}
             job["total"] = len(s["scenarios"])
             results = []
@@ -211,10 +217,10 @@ def start_tutor_suite() -> dict:
 
             with ThreadPoolExecutor(4) as ex:
                 results = list(ex.map(one, s["scenarios"]))
-            out = {"model": llm.model(), "arms": ARM_LABELS, "criteria": CRITERIA, "summary": _aggregate(results),
+            out = {"suite": name, "suite_label": SUITE_LABELS[name], "model": llm.model(), "arms": ARM_LABELS, "criteria": CRITERIA, "summary": _aggregate(results),
                    "results": results, "finished": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()),
                    "seconds": round(time.time() - job["started"])}
-            db.meta_set("last_tutor_suite", json.dumps(out))
+            db.meta_set(f"last_tutor_suite_{name}", json.dumps(out))
             job.update(status="done", result=out)
         except Exception as e:
             job.update(status="error", error=f"{type(e).__name__}: {str(e)[:300]}")
@@ -230,9 +236,21 @@ def job_status(jid: str) -> dict:
     return {k: v for k, v in j.items() if k != "result"} | ({"result": j["result"]} if j.get("status") == "done" else {})
 
 
-def last_tutor_suite() -> dict | None:
-    raw = db.meta_get("last_tutor_suite")
+def last_tutor_suite(name: str = "dev") -> dict | None:
+    raw = db.meta_get(f"last_tutor_suite_{name}")
     if raw:
-        return json.loads(raw)
-    shipped = SEED / "last_tutor_suite.json"  # results of the run made when this version was built
-    return json.loads(shipped.read_text()) if shipped.exists() else None
+        return with_before_fix(json.loads(raw), name)
+    shipped = SEED / "results" / f"tutor_{name}_latest.json"  # results of the run made when this version was built
+    out = json.loads(shipped.read_text()) if shipped.exists() else None
+    return with_before_fix(out, name)
+
+
+def with_before_fix(result: dict | None, name: str) -> dict | None:
+    """Attach the pre-fix H2 scores on the same scenarios (recorded before the briefing fix) for comparison."""
+    before = SEED / "results" / f"tutor_{name}_before_fix.json"
+    if result and before.exists():
+        b = json.loads(before.read_text())
+        result = dict(result)
+        result["before_fix"] = {"by_arm": b["summary"]["by_arm"], "by_category": b["summary"]["by_category"],
+                                "per_scenario": {r["id"]: r["arms"]["h2"].get("total") for r in b["results"]}}
+    return result

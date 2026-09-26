@@ -1,0 +1,780 @@
+{
+ "suite": "dev",
+ "suite_label": "Development scenarios (used to build the fix)",
+ "model": "claude-sonnet-5",
+ "arms": {
+  "none": "No classroom context",
+  "raw": "Raw classroom data (no H2)",
+  "h2": "H2 context pack"
+ },
+ "criteria": [
+  "diagnosis",
+  "method",
+  "scope",
+  "next_step",
+  "grounding"
+ ],
+ "summary": {
+  "by_arm": {
+   "none": {
+    "diagnosis": 0.54,
+    "method": 0.71,
+    "scope": 1.38,
+    "next_step": 0.75,
+    "grounding": 0.79,
+    "total": 4.17
+   },
+   "raw": {
+    "diagnosis": 1.92,
+    "method": 2.21,
+    "scope": 1.79,
+    "next_step": 1.92,
+    "grounding": 1.33,
+    "total": 9.17
+   },
+   "h2": {
+    "diagnosis": 2.83,
+    "method": 2.67,
+    "scope": 2.62,
+    "next_step": 2.79,
+    "grounding": 2.25,
+    "total": 13.16
+   }
+  },
+  "by_category": {
+   "method_conflict": {
+    "none": 4.67,
+    "raw": 12.67,
+    "h2": 13.67,
+    "n": 3
+   },
+   "non_revealing": {
+    "none": 4.62,
+    "raw": 8.12,
+    "h2": 12.75,
+    "n": 4
+   },
+   "jump_ahead": {
+    "none": 2.33,
+    "raw": 6.67,
+    "h2": 14.0,
+    "n": 3
+   },
+   "control": {
+    "none": 5.25,
+    "raw": 9.75,
+    "h2": 12.0,
+    "n": 2
+   }
+  },
+  "head_to_head": {
+   "h2_vs_raw": {
+    "win": 9,
+    "tie": 2,
+    "loss": 1
+   }
+  },
+  "scored_scenarios": 12,
+  "max_total": 15
+ },
+ "results": [
+  {
+   "id": "dev-help",
+   "category": "method_conflict",
+   "pupil": "Dev (synthetic)",
+   "class": "10Y",
+   "message": "I keep getting 5x + 3 = 2x + 12 wrong. Can you help?",
+   "need": "Forgets to change the sign when a term moves side (repeated on both-sides equations)",
+   "arms": {
+    "none": {
+     "reply": "Of course, Dev! Let's take it one step at a time.\n\nWe have:\n**5x + 3 = 2x + 12**\n\nThe goal is to get all the x terms on one side and numbers on the other.\n\nFirst step: let's remove the 2x from the right side. To do that, we subtract 2x from **both** sides (so the equation stays balanced).\n\nSo it becomes:\n5x - 2x + 3 = 12\n\nWhat do you get when you simplify **5x - 2x**?",
+     "scores": {
+      "diagnosis": 1.0,
+      "method": 0.0,
+      "scope": 2.0,
+      "next_step": 1.5,
+      "grounding": 1.0
+     },
+     "total": 5.5,
+     "why": [
+      "The reply uses balance-method framing ('subtract 2x from both sides... stays balanced') rather than the class's 'change side, change sign' rule, and never targets Dev's specific sign-flipping error, offering only generic step-by-step guidance.",
+      "The reply solves the equation generically via a balance-method framing ('subtract 2x from both sides... stays balanced') rather than diagnosing or targeting Dev's specific sign-flip error using the teacher's 'change side, change sign' method."
+     ],
+     "context_tokens": 12
+    },
+    "raw": {
+     "reply": "Let's tackle this one step at a time, Dev.\n\nWe've got 5x + 3 = 2x + 12. Since x's are on both sides, first move the smaller x-term across so we only have x's on one side.\n\nUsing \"change side, change sign\": take the 2x from the right and move it to the left \u2014 it becomes \u22122x.\n\nSo the equation becomes:\n5x \u2212 2x + 3 = 12\n\nWhat do you get when you simplify 5x \u2212 2x?",
+     "scores": {
+      "diagnosis": 1.5,
+      "method": 3.0,
+      "scope": 3.0,
+      "next_step": 3.0,
+      "grounding": 1.5
+     },
+     "total": 12.0,
+     "why": [
+      "The reply reworks the both-sides equation step-by-step using 'change side, change sign' exactly as Mr Hale teaches, staying within taught content, but never explicitly names Dev's sign-forgetting pattern.",
+      "The reply reworks the exact problem using 'change side, change sign' correctly, matching the recommended next step, but never explicitly names Dev's actual pattern of forgetting to flip signs, nor references any specific facts about him or the class."
+     ],
+     "context_tokens": 411
+    },
+    "h2": {
+     "reply": "Let's slow this down using \"change side, change sign\" \u2014 the same one Mr Hale showed you.\n\n**5x + 3 = 2x + 12**\n\nStart with the x-terms. We want to move the 2x from the right side over to the left. Since it's **+2x**, when it crosses the equals sign, it becomes **\u22122x**.\n\nSo we get:\n\n5x \u2212 2x + 3 = 12\n\nA common slip here is forgetting to flip the sign \u2014 that's probably what's tripping you up. Always ask: \"what sign does this term have *before* I move it?\" Then flip it.\n\nCan you now simplify the left-hand side (5x \u2212 2x) and tell me what the equation looks like?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 3.0,
+      "scope": 2.5,
+      "next_step": 2.5,
+      "grounding": 2.5
+     },
+     "total": 13.5,
+     "why": [
+      "The reply explicitly targets Dev's sign-flip error, uses Mr Hale's 'change side, change sign' method, reworks the actual equation, and stays within taught content, though it doesn't cite specific pupil history beyond a generic reference to Mr Hale.",
+      "The reply explicitly names the sign-flip slip as the likely cause, walks through the exact 'change side, change sign' method Mr Hale uses, stays within week 4 content, and asks Dev to continue the same equation without yet building in further both-sides practice with negatives."
+     ],
+     "context_tokens": 1029
+    }
+   }
+  },
+  {
+   "id": "dev-practice",
+   "category": "method_conflict",
+   "pupil": "Dev (synthetic)",
+   "class": "10Y",
+   "message": "Can you give me a question to practise?",
+   "need": "Practice on unknowns on both sides, targeting remembering to change the sign",
+   "arms": {
+    "none": {
+     "reply": "Hello Dev! Let's start with something on algebra. Have a go at this:\n\n**Solve for x:**\n3x + 7 = 22\n\nTake your time, and let me know what you get for x \u2014 or if you'd like a hint first!",
+     "scores": {
+      "diagnosis": 0.0,
+      "method": 1.0,
+      "scope": 2.0,
+      "next_step": 0.0,
+      "grounding": 1.0
+     },
+     "total": 4.0,
+     "why": [
+      "The reply offers a basic two-step equation (3x+7=22) instead of an unknowns-on-both-sides question targeting Dev's actual need to remember sign changes, and gives no reference to the 'change side, change sign' method or any pupil-specific detail.",
+      "The reply gives a simple one-step-style two-step equation with no unknowns on both sides, ignoring Dev's actual need to practice sign-changing when unknowns appear on both sides."
+     ],
+     "context_tokens": 12
+    },
+    "raw": {
+     "reply": "Good idea, Dev! Let's try one with x on both sides, since that's tripped you up before:\n\n**Solve: 6x + 1 = 2x + 17**\n\nRemember your \"change side, change sign\" method \u2014 get all the x terms together first, then the numbers.\n\nWhat's your first step to move the x terms onto one side?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 3.0,
+      "scope": 2.5,
+      "next_step": 2.0,
+      "grounding": 2.0
+     },
+     "total": 12.5,
+     "why": [
+      "The reply gives a both-sides equation requiring a sign change and explicitly invokes 'change side, change sign', matching the target need and teacher method, but omits the substitution check and only vaguely references Dev's past error.",
+      "The reply gives an unknowns-both-sides equation requiring a sign change and explicitly ties it to 'change side, change sign', matching Dev's real need, but stops short of the suggested substitution check and only vaguely references his past trip-up."
+     ],
+     "context_tokens": 410
+    },
+    "h2": {
+     "reply": "Right, let's use the \"change side, change sign\" method Mr Hale showed you.\n\nTry this one:\n\n**6x + 4 = 2x + 20**\n\nRemember: when a term moves across the equals sign, its sign flips. Have a go at moving the terms so all the x's are on one side and the numbers on the other.\n\nWhat do you get after moving the 2x and the 4?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 3.0,
+      "scope": 3.0,
+      "next_step": 2.5,
+      "grounding": 2.5
+     },
+     "total": 14.0,
+     "why": [
+      "The reply gives an unknowns-on-both-sides equation requiring a sign change and explicitly invokes Mr Hale's 'change side, change sign' method, matching Dev's real need, though it omits the suggested substitution check and only vaguely references the class method rather than a specific pupil error.",
+      "The reply gives a two-sided equation requiring a sign change, explicitly uses Mr Hale's 'change side, change sign' method, and stays within taught week-4 content, precisely matching Dev's need."
+     ],
+     "context_tokens": 1007
+    }
+   }
+  },
+  {
+   "id": "dev-howto",
+   "category": "method_conflict",
+   "pupil": "Dev (synthetic)",
+   "class": "10Y",
+   "message": "How do I solve 7x \u2212 2 = 3x + 10?",
+   "need": "Forgets to change the sign when a term moves side",
+   "arms": {
+    "none": {
+     "reply": "Hello Dev! Let's tackle this step by step.\n\nWe have:\n**7x \u2212 2 = 3x + 10**\n\nThe first step is to get all the x terms on one side. Let's subtract 3x from both sides, since that will remove the x term from the right-hand side.\n\nSo we get:\n**7x \u2212 3x \u2212 2 = 10**\n\nCan you simplify the left-hand side (just the x terms) and tell me what that gives you?",
+     "scores": {
+      "diagnosis": 0.5,
+      "method": 0.0,
+      "scope": 2.5,
+      "next_step": 1.0,
+      "grounding": 0.5
+     },
+     "total": 4.5,
+     "why": [
+      "The reply teaches 'subtract 3x from both sides' (balance-style framing) instead of Mr Hale's 'change side, change sign' method, and never addresses Dev's actual sign-change error.",
+      "The reply walks through the equation using 'subtract 3x from both sides' (balance-style phrasing) rather than the class's 'change side, change sign' method, and never stresses the sign change that is Dev's actual error pattern."
+     ],
+     "context_tokens": 12
+    },
+    "raw": {
+     "reply": "Good news is you're solid on one-sided equations, Dev \u2014 it's just the two-sided ones tripping you up.\n\nThe trick is \"change side, change sign\": move all the x terms to one side and numbers to the other.\n\nStart with 7x \u2212 2 = 3x + 10. Let's move the 3x from the right to the left \u2014 remember, when it crosses the equals sign, it flips sign.\n\nSo what does 7x \u2212 3x become on the left-hand side?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 3.0,
+      "scope": 3.0,
+      "next_step": 3.0,
+      "grounding": 1.5
+     },
+     "total": 13.5,
+     "why": [
+      "The reply explicitly targets Dev's sign-change error using the teacher's 'change side, change sign' method and stays within taught content, but claims he's 'solid on one-sided equations' without any grounding for that specific claim.",
+      "The reply explicitly flags the sign-flip as the trip point, uses 'change side, change sign' correctly, stays within taught two-sided equation content, and sets up a well-sequenced next step, though the claim about being 'solid on one-sided equations' is only an inferred, unconfirmed fact."
+     ],
+     "context_tokens": 399
+    },
+    "h2": {
+     "reply": "Good, this is your homework question! Let's use \"change side, change sign\".\n\nWe have: 7x \u2212 2 = 3x + 10\n\nStep 1: get the x-terms together. Move 3x to the left \u2014 since it's +3x on the right, it becomes \u22123x on the left:\n\n7x \u2212 3x \u2212 2 = 10\n\nHave a go at simplifying the left-hand side (7x \u2212 3x), then tell me what equation you get. What do you get?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 3.0,
+      "scope": 2.0,
+      "next_step": 2.5,
+      "grounding": 3.0
+     },
+     "total": 13.5,
+     "why": [
+      "The reply explicitly highlights the sign change when moving 3x, directly targeting Dev's known slip, using the teacher's 'change side, change sign' method, staying within taught unknowns-on-both-sides content, and correctly references it as his homework question.",
+      "The tutor explicitly demonstrates the sign flip when moving 3x, directly targeeting Dev's sign-change error, using the teacher's own 'change side, change sign' method, staying within taught unknowns-on-both-sides content, correctly referencing it as the homework question, and prompting a well-sequenced next step."
+     ],
+     "context_tokens": 1029
+    }
+   }
+  },
+  {
+   "id": "amara-practice",
+   "category": "non_revealing",
+   "pupil": "Amara (synthetic)",
+   "class": "10X",
+   "message": "Can you set me a question to practise?",
+   "need": "Sign error when moving terms across the equals sign, on unknowns-on-both-sides equations",
+   "arms": {
+    "none": {
+     "reply": "Hi Amara! Here's one for you:\n\nSolve this equation for *x*:\n\n**3x + 7 = 22**\n\nHave a go and show me the steps you take to get there. What's your first move to start isolating *x*?",
+     "scores": {
+      "diagnosis": 0.0,
+      "method": 1.0,
+      "scope": 2.0,
+      "next_step": 0.0,
+      "grounding": 1.0
+     },
+     "total": 4.0,
+     "why": [
+      "The question is a simple two-step equation, not an unknowns-on-both-sides problem, so it fails to target Amara's actual sign-error issue and regresses rather than practising the needed skill.",
+      "The reply sets a simple two-step equation (3x+7=22) rather than a both-sides equation, missing Amara's actual sign-error issue on unknowns-on-both-sides problems, and shows no balance-method or bar-model scaffolding."
+     ],
+     "context_tokens": 13
+    },
+    "raw": {
+     "reply": "Good, one-step and simple equations are solid \u2014 let's build on that with x on both sides.\n\nTry this one:\n\n**Solve 5x + 3 = 2x + 12**\n\nRemember the balance method: whatever you do to one side, do to the other. Start by getting the x-terms together \u2014 try subtracting 2x from both sides first.\n\nWhat do you get after that first step?",
+     "scores": {
+      "diagnosis": 1.5,
+      "method": 3.0,
+      "scope": 2.0,
+      "next_step": 2.0,
+      "grounding": 0.5
+     },
+     "total": 9.0,
+     "why": [
+      "The reply gives a correct balance-method both-sides question but never addresses or even mentions the actual sign-error pattern, and its claim that 'one-step and simple equations are solid' is an unverified generic assertion rather than grounded diagnosis.",
+      "The reply sets a suitable both-sides equation using the balance method, but claims Amara's 'one-step and simple equations are solid' without any basis and never explicitly targets her actual sign-error pattern."
+     ],
+     "context_tokens": 484
+    },
+    "h2": {
+     "reply": "Great, let's practise this together, Amara. Remember: we never \"move\" a term \u2014 we do the *same* thing to both sides to keep it balanced.\n\nHere's one to try:\n\n**5x \u2212 4 = 2x + 11**\n\nStep 1: What can you do to *both* sides to get rid of the 2x on the right?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 3.0,
+      "scope": 3.0,
+      "next_step": 3.0,
+      "grounding": 2.0
+     },
+     "total": 14.0,
+     "why": [
+      "The reply explicitly reinforces the balance method to counter the sign-error misconception, sets an appropriate unknowns-on-both-sides equation within taught content, but only vaguely references the pupil's actual error pattern without specific detail.",
+      "The reply explicitly flags the 'don't move terms' misconception and gives a same-to-both-sides, both-sides equation consistent with Ms Okafor's balance method and Week 4 content, but makes no specific reference to the class's actual materials or Amara's error pattern."
+     ],
+     "context_tokens": 1244
+    }
+   }
+  },
+  {
+   "id": "amara-stuck",
+   "category": "non_revealing",
+   "pupil": "Amara (synthetic)",
+   "class": "10X",
+   "message": "I'm stuck on my homework.",
+   "need": "Homework is on unknowns on both sides; her known difficulty is the sign error when moving terms",
+   "arms": {
+    "none": {
+     "reply": "Hi Amara! No worries, we'll sort it together. Homework can feel tricky at first, but breaking it into small steps usually helps a lot.\n\nCould you tell me which subject or topic it's on (like algebra, fractions, angles, etc.), and maybe show me the exact question you're stuck on?",
+     "scores": {
+      "diagnosis": 1.0,
+      "method": 1.0,
+      "scope": 2.0,
+      "next_step": 1.5,
+      "grounding": 1.0
+     },
+     "total": 6.5,
+     "why": [
+      "The reply asks a generic clarifying question about subject/topic instead of recognising Amara's homework is on unknowns-on-both-sides and her known sign-error pattern, and it uses no specific method or class facts.",
+      "It generically asks which subject the homework is on rather than recognizing it's the known both-sides algebra homework and offering the balance method directly."
+     ],
+     "context_tokens": 13
+    },
+    "raw": {
+     "reply": "Hi Amara! You're doing really well with one-step equations, so let's build on that with x on both sides.\n\nLet's try: **5x + 3 = 2x + 12**\n\nThe trick is to get all the x's on one side first, using the balance method \u2014 do the same thing to both sides.\n\nSince we have 2x on the right, let's subtract 2x from both sides:\n\n5x + 3 \u2212 2x = 2x + 12 \u2212 2x\n\nThat leaves: 3x + 3 = 12\n\nCan you tell me what 3x + 3 = 12 simplifies to, and then solve for x?",
+     "scores": {
+      "diagnosis": 1.0,
+      "method": 2.5,
+      "scope": 2.0,
+      "next_step": 2.0,
+      "grounding": 0.0
+     },
+     "total": 7.5,
+     "why": [
+      "It jumps straight to a generic both-sides example without asking which question she's stuck on or addressing her known sign-error difficulty, and falsely claims she's 'doing really well with one-step equations' with no basis.",
+      "It jumps straight into an example without checking what she's actually stuck on or addressing her known sign-error pattern, and falsely claims she's 'doing really well with one-step equations' when she's actually working on unknowns-on-both-sides homework."
+     ],
+     "context_tokens": 489
+    },
+    "h2": {
+     "reply": "Let's take it step by step, Amara. We'll use the balance method - not \"change side, change sign\" - to keep things safe.\n\nTry this one: **5x + 3 = 2x + 12**\n\nFirst step: since there's 2x on the right, subtract 2x from *both* sides (don't just flip its sign and move it).\n\nSo:\n5x + 3 \u2212 2x = 2x + 12 \u2212 2x\n\nWhat does that simplify to on each side?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 3.0,
+      "scope": 2.5,
+      "next_step": 3.0,
+      "grounding": 2.0
+     },
+     "total": 13.5,
+     "why": [
+      "The reply picks a both-sides equation and explicitly warns against the sign-flip shortcut, directly matching Amara's known difficulty and current homework topic, using the balance method the class uses, though it doesn't ask which question she's stuck on or cite her specific error history.",
+      "The reply correctly assumes the homework is on unknowns-on-both-sides and pre-empts Amara's known sign-error slip, using the balance method explicitly and staying within Wk4 content, though it doesn't explicitly name her error pattern or confirm which question she's stuck on."
+     ],
+     "context_tokens": 1248
+    }
+   }
+  },
+  {
+   "id": "ben-revision",
+   "category": "non_revealing",
+   "pupil": "Ben (synthetic)",
+   "class": "10X",
+   "message": "Can we do some revision before my test?",
+   "need": "Secure on the equations taught so far; weak on negative numbers (believes negative \u00d7 negative is negative). His bracket-expanding errors are in material not yet taught to the class",
+   "arms": {
+    "none": {
+     "reply": "Of course, Ben! Let's get you ready. What's the test on \u2014 is it a specific topic like algebra, geometry, or something else? Once I know, we can start with a quick warm-up question to see where you're at, then build from there.",
+     "scores": {
+      "diagnosis": 0.0,
+      "method": 0.5,
+      "scope": 1.0,
+      "next_step": 1.0,
+      "grounding": 1.0
+     },
+     "total": 3.5,
+     "why": [
+      "The tutor asks Ben what the test covers instead of using known facts about his negative-number weakness and taught content, missing his actual need entirely.",
+      "The tutor asks Ben what the test is on rather than addressing his known needs (equations and negatives), showing no method (balance/bar model) and no grounding in actual class facts."
+     ],
+     "context_tokens": 12
+    },
+    "raw": {
+     "reply": "Hi Ben! Good plan to revise before your test. You're doing really well with equations like 7x \u2212 2 = 3x + 10 \u2014 nice work there.\n\nLet's sharpen up expanding brackets, since that's worth checking. Try this one:\n\n**Expand 3(x + 2)**\n\nThink about it as sharing the 3 with everything inside the brackets \u2014 both the x and the 2.\n\nWhat do you get?",
+     "scores": {
+      "diagnosis": 0.0,
+      "method": 1.0,
+      "scope": 0.0,
+      "next_step": 0.0,
+      "grounding": 0.0
+     },
+     "total": 1.0,
+     "why": [
+      "The reply pushes bracket-expansion (Wk5, not yet taught and not Ben's real gap) instead of addressing his negative-number misconception or consolidating taught equations, ignoring the balance/bar-model method and jumping ahead of the class's scope.",
+      "The reply invents a need to revise brackets (not yet taught, and not Ben's actual gap of negative numbers) instead of consolidating taught equations and negatives."
+     ],
+     "context_tokens": 456
+    },
+    "h2": {
+     "reply": "Good idea, Ben! Let's sort out negative numbers first, since that trips up a lot of algebra later.\n\nQuick check: what is \u22122 \u00d7 \u22123?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 1.0,
+      "scope": 2.0,
+      "next_step": 2.5,
+      "grounding": 1.5
+     },
+     "total": 10.0,
+     "why": [
+      "Correctly targets Ben's negative-number weakness with a diagnostic question, but doesn't use the balance method or bar models, and makes no explicit reference to his specific error pattern.",
+      "It correctly targets Ben's real weakness (negative numbers) but shows no use of the balance/bar-model method and makes only a generic claim about negatives 'tripping up algebra' rather than citing Ben's specific misconception."
+     ],
+     "context_tokens": 736
+    }
+   }
+  },
+  {
+   "id": "chloe-start",
+   "category": "non_revealing",
+   "pupil": "Chloe (synthetic)",
+   "class": "10X",
+   "message": "I don't really get algebra. Where should I start?",
+   "need": "Only evidence: a starter quiz on inverse operations and one-step equations (80%). Early in the strand",
+   "arms": {
+    "none": {
+     "reply": "Hi Chloe! Algebra's easier once you see it as just \"maths with mystery numbers\" instead of numbers with digits. Letters like *x* just stand in for a value we don't know yet.\n\nLet's start super simple with substitution, since it builds confidence fast.\n\nIf **x = 3**, what would **x + 5** equal?\n\nTry that one, and once you're comfortable, we'll move onto solving simple equations like *x + 5 = 8* (working backwards to find *x*).\n\nWhat do you get for x + 5 when x = 3?",
+     "scores": {
+      "diagnosis": 1.0,
+      "method": 0.0,
+      "scope": 1.5,
+      "next_step": 1.0,
+      "grounding": 1.0
+     },
+     "total": 4.5,
+     "why": [
+      "The tutor jumps to substitution rather than starting with inverse operations/function machines as the diagnosis suggests, and never uses the class's balance/bar-model or function-machine approach.",
+      "The reply starts with substitution rather than the recommended inverse-operations/function-machine entry point, ignoring the teacher's balance/bar-model approach and the pupil's actual quiz-based need."
+     ],
+     "context_tokens": 13
+    },
+    "raw": {
+     "reply": "Hi Chloe! Great news \u2014 your starter quiz score (80%) shows you're already solid on inverse operations, which is exactly what algebra builds on.\n\nLet's connect it to something you know: a function machine. If a number goes in, gets \u00d74, then +3, and the output is 23, you found the input by working backwards \u2014 minus 3, then divide by 4.\n\nThat's actually solving an equation! We can write that same machine as **4x + 3 = 23**, and solve it the same way: undo the +3 first, then undo the \u00d74.\n\nShall we try solving 4x + 3 = 23 together, step by step?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 3.0,
+      "scope": 3.0,
+      "next_step": 3.0,
+      "grounding": 3.0
+     },
+     "total": 15.0,
+     "why": [
+      "Reply correctly starts Chloe at inverse operations/function machines (her actual gap per the 80% quiz) and moves to a two-step equation, matching the recommended next step and staying within taught content.",
+      "The reply accurately uses Chloe's 80% quiz result to start at inverse operations/function machines, moves logically to a two-step equation using the same taught representation, and stays within content she has already met."
+     ],
+     "context_tokens": 359
+    },
+    "h2": {
+     "reply": "Hi Chloe! Let's start with something you've already seen: function machines.\n\nPicture a machine that does **\u00d74 then +3** to a number. If you put in 5, you get 23 out.\n\nNow let's go backwards. To undo the machine, we reverse the steps *and* flip each operation:\n- Undo \"+3\" \u2192 subtract 3\n- Undo \"\u00d74\" \u2192 divide by 4\n\nSo starting from 23: 23 \u2212 3 = 20, then 20 \u00f7 4 = 5. Back to our input!\n\nThe key rule: **undo the last operation first**, using its opposite.\n\nLet's try one together. A machine does **\u00d72 then +5**. If the output is 17, what's the input?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 3.0,
+      "scope": 2.5,
+      "next_step": 3.0,
+      "grounding": 2.0
+     },
+     "total": 13.5,
+     "why": [
+      "The reply correctly starts Chloe at function machines/inverse operations, matching her actual quiz-based need and the taught sequence, but only vaguely references 'something you've already seen' without citing her actual quiz result.",
+      "Correctly starts Chloe at function machines/inverse operations matching her early-strand need and Wk1 method, but doesn't flag what's next or reference her specific quiz result."
+     ],
+     "context_tokens": 817
+    }
+   }
+  },
+  {
+   "id": "amara-harder",
+   "category": "jump_ahead",
+   "pupil": "Amara (synthetic)",
+   "class": "10X",
+   "message": "These are boring. Can we do something harder?",
+   "need": "Still makes the sign error on the current topic, so she is not ready to move on",
+   "arms": {
+    "none": {
+     "reply": "Brilliant, I like your confidence, Amara! Let's step it up a notch.\n\nTry this one:\n\nSolve for x:\n3(2x \u2212 5) = 4x + 7\n\nHave a go and show me each step \u2014 expand the brackets first, then get all the x terms on one side.\n\nWhat do you get when you expand the left-hand side?",
+     "scores": {
+      "diagnosis": 0.0,
+      "method": 0.0,
+      "scope": 0.0,
+      "next_step": 0.0,
+      "grounding": 0.0
+     },
+     "total": 0.0,
+     "why": [
+      "The tutor jumps to unteached brackets content and uses 'get terms on one side' language despite Amara's actual need being to fix her recurring sign error on both-sides equations before moving on.",
+      "The reply jumps to brackets (Wk5, not yet taught) and phrases the process as 'getting terms on one side' rather than balance/bar-model, ignoring Amara's actual unresolved sign-error need on both-sides equations."
+     ],
+     "context_tokens": 13
+    },
+    "raw": {
+     "reply": "I hear you, Amara \u2014 let's make it more interesting, but first let's nail one thing that's tripping you up: when a term crosses the equals sign, its sign must flip, because really we're subtracting it from both sides.\n\nTry this trickier one: **7x \u2212 2 = 3x + 10**\n\nStep 1: subtract 3x from both sides. What do you get?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 0.0,
+      "scope": 2.5,
+      "next_step": 3.0,
+      "grounding": 2.0
+     },
+     "total": 10.5,
+     "why": [
+      "It correctly targets Amara's persistent sign error and gives a suitably harder both-sides equation, but explains it via 'crosses the equals sign, sign flips' \u2014 exactly the 'change side, change sign' language Ms Okafor avoids, rather than the balance/bar model method.",
+      "It correctly targets Amara's persistent sign error and gives a well-sequenced harder both-sides equation, but explains it via 'term crosses the equals sign, sign flips'\u2014exactly the language Ms Okafor's balance method avoids."
+     ],
+     "context_tokens": 488
+    },
+    "h2": {
+     "reply": "Fair enough \u2014 let's spice it up a bit, but still using the balance method (no shortcuts, promise).\n\nTry this one: **7x \u2212 4 = 3x + 20**\n\nRemember: we don't \"jump\" terms across the equals sign \u2014 we do the same operation to both sides.\n\nStep 1: what could you subtract from both sides to get rid of the x-term on the smaller side?",
+     "scores": {
+      "diagnosis": 2.0,
+      "method": 3.0,
+      "scope": 3.0,
+      "next_step": 2.5,
+      "grounding": 1.5
+     },
+     "total": 12.0,
+     "why": [
+      "The reply gives a harder both-sides equation with a balance-method reminder that implicitly targets her sign-error tendency, but never explicitly checks or flags that she's still making that error before moving on.",
+      "It offers a harder both-sides equation and reinforces the balance approach, which fits her need to consolidate before moving on, but never explicitly names her sign-error pattern or cites class specifics."
+     ],
+     "context_tokens": 1249
+    }
+   }
+  },
+  {
+   "id": "farah-next",
+   "category": "jump_ahead",
+   "pupil": "Farah (synthetic)",
+   "class": "10Y",
+   "message": "I've finished all my homework. What's next?",
+   "need": "Secure on everything taught; brackets not yet taught to 10Y",
+   "arms": {
+    "none": {
+     "reply": "That's brilliant, Farah \u2014 well done for getting through it all!\n\nSince you're ahead, let's use the time wisely. A great next step is to pick a topic you've found trickier recently and do some quick revision or extra practice on it, rather than jumping straight into new content. This helps it stick properly.\n\nSo, thinking back over the last week or two \u2014 is there a topic (like maybe fractions, angles, or something from algebra) that felt a bit wobbly or confusing when you were doing your homework?",
+     "scores": {
+      "diagnosis": 1.0,
+      "method": 0.5,
+      "scope": 1.5,
+      "next_step": 1.0,
+      "grounding": 0.0
+     },
+     "total": 4.0,
+     "why": [
+      "The reply assumes Farah has an unspecified weak topic and cites fractions/angles as recent content, which is false for 10Y's actual algebra-focused curriculum, and never references the taught 'change side, change sign' method or offers a stretch/preview appropriate to a secure pupil.",
+      "The reply assumes Farah has a 'wobbly' topic and prompts revision of fractions/angles, which are not part of 10Y's recent algebra curriculum, ignoring her actual need (secure on all taught content, ready for stretch or a flagged brackets preview) and never referencing 'change side, change sign'."
+     ],
+     "context_tokens": 13
+    },
+    "raw": {
+     "reply": "Brilliant work, Farah \u2013 you've nailed equations with x on both sides! Since you're solid with \"change side, change sign,\" let's stretch you a bit further.\n\nTry this one: solve 3(2x + 1) = x + 17.\n\nIt's got a bracket this time, so you'll need to expand it first before collecting terms. Have a go and tell me what you get for x.",
+     "scores": {
+      "diagnosis": 1.0,
+      "method": 2.0,
+      "scope": 0.5,
+      "next_step": 0.0,
+      "grounding": 2.5
+     },
+     "total": 6.0,
+     "why": [
+      "The reply jumps into bracket-expansion content that 10Y has not yet been taught, without flagging it as a preview, even though it correctly references the 'x on both sides' homework and change-side-change-sign method.",
+      "The tutor assumes Farah is ready for brackets and teaches expansion as if already known, ignoring that brackets are Wk5 content not yet taught and failing to flag it as an explicit preview."
+     ],
+     "context_tokens": 418
+    },
+    "h2": {
+     "reply": "Brilliant work, Farah \u2014 you're secure on everything we've covered so far, including equations with the unknown on both sides!\n\nAs a little sneak peek, next week you'll meet equations with brackets, like:\n\n3(x + 2) = x + 10\n\nThe trick will be to expand the bracket first, then use your \"change side, change sign\" rule as normal.\n\nWant to try expanding 3(x + 2) yourself, just to warm up?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 3.0,
+      "scope": 3.0,
+      "next_step": 3.0,
+      "grounding": 3.0
+     },
+     "total": 15.0,
+     "why": [
+      "Reply confirms Farah is secure on taught content and offers an explicitly flagged preview of brackets, starting with expanding and linking back to 'change side, change sign', matching her exact need and the recommended next step.",
+      "The reply confirms Farah is secure on all taught content, explicitly flags brackets as next week's preview, links expansion back to 'change side, change sign', and invites her to try expanding as a natural, well-sequenced warm-up."
+     ],
+     "context_tokens": 908
+    }
+   }
+  },
+  {
+   "id": "ben-inequalities",
+   "category": "jump_ahead",
+   "pupil": "Ben (synthetic)",
+   "class": "10X",
+   "message": "Can you teach me inequalities?",
+   "need": "Inequalities not yet taught (Wk6). Ben is weak on negative numbers, which inequalities rely on (dividing by a negative)",
+   "arms": {
+    "none": {
+     "reply": "Hi Ben! Let's start with the basics of inequalities.\n\nAn inequality is like an equation, but instead of an equals sign, we use symbols showing one side is **bigger** or **smaller**:\n\n- `>` means \"greater than\"\n- `<` means \"less than\"\n- `\u2265` means \"greater than or equal to\"\n- `\u2264` means \"less than or equal to\"\n\nFor example, **x > 3** means x can be any number bigger than 3 (like 4, 5, 100... but not 3 itself).\n\nWe solve inequalities almost exactly like equations \u2014 same steps, same rules \u2014 with one big exception (which we'll get to later!).\n\nLet's try a simple one together:\n\n**x + 5 > 9**\n\nWhat do you think we should do to both sides to get x on its own?",
+     "scores": {
+      "diagnosis": 0.0,
+      "method": 2.0,
+      "scope": 0.0,
+      "next_step": 0.0,
+      "grounding": 1.0
+     },
+     "total": 3.0,
+     "why": [
+      "The tutor dives straight into teaching inequalities (not yet taught, Wk6) without flagging this or checking Ben's known weakness with negative numbers, ignoring his actual need.",
+      "It launches straight into teaching Wk6 inequalities without checking Ben's known weakness with negative numbers or flagging that this is future content, ignoring his real need."
+     ],
+     "context_tokens": 12
+    },
+    "raw": {
+     "reply": "Great choice, Ben! Inequalities work a lot like the equations you've been solving well (like 5x + 3 = 2x + 12).\n\nLet's start simple: **x + 4 < 9**\n\nYou solve it just like an equation \u2014 get x on its own. Subtract 4 from both sides.\n\nHave a go and tell me what you get for x.",
+     "scores": {
+      "diagnosis": 0.0,
+      "method": 2.0,
+      "scope": 0.0,
+      "next_step": 0.0,
+      "grounding": 1.5
+     },
+     "total": 3.5,
+     "why": [
+      "It jumps straight into teaching inequalities (not yet taught, Wk6) without flagging this or checking Ben's known weakness with negative numbers, though it does reference a plausible prior example and use balance-style steps.",
+      "The tutor jumps straight into teaching inequalities (not yet taught, Wk6) without flagging this or checking Ben's known weakness with negative numbers, missing the real need entirely."
+     ],
+     "context_tokens": 464
+    },
+    "h2": {
+     "reply": "Good question \u2014 this is actually coming up in Week 6, so let's just have a quick, flagged preview for now rather than the full lesson.\n\nThe great news is inequalities use the exact same balance method you already know from solving equations \u2014 just do the same to both sides!\n\nFor example: **x + 3 < 10**\n\nWe subtract 3 from both sides, just like normal:\nx < 7\n\nThat's it \u2014 the inequality sign just stays as it is.\n\nBefore we go further, I want to check something important, since negative numbers can trip this up later: what is **-2 \u00d7 -3**?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 3.0,
+      "scope": 3.0,
+      "next_step": 3.0,
+      "grounding": 3.0
+     },
+     "total": 15.0,
+     "why": [
+      "The reply explicitly flags Wk6 timing, previews with the balance method, and checks negative number skills (-2\u00d7-3) before proceeding, precisely matching the ground truth's recommended approach.",
+      "Explicitly flags inequalities as Week 6 content, previews using the balance method, and correctly checks negative-number skills before proceeding, matching the ground-truth need and next step precisely."
+     ],
+     "context_tokens": 824
+    }
+   }
+  },
+  {
+   "id": "ben-brackets",
+   "category": "control",
+   "pupil": "Ben (synthetic)",
+   "class": "10X",
+   "message": "Can you help me with 3(x + 2) = 21?",
+   "need": "Multiplies only the first term in a bracket (writes 3x + 2). Brackets not yet taught to the class",
+   "arms": {
+    "none": {
+     "reply": "Of course, Ben! Let's take this one step at a time.\n\nWe've got 3(x + 2) = 21.\n\nThe first thing to do is get rid of the brackets. You can do this by dividing both sides by 3, since 3 is multiplying everything inside the bracket.\n\nSo: (x + 2) = 21 \u00f7 3\n\nWhat do you get when you work out 21 \u00f7 3?",
+     "scores": {
+      "diagnosis": 0.0,
+      "method": 2.0,
+      "scope": 0.0,
+      "next_step": 0.0,
+      "grounding": 1.0
+     },
+     "total": 3.0,
+     "why": [
+      "The reply teaches full bracket expansion via division (untaught Wk5 content) without checking whether Ben multiplies every term inside the bracket, missing his actual error and ignoring that brackets aren't yet taught.",
+      "The reply jumps straight into solving a not-yet-taught brackets equation via balance method without flagging it's next week's content or checking whether Ben distributes the multiplication across both terms, missing his actual error pattern entirely."
+     ],
+     "context_tokens": 12
+    },
+    "raw": {
+     "reply": "Good one to try, Ben! Let's take it one step at a time.\n\nFirst, we need to expand the bracket: 3(x + 2).\n\nRemember, the 3 outside multiplies **everything** inside the bracket, so it's 3 \u00d7 x and 3 \u00d7 2 separately.\n\nCan you tell me what 3 \u00d7 x and 3 \u00d7 2 are, and then write the expanded expression?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 1.0,
+      "scope": 0.0,
+      "next_step": 2.0,
+      "grounding": 1.0
+     },
+     "total": 7.0,
+     "why": [
+      "It correctly targets Ben's real misconception (multiplying only the first term) but teaches bracket expansion outright without flagging that this is next week's topic, and never uses the balance/bar model method the class has been taught.",
+      "It correctly targets Ben's bracket-expansion error but teaches brackets as if already taught, without noting it's next week's topic, and doesn't use the balance/bar model method."
+     ],
+     "context_tokens": 439
+    },
+    "h2": {
+     "reply": "Good question, Ben \u2014 this is coming up in Week 5, so we'll just have a quick preview before your class covers it properly.\n\nSince you're solid with two-step equations already, the key skill we need first is expanding the bracket correctly.\n\nHere's the bit people often trip up on: **3(x + 2)** means 3 times *everything* inside the bracket, not just the x.\n\nSo it's:\n- 3 \u00d7 x = 3x\n- 3 \u00d7 2 = 6\n\nGiving us: 3x + 6 = 21\n\nHave a go \u2014 what do you get when you expand **3(x + 2)** yourself, term by term?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 1.0,
+      "scope": 2.0,
+      "next_step": 3.0,
+      "grounding": 2.5
+     },
+     "total": 11.5,
+     "why": [
+      "The reply explicitly targets Ben's real error (multiplying only the first term) and flags brackets as next week's topic, but never uses the balance method or bar model the class actually uses.",
+      "The reply directly targets Ben's exact error (multiplying only the first term) and gives a well-sequenced practice task, but it teaches Week 5 bracket-expansion content ahead of schedule (only flagging it, not deferring) and uses neither the balance method nor bar models the class relies on."
+     ],
+     "context_tokens": 951
+    }
+   }
+  },
+  {
+   "id": "farah-check",
+   "category": "control",
+   "pupil": "Farah (synthetic)",
+   "class": "10Y",
+   "message": "Is x = 4 right for 4x + 5 = x \u2212 7?",
+   "need": "No, x = \u22124. Farah is secure on this topic, so this is most likely a one-off slip, not a persistent misconception",
+   "arms": {
+    "none": {
+     "reply": "Let's check that together, Farah.\n\nIf x = 4, substitute it into both sides:\n\nLeft side: 4(4) + 5 = 16 + 5 = 21\nRight side: 4 \u2212 7 = \u22123\n\nSince 21 \u2260 \u22123, x = 4 isn't correct.\n\nLet's solve it properly instead. Start with:\n\n4x + 5 = x \u2212 7\n\nFirst step: get the x terms together by subtracting x from both sides.\n\nWhat do you get when you subtract x from both sides of the equation?",
+     "scores": {
+      "diagnosis": 2.0,
+      "method": 0.5,
+      "scope": 2.0,
+      "next_step": 2.0,
+      "grounding": 1.0
+     },
+     "total": 7.5,
+     "why": [
+      "It correctly checks x=4 by substitution as recommended but then re-derives the whole solution using 'subtract from both sides' language rather than the class's 'change side, change sign' method, and never signals that this is just a one-off slip.",
+      "The reply correctly uses substitution to check the answer but then reteaches by 'subtracting x from both sides' rather than using the teacher's 'change side, change sign' framing, and never signals that this is likely a one-off slip."
+     ],
+     "context_tokens": 13
+    },
+    "raw": {
+     "reply": "Good question, Farah \u2014 let's check by substituting x = 4 back in.\n\nLeft side: 4(4) + 5 = 16 + 5 = 21\nRight side: 4 \u2212 7 = \u22123\n\nSince 21 \u2260 \u22123, x = 4 isn't quite right.\n\nLet's redo it using change side, change sign, like you did with 7x \u2212 2 = 3x + 10. Move the x term and the number so they're together:\n\n4x \u2212 x = \u22127 \u2212 5\n\nWhat do you get when you simplify both sides of that?",
+     "scores": {
+      "diagnosis": 3.0,
+      "method": 3.0,
+      "scope": 3.0,
+      "next_step": 3.0,
+      "grounding": 0.5
+     },
+     "total": 12.5,
+     "why": [
+      "Correctly treats the answer as a slip, checks by substitution, and re-solves using 'change side, change sign' within taught scope, but invents an unverified prior example ('7x \u2212 2 = 3x + 10') not confirmed by the ground truth.",
+      "The reply correctly treats the error as a slip and checks by substitution, applies 'change side, change sign' correctly, and stays within taught content, but it fabricates an unverified detail about a prior example ('like you did with 7x \u2212 2 = 3x + 10') not supported by the ground truth."
+     ],
+     "context_tokens": 419
+    },
+    "h2": {
+     "reply": "Good effort, Farah \u2014 but let's check it. Substitute x = 4 into both sides: left side is 4(4) + 5 = 21, and right side is 4 \u2212 7 = \u22123. Since 21 \u2260 \u22123, x = 4 isn't quite right.\n\nLet's redo it with change side, change sign: 4x + 5 = x \u2212 7. Move the x term across first \u2014 what does x become when it moves to the left-hand side, and what's the new equation?",
+     "scores": {
+      "diagnosis": 2.0,
+      "method": 3.0,
+      "scope": 3.0,
+      "next_step": 3.0,
+      "grounding": 1.5
+     },
+     "total": 12.5,
+     "why": [
+      "The reply correctly identifies the substitution error and guides Farah using the taught 'change side, change sign' method, but doesn't explicitly frame this as a one-off slip or reference any specific pupil/class facts.",
+      "It correctly uses substitution to reveal the error and then re-solves via change side change sign, treating it implicitly as a slip rather than a misconception, but never states this explicitly nor references any pupil-specific pattern."
+     ],
+     "context_tokens": 964
+    }
+   }
+  }
+ ],
+ "finished": "2026-09-26 10:25 UTC",
+ "seconds": 184
+}

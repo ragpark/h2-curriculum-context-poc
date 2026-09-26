@@ -1,0 +1,78 @@
+# English (Macbeth) tutor test. Written BEFORE any English tutor run; ground truth written by hand from the class facts.
+# Tests whether the approach transfers to a subject whose knowledge is a web, not a ladder.
+# Note: in English, pupils often read ahead, so 'respecting what has been taught' is a softer rule than in maths.
+classes:
+  "11E":
+    teacher: "Ms Adeyemi"
+    method: "Thesis-first essay planning, with zoom-in word analysis (what, how, why)"
+    avoid: "Formulaic paragraph templates that replace a line of argument"
+    taught: "Wk1 context (James I, Gunpowder Plot, witchcraft); Wk2 Act 1 ambition and Lady Macbeth (zoom-in, hot-seating); Wk3 Act 2 guilt, blood and sleep imagery; Wk4 Acts 3–4 appearance and reality, are the witches to blame?; Wk5 thesis-led writing, extract to whole play, purposeful context"
+    not_yet_taught: "Wk6 Act 5 sleepwalking scene; Wk7 the ending ('dead butcher'). Pupils may have read ahead; a good tutor can discuss it but should say it is coming up in class"
+  "11F":
+    teacher: "Mr Doyle"
+    method: "PETAL paragraphs (Point, Evidence, Technique, Analysis, Link)"
+    avoid: "Abandoning the PETAL structure the class has been taught"
+    taught: "Wk2 PETAL paragraphs on Lady Macbeth; Wk3 PETAL on guilt"
+    not_yet_taught: "Wk6 Act 5. Pupils may have read ahead; a good tutor can discuss it but should say it is coming up in class"
+
+scenarios:
+  - id: en-priya-check
+    category: specific
+    pupil: pupil:priya
+    message: "Can you check my paragraph? 'Macbeth sees that Malcolm is going to be king and then he says stars hide your fires which means he wants to be king and doesn't want anyone to find out.'"
+    need: "Retells the plot instead of analysing; knows her quotations. Needs to zoom in on words such as 'black and deep desires' and explain their effect"
+    good_next: "Pick one or two words from the quotation and model what, how, why; then have her rewrite one sentence"
+  - id: en-priya-revise
+    category: non_revealing
+    pupil: pupil:priya
+    message: "What should I revise for my Macbeth essay?"
+    need: "Her quotation and context knowledge is strong; her weakness is analysis (retelling, naming techniques without effect)"
+    good_next: "Practise analysing short quotations for effect, not learning more quotations"
+  - id: en-priya-start
+    category: non_revealing
+    pupil: pupil:priya
+    message: "I don't know how to start my essay."
+    need: "Needs a thesis rather than a plot summary; the class uses thesis-first planning"
+    good_next: "Help her write a one-sentence thesis that answers the question, then plan moments that support it"
+  - id: en-priya-ending
+    category: jump_ahead
+    pupil: pupil:priya
+    message: "Can you explain what happens at the end when Macbeth dies?"
+    need: "Act 5 is coming up in class (weeks 6–7). Her need is analysis, not more plot"
+    good_next: "Answer briefly, say it is coming up in class, and turn it into analysis of how Shakespeare presents Macbeth at the end"
+  - id: en-tom-witches
+    category: specific
+    pupil: pupil:tom
+    message: "Is Macbeth just controlled by the witches?"
+    need: "Treats characters as real people; needs to discuss how Shakespeare presents choice and fate, and weigh both readings"
+    good_next: "Weigh both readings using Banquo as a contrast; frame it as what Shakespeare uses Macbeth and the witches to explore"
+  - id: en-tom-context
+    category: specific
+    pupil: pupil:tom
+    message: "How do I get more marks for context?"
+    need: "Bolts context on as separate facts; needs to link context directly to the argument"
+    good_next: "Show how to fold one context point (e.g. the Gunpowder Plot) into an analytical sentence about kingship or regicide"
+  - id: en-tom-spot
+    category: jump_ahead
+    pupil: pupil:tom
+    message: "What does 'Out, damned spot' mean?"
+    need: "Act 5 is coming up in class (week 6). Links to guilt and blood imagery, which he analyses well"
+    good_next: "Explain briefly, flag it is coming up, and connect it to the blood imagery he has already studied in Act 2"
+  - id: en-zainab-lady
+    category: method_conflict
+    pupil: pupil:zainab
+    message: "Help me write about Lady Macbeth."
+    need: "Reads Lady Macbeth only as evil; needs an alternative interpretation (vulnerability, dependence, collapse). Class uses PETAL"
+    good_next: "Use a PETAL paragraph that introduces a second reading of Lady Macbeth"
+  - id: en-zainab-practice
+    category: method_conflict
+    pupil: pupil:zainab
+    message: "Give me a practice question."
+    need: "Stays in the extract and reads Lady Macbeth one way; class uses PETAL"
+    good_next: "An extract-to-whole-play question on Lady Macbeth that prompts a second reading, to be answered in PETAL paragraphs"
+  - id: en-zainab-grade
+    category: non_revealing
+    pupil: pupil:zainab
+    message: "I got a 4 on my essay. How do I improve?"
+    need: "Stays in the extract (does not move to the whole play) and gives one fixed reading of Lady Macbeth"
+    good_next: "Show how to move out from the extract to other moments in the play, and add an alternative reading"

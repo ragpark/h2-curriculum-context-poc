@@ -1,0 +1,52 @@
+# English held-out tagging set (Macbeth). Written BEFORE any English tagging was run; never used to adjust anything.
+# Wording deliberately differs from the class materials. Includes off-topic units that should get no topic tags.
+subject: english
+units:
+  - id: en-01
+    title: "Starter"
+    text: "Look again at the Captain's report in Act 1 Scene 2. What impression do we get of Macbeth before we even meet him? Pick out the single most important word."
+    gold: {concepts: [cc:english/macbeth/ch-macbeth], acceptable_concepts: [cc:english/macbeth/sk-language, cc:english/macbeth/lf-structure], method: md:english/zoom-in, representation: null, misconceptions: []}
+  - id: en-02
+    title: "Exam tip"
+    text: "Examiners see a lot of answers that say 'Shakespeare uses a metaphor here' and stop. Every time you name a device, add a sentence on what it makes the audience think or feel."
+    gold: {concepts: [cc:english/macbeth/sk-language], acceptable_concepts: [cc:english/macbeth/sk-terminology], method: null, representation: null, misconceptions: [mc:english/feature-spotting]}
+  - id: en-03
+    title: "Debate"
+    text: "Motion: 'The weird sisters are to blame for everything.' Prepare two speeches, one for and one against. Remember Banquo hears the same prophecies but does not kill anyone."
+    gold: {concepts: [cc:english/macbeth/th-fate, cc:english/macbeth/ch-witches], acceptable_concepts: [cc:english/macbeth/sk-alternative, cc:english/macbeth/ch-banquo, cc:english/macbeth/sk-argument], method: null, representation: null, misconceptions: [mc:english/witches-control]}
+  - id: en-04
+    title: "Context in action"
+    text: "The audience of 1606 had just lived through an attempt to blow up the King and Parliament. Use that to explain why Duncan's murder would have felt so shocking, in the same sentence as your analysis."
+    gold: {concepts: [cc:english/macbeth/ctx-gunpowder, cc:english/macbeth/sk-context], acceptable_concepts: [cc:english/macbeth/th-kingship], method: null, representation: null, misconceptions: [mc:english/bolt-on-context]}
+  - id: en-05
+    title: "Sleepwalking"
+    text: "Act 5 Scene 1: Lady Macbeth washes invisible blood from her hands and speaks in broken prose. Compare her with the woman who said 'A little water clears us of this deed'."
+    gold: {concepts: [cc:english/macbeth/ch-lady, cc:english/macbeth/th-guilt], acceptable_concepts: [cc:english/macbeth/lf-blood, cc:english/macbeth/lf-verse, cc:english/macbeth/lf-structure], method: null, representation: null, misconceptions: []}
+  - id: en-06
+    title: "Timeline task"
+    text: "Plot Macbeth's journey from 'brave Macbeth' to 'dead butcher' on a timeline. Mark the turning point where the hero becomes a tyrant."
+    gold: {concepts: [cc:english/macbeth/ch-macbeth, cc:english/macbeth/lf-structure], acceptable_concepts: [cc:english/macbeth/th-kingship, cc:english/macbeth/ctx-tragedy], method: null, representation: rp:english/character-arc, misconceptions: []}
+  - id: en-07
+    title: "Masculinity"
+    text: "Lady Macbeth tells her husband to be a man; Macduff says he must also 'feel it as a man'. What different ideas of manhood does the play set against each other?"
+    gold: {concepts: [cc:english/macbeth/th-masculinity], acceptable_concepts: [cc:english/macbeth/ch-macduff, cc:english/macbeth/ch-lady, cc:english/macbeth/ctx-gender], method: null, representation: null, misconceptions: []}
+  - id: en-08
+    title: "Quotation practice"
+    text: "Rewrite this sentence so the quotation is shorter and sits inside your own words: Macbeth says 'Will all great Neptune's ocean wash this blood clean from my hand? No, this my hand will rather the multitudinous seas incarnadine'."
+    gold: {concepts: [cc:english/macbeth/sk-quotation], acceptable_concepts: [cc:english/macbeth/lf-blood], method: null, representation: null, misconceptions: [mc:english/long-quotes]}
+  - id: en-09
+    title: "Planning an essay"
+    text: "Question: 'How far does Shakespeare present Macbeth as a victim?' Write a one-sentence argument that answers 'how far', then list three moments from different acts to support it."
+    gold: {concepts: [cc:english/macbeth/sk-argument], acceptable_concepts: [cc:english/macbeth/sk-extract-whole, cc:english/macbeth/ch-macbeth, cc:english/macbeth/th-fate], method: md:english/thesis-first, representation: null, misconceptions: []}
+  - id: en-10
+    title: "Poetry starter"
+    text: "Read 'Ozymandias' by Percy Shelley and underline every word connected with power."
+    gold: {concepts: [], acceptable_concepts: [], method: null, representation: null, misconceptions: []}
+  - id: en-11
+    title: "Language paper practice"
+    text: "Write the opening of a story set in an abandoned railway station. Aim for 450 words and vary your sentence openings."
+    gold: {concepts: [], acceptable_concepts: [], method: null, representation: null, misconceptions: []}
+  - id: en-12
+    title: "Witches' chant"
+    text: "Read 'Double, double toil and trouble' aloud. How does the rhythm and rhyme of the witches' speech set them apart from every other character?"
+    gold: {concepts: [cc:english/macbeth/lf-verse, cc:english/macbeth/ch-witches], acceptable_concepts: [cc:english/macbeth/th-supernatural], method: null, representation: null, misconceptions: []}

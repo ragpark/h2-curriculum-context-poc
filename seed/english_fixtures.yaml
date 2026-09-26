@@ -1,0 +1,142 @@
+# English (Macbeth) fixtures — all fictional. Short concept IDs are expanded to cc:english/macbeth/<id>.
+classes:
+  - {id: "11E", subject: english, teacher: "Ms Adeyemi (fictional)", current_week: 5, scheme: "Year 11 GCSE English Literature — Macbeth"}
+  - {id: "11F", subject: english, teacher: "Mr Doyle (fictional)", current_week: 5, scheme: "Year 11 GCSE English Literature — Macbeth"}
+
+materials:
+  - id: mat:11e-w1-context
+    class: "11E"
+    week: 1
+    title: "Week 1 — Kings, witches and the Gunpowder Plot"
+    body: |
+      ## A new king who feared witches
+      Macbeth was first performed around 1606 for James I, who believed in the Divine Right of Kings and wrote Daemonologie about witchcraft.
+      Build a quotation web linking James I, the Gunpowder Plot of 1605 and the witches.
+
+      ## Why killing a king mattered
+      After the Gunpowder Plot, regicide was the ultimate crime. Keep asking: how would a Jacobean audience react to Macbeth killing Duncan?
+
+  - id: mat:11e-w2-act1
+    class: "11E"
+    week: 2
+    title: "Week 2 — Act 1: ambition and temptation"
+    body: |
+      ## Zoom in: 'Stars, hide your fires'
+      Zoom in on one word at a time: what does "black and deep desires" suggest? How does the darkness imagery show Macbeth hiding his ambition? Why might Shakespeare make him hide it in an aside?
+
+      ## Hot-seating Lady Macbeth
+      Hot-seat Lady Macbeth after "unsex me here". Is she powerful, or is she already afraid of what she is asking for?
+
+  - id: mat:11e-w3-act2
+    class: "11E"
+    week: 3
+    title: "Week 3 — Act 2: guilt, blood and sleep"
+    body: |
+      ## Zoom in: blood and water
+      "Will all great Neptune's ocean wash this blood / Clean from my hand?" Zoom in on "all" and "great": why does Shakespeare make the whole ocean too small to clean one hand?
+
+      ## Common mistake: naming the technique and stopping
+      Don't write "Shakespeare uses blood imagery" and move on. Say what the image suggests about Macbeth's guilt, and why it matters.
+
+  - id: mat:11e-w4-act3-4
+    class: "11E"
+    week: 4
+    title: "Week 4 — Acts 3–4: Banquo, the witches and appearance versus reality"
+    body: |
+      ## Nothing is what it seems
+      Track appearance and reality: "Fair is foul", "There's daggers in men's smiles". Where does dramatic irony make the audience know more than the characters?
+
+      ## Are the witches to blame?
+      Some readers argue the witches control Macbeth; others argue he chooses. Plan both readings, then decide which you find more convincing and why.
+
+  - id: mat:11e-w5-thesis
+    class: "11E"
+    week: 5
+    title: "Week 5 — Writing a thesis-led response"
+    body: |
+      ## Start with a thesis
+      Before writing, state your big idea in one sentence: for example, "Shakespeare presents ambition as a force that destroys the natural order."
+
+      ## From the extract to the whole play
+      Analyse the extract closely, then move out to at least two other moments across the play that develop your thesis.
+
+      ## Context that earns its place
+      Only use context that sharpens your argument: link the Gunpowder Plot directly to why regicide would horrify the audience, not as a separate fact.
+
+  - id: mat:11e-w6-act5
+    class: "11E"
+    week: 6
+    title: "Week 6 — Act 5: collapse (planned)"
+    body: |
+      ## The sleepwalking scene
+      Lady Macbeth now speaks in prose: "Out, damned spot!" How has the powerful woman of Act 1 changed?
+
+  - id: mat:11e-w7-ending
+    class: "11E"
+    week: 7
+    title: "Week 7 — Tyranny and the ending (planned)"
+    body: |
+      ## 'This dead butcher'
+      Malcolm calls Macbeth "this dead butcher". Is that the whole truth about the tragic hero?
+
+  - id: mat:11f-w2-petal
+    class: "11F"
+    week: 2
+    title: "11F Week 2 — PETAL paragraphs on Lady Macbeth"
+    body: |
+      ## Writing a PETAL paragraph
+      Point, Evidence, Technique, Analysis, Link. Point: Lady Macbeth is ruthless. Evidence: "unsex me here". Technique: imperative. Analysis: she commands spirits to remove her femininity. Link back to the question.
+
+  - id: mat:11f-w3-guilt
+    class: "11F"
+    week: 3
+    title: "11F Week 3 — PETAL on guilt"
+    body: |
+      ## PETAL practice: Macbeth's guilt
+      Use PETAL to write about "Macbeth does murder sleep". Remember the T: name the technique, then analyse it.
+
+  - id: mat:11f-w6-act5
+    class: "11F"
+    week: 6
+    title: "11F Week 6 — Act 5 (planned)"
+    body: |
+      ## The end of the Macbeths
+      Read Act 5 and complete a character arc timeline for both Macbeths.
+
+pupils:
+  - {id: pupil:priya, name: "Priya (synthetic)", class: "11E"}
+  - {id: pupil:tom, name: "Tom (synthetic)", class: "11E"}
+  - {id: pupil:zainab, name: "Zainab (synthetic)", class: "11F"}
+
+# Evidence is teacher-marked work: a task, the topics it covered, a mark (0–1) and, where the teacher saw one, a misconception.
+scenarios:
+  - id: retells-plot
+    title: "Knows the play well, but retells instead of analysing"
+    pupil: pupil:priya
+    story: "Strong on quotations and context facts, but her paragraphs explain what happens rather than how Shakespeare presents it, and name techniques without their effect."
+    events:
+      - {source: "Class quiz", activity: "Quotation retrieval quiz: Acts 1–2", concepts: [sk-quotation, ch-macbeth], score: 0.9}
+      - {source: "Class quiz", activity: "Context quiz: James I, the Gunpowder Plot and witchcraft", concepts: [ctx-james, ctx-gunpowder, ctx-witchcraft], score: 0.85}
+      - {source: "Teacher marking", activity: "Paragraph: How does Shakespeare present Macbeth's ambition in 'Stars, hide your fires'?", concepts: [th-ambition, ch-macbeth, sk-language], score: 0.35, misconception: mc:english/retelling}
+      - {source: "Teacher marking", activity: "Paragraph: blood imagery in Act 2 Scene 2", concepts: [lf-blood, th-guilt, sk-language], score: 0.4, misconception: mc:english/feature-spotting}
+      - {source: "Teacher marking", activity: "Paragraph: Lady Macbeth in Act 1 Scene 5", concepts: [ch-lady, sk-language], score: 0.4, misconception: mc:english/retelling}
+  - id: bolts-on-context
+    title: "Good analysis, but context bolted on and characters as real people"
+    pupil: pupil:tom
+    story: "Analyses words well, but adds context as a separate fact and writes about what characters 'should have done' as if they were real."
+    events:
+      - {source: "Class quiz", activity: "Quotation retrieval quiz: Acts 1–2", concepts: [sk-quotation], score: 0.7}
+      - {source: "Teacher marking", activity: "Paragraph: Macbeth's guilt after the murder", concepts: [th-guilt, lf-blood, sk-language], score: 0.75}
+      - {source: "Teacher marking", activity: "Paragraph: the witches in Act 1 Scene 3", concepts: [ch-witches, th-supernatural, sk-context], score: 0.45, misconception: mc:english/bolt-on-context}
+      - {source: "Teacher marking", activity: "Paragraph: Is Macbeth to blame for Duncan's murder?", concepts: [th-fate, ch-macbeth, sk-argument], score: 0.4, misconception: mc:english/real-people}
+      - {source: "Teacher marking", activity: "Paragraph: Lady Macbeth and Jacobean ideas about women", concepts: [ch-lady, ctx-gender, sk-context], score: 0.4, misconception: mc:english/bolt-on-context}
+  - id: single-reading
+    title: "Sees Lady Macbeth as simply evil; stays in the extract"
+    pupil: pupil:zainab
+    story: "Knows her quotations and writes tidy PETAL paragraphs, but reads Lady Macbeth only as a villain and does not move beyond the extract."
+    events:
+      - {source: "Class quiz", activity: "Quotation retrieval quiz: Acts 1–2", concepts: [sk-quotation], score: 0.95}
+      - {source: "Teacher marking", activity: "PETAL paragraph: Lady Macbeth in Act 1 Scene 5", concepts: [ch-lady, sk-language], score: 0.6, misconception: mc:english/single-reading}
+      - {source: "Teacher marking", activity: "PETAL paragraph: 'Macbeth does murder sleep'", concepts: [lf-sleep, th-guilt, sk-language], score: 0.75}
+      - {source: "Teacher marking", activity: "Paragraph: how is Lady Macbeth presented as powerful?", concepts: [ch-lady, th-ambition], score: 0.5, misconception: mc:english/single-reading}
+      - {source: "Teacher marking", activity: "Extract essay: Lady Macbeth in Act 1 Scene 5 and in the play as a whole", concepts: [sk-extract-whole, ch-lady], score: 0.45, misconception: mc:english/extract-only}

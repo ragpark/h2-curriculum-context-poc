@@ -1,0 +1,222 @@
+# Curriculum map — GCSE English Literature (KS4): Macbeth. Illustrative seed.
+#
+# Unlike the maths strand, this is a WEB not a ladder:
+#   • Knowledge (context, characters, themes, language & form) is connected by 'relatesTo' links, not prerequisites.
+#   • Only the writing skills (mapped to the GCSE assessment objectives) build on each other ('prerequisites').
+#   • Key quotations are first-class nodes that 'evidence' characters, themes and methods.
+subject: english
+graph_version: "2026.1"
+title: "English Literature — Macbeth (KS4)"
+layout: strands
+strands:
+  - {id: context, label: Context}
+  - {id: characters, label: Characters}
+  - {id: themes, label: Themes}
+  - {id: language, label: "Language, form & structure"}
+  - {id: skills, label: "Writing skills (AOs)"}
+
+concepts:
+  # ---- context
+  - {id: cc:english/macbeth/ctx-james, strand: context, label: "James I and the Divine Right of Kings", keywords: [james, "divine right", "king james", monarch, "new king"]}
+  - {id: cc:english/macbeth/ctx-gunpowder, strand: context, label: "The Gunpowder Plot and fear of regicide", keywords: ["gunpowder plot", "gunpowder", regicide, treason, "1605"]}
+  - {id: cc:english/macbeth/ctx-witchcraft, strand: context, label: "Jacobean beliefs about witchcraft", keywords: [witchcraft, daemonologie, "witch trials", "jacobean beliefs"]}
+  - {id: cc:english/macbeth/ctx-chain, strand: context, label: "The Great Chain of Being and natural order", keywords: ["great chain of being", "chain of being", "natural order", hierarchy]}
+  - {id: cc:english/macbeth/ctx-gender, strand: context, label: "Jacobean expectations of men and women", keywords: ["jacobean women", "gender roles", patriarchal, "role of women", "expectations of women"]}
+  - {id: cc:english/macbeth/ctx-tragedy, strand: context, label: "Shakespearean tragedy and the tragic hero", keywords: ["tragic hero", tragedy, "fatal flaw", hamartia, catharsis]}
+  # ---- characters
+  - {id: cc:english/macbeth/ch-macbeth, strand: characters, label: "Macbeth: from hero to tyrant", keywords: [macbeth, "brave macbeth", tyrant, "macbeth's"]}
+  - {id: cc:english/macbeth/ch-lady, strand: characters, label: "Lady Macbeth: power, manipulation and decline", keywords: ["lady macbeth", "unsex me", "sleepwalking", "damned spot"]}
+  - {id: cc:english/macbeth/ch-banquo, strand: characters, label: "Banquo as Macbeth's foil", keywords: [banquo, foil, "banquo's ghost", fleance]}
+  - {id: cc:english/macbeth/ch-witches, strand: characters, label: "The witches: prophecy and ambiguity", keywords: [witches, "weird sisters", prophecy, prophecies, hecate]}
+  - {id: cc:english/macbeth/ch-macduff, strand: characters, label: "Macduff: loyalty, grief and manhood", keywords: [macduff, "lady macduff", "feel it as a man"]}
+  - {id: cc:english/macbeth/ch-duncan-malcolm, strand: characters, label: "Duncan and Malcolm: rightful kingship", keywords: [duncan, malcolm, "rightful king", "king-becoming graces"]}
+  # ---- themes
+  - {id: cc:english/macbeth/th-ambition, strand: themes, label: "Ambition", keywords: [ambition, ambitious, "vaulting ambition", desire, desires]}
+  - {id: cc:english/macbeth/th-kingship, strand: themes, label: "Power, kingship and tyranny", keywords: [kingship, power, tyranny, tyrant, crown, throne]}
+  - {id: cc:english/macbeth/th-guilt, strand: themes, label: "Guilt and conscience", keywords: [guilt, guilty, conscience, remorse, "scorpions"]}
+  - {id: cc:english/macbeth/th-appearance, strand: themes, label: "Appearance and reality", keywords: ["appearance and reality", deception, "fair is foul", "serpent under", "daggers in men's smiles"]}
+  - {id: cc:english/macbeth/th-supernatural, strand: themes, label: "The supernatural", keywords: [supernatural, ghost, apparitions, dagger, spirits]}
+  - {id: cc:english/macbeth/th-masculinity, strand: themes, label: "Masculinity and gender", keywords: [masculinity, manhood, "be a man", gender, "unsex"]}
+  - {id: cc:english/macbeth/th-fate, strand: themes, label: "Fate and free will", keywords: [fate, "free will", destiny, "to blame", responsibility, choice]}
+  - {id: cc:english/macbeth/th-order, strand: themes, label: "Order and disorder", keywords: [disorder, chaos, "unnatural", "natural order", storms]}
+  # ---- language, form & structure
+  - {id: cc:english/macbeth/lf-soliloquy, strand: language, label: "Soliloquies and asides", keywords: [soliloquy, soliloquies, aside, asides]}
+  - {id: cc:english/macbeth/lf-blood, strand: language, label: "Blood imagery", keywords: ["blood imagery", blood, "neptune's ocean", "damned spot"]}
+  - {id: cc:english/macbeth/lf-dark, strand: language, label: "Darkness and light imagery", keywords: [darkness, "light imagery", "stars, hide your fires", night, "black and deep"]}
+  - {id: cc:english/macbeth/lf-sleep, strand: language, label: "Sleep imagery", keywords: [sleep, sleepless, "murder sleep", sleepwalking]}
+  - {id: cc:english/macbeth/lf-irony, strand: language, label: "Dramatic irony", keywords: ["dramatic irony", irony, ironic]}
+  - {id: cc:english/macbeth/lf-verse, strand: language, label: "Verse, prose and the witches' chanting rhythm", keywords: ["iambic pentameter", prose, verse, trochaic, rhythm, chant, rhyme]}
+  - {id: cc:english/macbeth/lf-structure, strand: language, label: "Structure: the tragic hero's rise and fall", keywords: [structure, "rise and fall", "turning point", climax, "five acts"]}
+  # ---- writing skills (assessment objectives)
+  - {id: cc:english/macbeth/sk-quotation, strand: skills, label: "Select and embed short quotations", keywords: ["embed", "embedded quotation", "short quotations", "select quotations", "quotation"]}
+  - {id: cc:english/macbeth/sk-language, strand: skills, label: "Analyse words and methods for their effect", keywords: [analyse, analysis, "zoom in", effect, connotation, connotations, "word choice"]}
+  - {id: cc:english/macbeth/sk-terminology, strand: skills, label: "Use subject terminology accurately", keywords: [terminology, "technical terms", "subject terminology"]}
+  - {id: cc:english/macbeth/sk-context, strand: skills, label: "Link context to meaning", keywords: ["link context", "use context", "context to", "contextual"]}
+  - {id: cc:english/macbeth/sk-argument, strand: skills, label: "Build a thesis-led argument", keywords: [thesis, argument, "line of argument", "essay plan", "big idea"]}
+  - {id: cc:english/macbeth/sk-extract-whole, strand: skills, label: "Move from the extract to the whole play", keywords: ["whole play", "extract", "elsewhere in the play", "across the play"]}
+  - {id: cc:english/macbeth/sk-alternative, strand: skills, label: "Consider alternative interpretations", keywords: ["alternative interpretation", "another reading", "some readers", interpretations, "could also"]}
+  - {id: cc:english/macbeth/sk-spag, strand: skills, label: "Accurate spelling, punctuation and grammar", keywords: [spelling, punctuation, grammar, spag]}
+
+# Skills build on each other (the only 'ladder' in this map). Weight = how strongly.
+prerequisites:
+  - [cc:english/macbeth/sk-quotation, cc:english/macbeth/sk-language, 0.9]
+  - [cc:english/macbeth/sk-terminology, cc:english/macbeth/sk-language, 0.5]
+  - [cc:english/macbeth/sk-language, cc:english/macbeth/sk-alternative, 0.7]
+  - [cc:english/macbeth/sk-quotation, cc:english/macbeth/sk-argument, 0.6]
+  - [cc:english/macbeth/sk-argument, cc:english/macbeth/sk-context, 0.6]
+  - [cc:english/macbeth/sk-argument, cc:english/macbeth/sk-extract-whole, 0.8]
+  - [cc:english/macbeth/sk-language, cc:english/macbeth/sk-extract-whole, 0.5]
+
+# Knowledge web: undirected links between context, characters, themes and methods.
+related:
+  - [ch-macbeth, th-ambition]
+  - [ch-macbeth, th-guilt]
+  - [ch-macbeth, th-kingship]
+  - [ch-macbeth, th-fate]
+  - [ch-macbeth, th-masculinity]
+  - [ch-macbeth, lf-soliloquy]
+  - [ch-macbeth, lf-structure]
+  - [ch-lady, th-ambition]
+  - [ch-lady, th-masculinity]
+  - [ch-lady, th-guilt]
+  - [ch-lady, th-appearance]
+  - [ch-lady, lf-dark]
+  - [ch-lady, lf-sleep]
+  - [ch-lady, ctx-gender]
+  - [ch-banquo, th-fate]
+  - [ch-banquo, th-kingship]
+  - [ch-banquo, th-supernatural]
+  - [ch-witches, th-supernatural]
+  - [ch-witches, th-fate]
+  - [ch-witches, th-appearance]
+  - [ch-witches, lf-verse]
+  - [ch-witches, ctx-witchcraft]
+  - [ch-macduff, th-masculinity]
+  - [ch-macduff, th-order]
+  - [ch-duncan-malcolm, th-kingship]
+  - [ch-duncan-malcolm, th-order]
+  - [ch-duncan-malcolm, lf-irony]
+  - [ch-duncan-malcolm, ctx-james]
+  - [ctx-james, th-kingship]
+  - [ctx-james, ctx-witchcraft]
+  - [ctx-gunpowder, th-kingship]
+  - [ctx-gunpowder, th-appearance]
+  - [ctx-witchcraft, th-supernatural]
+  - [ctx-chain, th-order]
+  - [ctx-chain, th-kingship]
+  - [ctx-gender, th-masculinity]
+  - [ctx-tragedy, lf-structure]
+  - [ctx-tragedy, th-ambition]
+  - [lf-irony, th-appearance]
+  - [lf-dark, th-appearance]
+  - [lf-sleep, th-guilt]
+  - [lf-blood, th-guilt]
+  - [ctx-tragedy, ch-macbeth]
+
+# Key quotations (the play is public domain). act = act.scene
+quotations:
+  - {id: q:macbeth/fair-foul, text: "Fair is foul, and foul is fair", speaker: Witches, act: "1.1", evidences: [th-appearance, ch-witches, lf-verse]}
+  - {id: q:macbeth/brave, text: "For brave Macbeth—well he deserves that name—", speaker: Captain, act: "1.2", evidences: [ch-macbeth, lf-structure]}
+  - {id: q:macbeth/instruments, text: "oftentimes, to win us to our harm, / The instruments of darkness tell us truths", speaker: Banquo, act: "1.3", evidences: [ch-banquo, ch-witches, th-supernatural]}
+  - {id: q:macbeth/stars, text: "Stars, hide your fires; / Let not light see my black and deep desires", speaker: Macbeth, act: "1.4", evidences: [ch-macbeth, th-ambition, lf-dark, lf-soliloquy]}
+  - {id: q:macbeth/unsex, text: "Come, you spirits / That tend on mortal thoughts, unsex me here", speaker: Lady Macbeth, act: "1.5", evidences: [ch-lady, th-masculinity, th-supernatural, ctx-gender]}
+  - {id: q:macbeth/serpent, text: "look like th' innocent flower, / But be the serpent under't", speaker: Lady Macbeth, act: "1.5", evidences: [ch-lady, th-appearance]}
+  - {id: q:macbeth/vaulting, text: "I have no spur / To prick the sides of my intent, but only / Vaulting ambition", speaker: Macbeth, act: "1.7", evidences: [ch-macbeth, th-ambition, lf-soliloquy]}
+  - {id: q:macbeth/dagger, text: "Is this a dagger which I see before me", speaker: Macbeth, act: "2.1", evidences: [th-supernatural, th-guilt, lf-soliloquy]}
+  - {id: q:macbeth/neptune, text: "Will all great Neptune's ocean wash this blood / Clean from my hand?", speaker: Macbeth, act: "2.2", evidences: [ch-macbeth, th-guilt, lf-blood]}
+  - {id: q:macbeth/sleep, text: "Macbeth does murder sleep", speaker: Macbeth, act: "2.2", evidences: [th-guilt, lf-sleep]}
+  - {id: q:macbeth/daggers-smiles, text: "There's daggers in men's smiles", speaker: Donalbain, act: "2.3", evidences: [th-appearance]}
+  - {id: q:macbeth/thou-hast-it, text: "Thou hast it now: King, Cawdor, Glamis, all, / As the weird women promised", speaker: Banquo, act: "3.1", evidences: [ch-banquo, th-fate]}
+  - {id: q:macbeth/scorpions, text: "O, full of scorpions is my mind, dear wife!", speaker: Macbeth, act: "3.2", evidences: [ch-macbeth, th-guilt]}
+  - {id: q:macbeth/feel-it, text: "I shall do so; / But I must also feel it as a man", speaker: Macduff, act: "4.3", evidences: [ch-macduff, th-masculinity]}
+  - {id: q:macbeth/spot, text: "Out, damned spot! out, I say!", speaker: Lady Macbeth, act: "5.1", evidences: [ch-lady, th-guilt, lf-blood, lf-verse]}
+  - {id: q:macbeth/tomorrow, text: "To-morrow, and to-morrow, and to-morrow", speaker: Macbeth, act: "5.5", evidences: [ch-macbeth, lf-soliloquy, th-fate]}
+  - {id: q:macbeth/butcher, text: "this dead butcher and his fiend-like queen", speaker: Malcolm, act: "5", evidences: [ch-macbeth, ch-lady, th-kingship]}
+
+misconceptions:
+  - id: mc:english/retelling
+    label: Retells the plot instead of analysing
+    description: "Explains what happens (\"then Macbeth kills Duncan\") rather than how and why Shakespeare presents it."
+    affects: [sk-language, sk-argument]
+    keywords: ["retell", "retelling", "what happens", "narrative", "tells the story"]
+  - id: mc:english/feature-spotting
+    label: Names a technique without explaining its effect
+    description: "Writes \"Shakespeare uses imagery\" and stops, without saying what the image suggests or does."
+    affects: [sk-language, sk-terminology]
+    keywords: ["feature spotting", "feature-spotting", "just name", "without explaining", "so what"]
+  - id: mc:english/bolt-on-context
+    label: Bolts on context that does not support the argument
+    description: "Adds a context fact (\"James I believed in witches\") in a separate sentence that is not linked to the point being made."
+    affects: [sk-context]
+    keywords: ["bolt on", "bolted on", "bolt-on", "context dump", "linked to your point"]
+  - id: mc:english/real-people
+    label: Treats characters as real people rather than Shakespeare's constructions
+    description: "Writes about what Macbeth \"should have done\" instead of what Shakespeare uses him to show."
+    affects: [sk-argument, sk-language]
+    keywords: ["real people", "real person", "should have", "construct", "shakespeare uses"]
+  - id: mc:english/witches-control
+    label: Believes the witches control Macbeth, so he is not responsible
+    description: "Reads the prophecies as fixed commands, missing that Macbeth chooses to act on them."
+    affects: [th-fate, ch-witches, ch-macbeth]
+    keywords: ["witches made him", "control macbeth", "controlled by the witches", "no choice"]
+  - id: mc:english/single-reading
+    label: Reads Lady Macbeth as simply evil (one fixed reading)
+    description: "Sees Lady Macbeth only as a villain, missing her vulnerability, her dependence on Macbeth and her collapse."
+    affects: [ch-lady, sk-alternative]
+    keywords: ["simply evil", "just evil", "evil villain", "one reading", "fixed reading"]
+  - id: mc:english/long-quotes
+    label: Uses long quotations instead of short embedded ones
+    description: "Copies out whole lines, leaving no room to analyse individual words."
+    affects: [sk-quotation]
+    keywords: ["long quotations", "whole lines", "copy out", "too long"]
+  - id: mc:english/presentism
+    label: Judges the play only by modern values
+    description: "Calls Jacobean attitudes \"stupid\" or \"sexist\" without considering how a Jacobean audience would respond."
+    affects: [sk-context, ctx-gender]
+    keywords: ["modern values", "today we", "nowadays", "modern audience only"]
+  - id: mc:english/extract-only
+    label: Writes only about the extract, not the whole play
+    description: "Answers the extract question well but never moves out to the rest of the play."
+    affects: [sk-extract-whole]
+    keywords: ["only the extract", "extract only", "rest of the play", "never moves out"]
+
+methods:
+  - id: md:english/zoom-in
+    label: "Zoom-in word analysis (what, how, why)"
+    teaches: [sk-language, sk-terminology, sk-quotation]
+    keywords: ["zoom in", "zoom-in", "what, how, why", "single word", "one word"]
+  - id: md:english/petal
+    label: "PETAL paragraphs (Point, Evidence, Technique, Analysis, Link)"
+    teaches: [sk-language, sk-quotation, sk-argument, sk-terminology]
+    keywords: [petal, "point, evidence", "point evidence technique"]
+  - id: md:english/thesis-first
+    label: Thesis-first essay planning
+    teaches: [sk-argument, sk-extract-whole, sk-alternative, sk-context]
+    keywords: ["thesis statement", "thesis-first", "thesis first", "big idea", "line of argument"]
+  - id: md:english/retrieval
+    label: Quotation retrieval practice
+    teaches: [sk-quotation]
+    keywords: ["retrieval", flashcards, "quote quiz", "quotation quiz"]
+  - id: md:english/drama
+    label: Drama and hot-seating
+    teaches: [ch-macbeth, ch-lady, sk-alternative]
+    keywords: ["hot-seat", "hot seating", "hot-seating", "act out", "freeze frame"]
+
+representations:
+  - {id: rp:english/tension-graph, label: "Tension graph across the acts", keywords: ["tension graph", "tension across"]}
+  - {id: rp:english/quote-web, label: "Quotation web", keywords: ["quotation web", "quote web", "mind map"]}
+  - {id: rp:english/character-arc, label: "Character arc timeline", keywords: ["character arc", timeline, "arc"]}
+  - {id: rp:english/annotated-extract, label: "Annotated extract", keywords: ["annotate", "annotated", "annotation"]}
+
+# Illustrative mapping to the GCSE English Literature assessment objectives (DfE subject content) and a placeholder shared layer.
+crosswalk:
+  - [sk-quotation, gcse-eng-lit-aos, AO1, closeMatch]
+  - [sk-argument, gcse-eng-lit-aos, AO1, closeMatch]
+  - [sk-extract-whole, gcse-eng-lit-aos, AO1, broadMatch]
+  - [sk-alternative, gcse-eng-lit-aos, AO1, broadMatch]
+  - [sk-language, gcse-eng-lit-aos, AO2, closeMatch]
+  - [sk-terminology, gcse-eng-lit-aos, AO2, closeMatch]
+  - [sk-context, gcse-eng-lit-aos, AO3, closeMatch]
+  - [sk-spag, gcse-eng-lit-aos, AO4, exactMatch]
+  - [ch-lady, shared-layer, "shared:ks4/english/macbeth/lady-macbeth", exactMatch]
+  - [th-ambition, shared-layer, "shared:ks4/english/macbeth/ambition", exactMatch]

@@ -580,7 +580,7 @@ function renderHelp() {
 
 /* ------------------------------------------------------------------ connect */
 function renderConnect() {
-  const url = location.origin + "/mcp/";
+  const url = location.origin + "/mcp";
   $("#mcp-url").value = url;
   $("#btn-copy").onclick = () => { navigator.clipboard?.writeText(url); toast("Copied"); };
   $("#curl-ex").textContent = `curl -X POST ${location.origin}/api/context \\

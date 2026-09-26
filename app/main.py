@@ -34,6 +34,16 @@ async def lifespan(app):
 app = FastAPI(title="Curriculum Map for AI Tutors — POC", version="0.2", lifespan=lifespan,
               description="A shared curriculum map (H2), with pupil progress (H1) and teachers' materials (H3) tagged against it, assembled into a briefing for AI tutors.")
 app.mount("/mcp", mcp.streamable_http_app())
+
+
+@app.middleware("http")
+async def _mcp_no_redirect(request: Request, call_next):
+    # Clients connect to ".../mcp"; serve it directly instead of a 307 redirect to ".../mcp/",
+    # which some MCP clients do not follow for POST requests.
+    if request.scope["path"] == "/mcp":
+        request.scope["path"] = "/mcp/"
+        request.scope["raw_path"] = b"/mcp/"
+    return await call_next(request)
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 

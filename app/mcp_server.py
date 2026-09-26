@@ -1,5 +1,8 @@
 """MCP surface: lets any MCP-capable AI tutor use H2 without a bespoke integration."""
+import os
+
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 from . import align as A
 from . import content as C
@@ -7,7 +10,20 @@ from . import context as X
 from . import graph as G
 from . import learner as L
 
-mcp = FastMCP("curriculum-map", stateless_http=True, json_response=True)
+def _security() -> TransportSecuritySettings:
+    """Keep the MCP library's DNS-rebinding protection on, but allow this service's public hostname.
+    By default the library only accepts Host: localhost, which rejects every request made to the public URL (HTTP 421).
+    Railway sets RAILWAY_PUBLIC_DOMAIN; MCP_ALLOWED_HOSTS (comma-separated) can add more, e.g. a custom domain."""
+    hosts = ["127.0.0.1:*", "localhost:*", "[::1]:*"]
+    extra = [h.strip() for h in os.environ.get("MCP_ALLOWED_HOSTS", "").split(",") if h.strip()]
+    for d in [os.environ.get("RAILWAY_PUBLIC_DOMAIN", "")] + extra:
+        if d:
+            hosts += [d, f"{d}:*"]
+    origins = ["https://claude.ai", "https://www.claude.ai"] + [f"https://{h}" for h in hosts if "*" not in h and not h.startswith(("127.", "localhost", "["))]
+    return TransportSecuritySettings(enable_dns_rebinding_protection=True, allowed_hosts=hosts, allowed_origins=origins)
+
+
+mcp = FastMCP("curriculum-map", stateless_http=True, json_response=True, transport_security=_security())
 mcp.settings.streamable_http_path = "/"
 
 

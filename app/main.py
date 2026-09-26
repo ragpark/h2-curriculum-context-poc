@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from . import align as A
 from . import behaviour as B
+from . import case as K
 from . import content as C
 from . import context as X
 from . import db
@@ -99,6 +100,7 @@ def graph(subject: str = "maths"):
 
 @app.get("/api/graph/node")
 def node(id: str):
+    id = K.resolve_alias(id)  # accepts the readable ID, a CASE UUID or a CASE URI
     d = G.get().node_detail(id)
     if not d:
         raise HTTPException(404, "unknown node")
@@ -107,6 +109,44 @@ def node(id: str):
         "evidence": db.q1("select count(*) n from evidence where concepts ? %s", (id,))["n"],
     }
     return d
+
+
+# ---------------------------------------------------------------- CASE v1.1 (read-only export)
+@app.get(K.API + "/CFDocuments")
+def case_documents():
+    return {"CFDocuments": K.documents()}
+
+
+@app.get(K.API + "/CFDocuments/{sid}")
+def case_document(sid: str):
+    d = next((x for x in K.documents() if x["identifier"] == sid), None)
+    if not d:
+        raise HTTPException(404, "unknown CFDocument")
+    return d
+
+
+@app.get(K.API + "/CFPackages/{sid}")
+def case_package(sid: str):
+    return K.package(sid)
+
+
+@app.get(K.API + "/CFItems/{sid}")
+def case_item(sid: str):
+    return K.find_item(sid)[0]
+
+
+@app.get(K.API + "/CFItemAssociations/{sid}")
+def case_item_associations(sid: str):
+    return K.item_associations(sid)
+
+
+@app.get(K.API + "/CFAssociations/{sid}")
+def case_association(sid: str):
+    for s_ in S.SUBJECTS:
+        for a in K.associations(s_):
+            if a["identifier"] == sid:
+                return a
+    raise HTTPException(404, "unknown CFAssociation")
 
 
 class AlignIn(BaseModel):
@@ -247,7 +287,7 @@ class ContextIn(BaseModel):
 
 @app.post("/api/context")
 def context(c: ContextIn, facets: bool = True):
-    return X.assemble(c.learner, concept=c.concept, message=c.message, facets=facets, mode=c.mode)
+    return X.assemble(c.learner, concept=K.resolve_alias(c.concept) if c.concept else None, message=c.message, facets=facets, mode=c.mode)
 
 
 @app.post("/api/tutor")

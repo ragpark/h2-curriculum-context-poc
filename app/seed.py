@@ -147,6 +147,8 @@ def reset():
     load_graph()
     load_fixtures()
     db.meta_set("seeded", "yes")
+    import datetime
+    db.meta_set("seeded_at", datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat())
     db.meta_set("seed_version", SEED_VERSION)
 
 

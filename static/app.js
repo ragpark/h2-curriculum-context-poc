@@ -304,6 +304,7 @@ async function inspect(id) {
       ${d.quotations && d.quotations.length ? `<h4>Key quotations</h4>${d.quotations.map((q) => `<div style="margin-bottom:8px"><p class="quote">“${esc(q.text)}”</p><div class="sub">${esc(q.speaker)}, ${esc(q.act)}</div></div>`).join("")}` : ""}
       <h4>Misconceptions that affect it</h4>${d.misconceptions.length ? d.misconceptions.map((m) => `<div style="margin-bottom:6px">${tag("misconception", m.id)}<div class="sub" style="margin:3px 0 0">${esc(m.description || "")}</div></div>`).join("") : `<div class="sub">None</div>`}
       <h4>Methods that teach it</h4>${chips(d.methods, "method")}
+      ${d.case ? `<h4>CASE identity</h4><dl class="kv"><dt>Identifier</dt><dd class="mono" style="font-size:11px">${esc(d.case.identifier)}</dd><dt>Web address</dt><dd><a href="${esc(d.case.uri)}" target="_blank" style="font-size:11px;word-break:break-all">${esc(d.case.uri)}</a></dd><dt>Readable ID</dt><dd class="mono" style="font-size:11px">${esc(d.case.alias)}</dd></dl>` : ""}
       <h4>Links to other curricula</h4>${d.crosswalk.length ? `<table class="t">${d.crosswalk.map((x) => `<tr><td>${esc(x.scheme)}</td><td class="mono">${esc(x.id)}</td><td>${esc(x.match)}</td></tr>`).join("")}</table><div class="sub" style="margin-top:6px">Illustrative mappings. “shared-layer” IDs are placeholders for whichever shared public layer is adopted.</div>` : `<div class="sub">None</div>`}
       ${d.ancestors.length || !d.strand ? `<h4>Full prerequisite chain</h4><div class="sub">${d.ancestors.length} ancestor concepts, up to ${Math.max(0, ...d.ancestors.map((a) => a.depth))} steps back</div>` : ""}` : ""}
     ${d.affects ? `<h4>Affects</h4>${chips(d.affects)}` : ""}${d.teaches ? `<h4>Teaches</h4>${chips(d.teaches)}` : ""}
@@ -663,6 +664,9 @@ function renderHelp() {
 
 /* ------------------------------------------------------------------ connect */
 function renderConnect() {
+  api("/ims/case/v1p1/CFDocuments").then((d) => {
+    $("#case-docs").innerHTML = `<tr><th>Framework</th><th>Version</th><th>Identifier</th><th></th></tr>` + d.CFDocuments.map((x) => `<tr><td>${esc(x.title)}</td><td>${esc(x.version)}</td><td class="mono" style="font-size:11px">${esc(x.identifier)}</td><td><a href="${esc(x.CFPackageURI.uri)}" target="_blank">Open package</a></td></tr>`).join("");
+  });
   const url = location.origin + "/mcp";
   $("#mcp-url").value = url;
   $("#btn-copy").onclick = () => { navigator.clipboard?.writeText(url); toast("Copied"); };

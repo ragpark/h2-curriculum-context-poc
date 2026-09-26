@@ -5,6 +5,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 
 from . import align as A
+from . import case as K
 from . import content as C
 from . import context as X
 from . import graph as G
@@ -33,20 +34,21 @@ def get_learning_context(learner_id: str, message: str = "", concept_id: str = "
     the class teacher's method and representation, relevant teacher materials, and next-step guidance.
     Works for any subject on the map (maths: 'pupil:amara'…; English/Macbeth: 'pupil:priya', 'pupil:tom', 'pupil:zainab').
     Provide the pupil's message and/or a concept ID."""
-    return X.assemble(learner_id, concept=concept_id or None, message=message or None, facets=True)
+    return X.assemble(learner_id, concept=K.resolve_alias(concept_id) or None, message=message or None, facets=True)
 
 
 @mcp.tool()
 def get_prerequisites(concept_id: str) -> dict:
     """Prerequisite chain, related topics, key quotations, misconceptions, methods and crosswalks for a curriculum
     concept ID (e.g. 'cc:maths/alg/lin-eq-both-sides' or 'cc:english/macbeth/ch-lady')."""
-    d = G.get().node_detail(G.get().resolve(concept_id))
+    d = G.get().node_detail(G.get().resolve(K.resolve_alias(concept_id)))
     return d or {"error": f"unknown concept {concept_id}"}
 
 
 @mcp.tool()
 def find_teacher_materials(class_id: str, concept_id: str, query: str = "", method_id: str = "") -> list:
     """Retrieve the class teacher's own materials aligned to a concept, boosted by teaching method."""
+    concept_id = K.resolve_alias(concept_id)
     return C.search(class_id, query or G.get().label(concept_id), concept=G.get().resolve(concept_id), method=method_id or None, k=5)
 
 

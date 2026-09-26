@@ -119,6 +119,7 @@ class Graph:
 
     def to_json(self, subject="maths"):
         from . import seed as S  # subject metadata lives with the seed definitions
+        from . import case as K
         layers = self.layers(subject)
         meta = S.subject_meta(subject) if subject in S.SUBJECTS else {}
         concepts = self.of_type("concept", active_only=False, subject=subject)
@@ -127,7 +128,8 @@ class Graph:
             "subject": subject, "title": meta.get("label"), "layout": meta.get("layout", "layers"),
             "strands": meta.get("strands", []),
             "version": self.version_for(subject),
-            "concepts": [{**_pub(n), "layer": layers.get(n["id"], 0), "crosswalk": self.crosswalk.get(n["id"], [])}
+            "case_document": K.documents()[list(S.SUBJECTS).index(subject)] if subject in S.SUBJECTS else None,
+            "concepts": [{**_pub(n), "layer": layers.get(n["id"], 0), "crosswalk": self.crosswalk.get(n["id"], []), "case": K.ref(n["id"])}
                          for n in concepts],
             "misconceptions": [{**_pub(n), "affects": self.affects.get(n["id"], [])} for n in self.of_type("misconception", subject=subject)],
             "methods": [{**_pub(n), "teaches": self.teaches.get(n["id"], [])} for n in self.of_type("method", subject=subject)],
@@ -143,6 +145,8 @@ class Graph:
         if not n:
             return None
         d = _pub(n)
+        from . import case as K
+        d["case"] = K.ref(nid)
         if n["type"] == "concept":
             d.update(
                 prerequisites=[self.ref(p, strength=w) for p, w in self.prereqs.get(nid, [])],

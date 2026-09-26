@@ -430,6 +430,7 @@
               <dt>Curriculum map</dt><dd>One shared list of the topics in a subject, showing which topics come first, the mistakes pupils often make and ways to teach each one. It's the same for every school.</dd>
               <dt>Topic (concept)</dt><dd>One thing pupils learn, such as “solve equations with x on both sides”.</dd>
               <dt>Builds on / comes before</dt><dd>A topic you need first. You need two-step equations before equations with x on both sides.</dd>
+              <dt>CASE</dt><dd>A published standard (from 1EdTech) for sharing lists of curriculum topics between computer systems. Each topic gets a permanent code and a web address, so different organisations can point at the same topic and say how their topics match up. The prototype can export its maps in this form.</dd>
               <dt>Misconception</dt><dd>A common mistaken idea, such as forgetting to change the sign when moving a number across the equals sign.</dd>
               <dt>Teaching method</dt><dd>A way of teaching a topic, such as the balance method or “change side, change sign”.</dd>
               <dt>Representation</dt><dd>A picture or model used to explain, such as a bar model or algebra tiles.</dd>
@@ -492,8 +493,21 @@
             <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Turns on the Claude tagger, live tutor replies and the A/B evaluation</td></tr>
             <tr><td><code>ANTHROPIC_MODEL</code></td><td>Optional. Defaults to <code>claude-sonnet-5</code></td></tr>
             <tr><td><code>ALIGNER_MODE</code></td><td><code>auto</code> (default), <code>heuristic</code> or <code>claude</code></td></tr>
+            <tr><td><code>CASE_BASE_URI</code></td><td>Optional. The web address CASE identifiers resolve under. Defaults to this service</td></tr>
           </table>
         </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>CASE export (1EdTech CASE v1.1, read-only)</h3>
+        <p class="sub">Every topic has a permanent CASE identifier (a UUID derived from its readable ID, so it never changes) and a web address that resolves to its description. The readable ID, such as <code>cc:maths/alg/lin-eq-both-sides</code>, is kept as <code>humanCodingScheme</code>. The map, the MCP tools and the API accept any of the three forms.</p>
+        <div class="tbl-wrap"><table class="t" id="case-docs"></table></div>
+        <table class="t" style="margin-top:10px">
+          <tr><td><code>/ims/case/v1p1/CFDocuments</code></td><td>The frameworks: one per subject</td></tr>
+          <tr><td><code>/ims/case/v1p1/CFPackages/{id}</code></td><td>A whole framework: topics, groupings and links</td></tr>
+          <tr><td><code>/ims/case/v1p1/CFItems/{id}</code></td><td>One topic. This is the address its identifier resolves to</td></tr>
+          <tr><td><code>/ims/case/v1p1/CFItemAssociations/{id}</code></td><td>One topic with all its links</td></tr>
+        </table>
+        <p class="sub" style="margin-top:10px"><b>What maps to CASE:</b> topics, strands and acts become CFItems; prerequisites become <code>precedes</code>; related topics and close or broad crosswalks become <code>isRelatedTo</code>; exact crosswalks become <code>exactMatchOf</code>; retired topics become <code>replacedBy</code>. <b>What stays in the map:</b> misconceptions, teaching methods, representations and quotations. CASE has no native types for these, so they remain the publisher's teaching layer and point at the CASE addresses. Crosswalk targets use placeholder <code>urn:</code> addresses until those schemes are published in CASE.</p>
       </div>
     </section>
   </main>

@@ -3,6 +3,7 @@ from . import align as A
 from . import db
 from . import behaviour as B
 from . import graph as G
+from . import seed as S
 
 SECURE, DEVELOPING = 0.7, 0.4
 MC_ACTIVE = 0.5
@@ -14,13 +15,25 @@ def _norm(s):
 
 def record(learner: str, *, source: str, item: str | None = None, response: str | None = None,
            activity: str | None = None, score: float | None = None, mode: str | None = None,
-           process: list[dict] | None = None) -> dict:
+           process: list[dict] | None = None, concepts: list[str] | None = None,
+           misconception: str | None = None) -> dict:
     g = G.get()
     p = db.q1("select * from pupil where id=%s", (learner,))
     if not p:
         raise KeyError(learner)
-    misconception, alignment = None, None
-    if item:
+    subject = S.subject_of_pupil(learner)
+    alignment = None
+    if misconception and (misconception not in g.nodes or g.nodes[misconception]["type"] != "misconception"):
+        raise ValueError(f"unknown misconception {misconception}")
+    if concepts:
+        # Teacher-marked work: the teacher says which topics it covered, gives a mark and may record a misconception.
+        bad = [c for c in concepts if c not in g.nodes or g.nodes[c]["type"] != "concept"]
+        if bad:
+            raise ValueError(f"unknown topics: {bad}")
+        prov, conf = "teacher", 1.0
+        outcome = float(score if score is not None else 0.5)
+    elif item:
+        misconception = None
         it = db.q1("select * from item where id=%s", (item,))
         if not it:
             raise KeyError(item)
@@ -32,14 +45,14 @@ def record(learner: str, *, source: str, item: str | None = None, response: str 
                     misconception = d.get("misconception")
     else:
         # Activity-level markbook entry: no concept IDs supplied, so the alignment service interprets the title.
-        alignment = A.align(activity or "", mode)
+        alignment = A.align(activity or "", mode, subject)
         concepts = [c["id"] for c in alignment["concepts"]]
         conf = min([c["confidence"] for c in alignment["concepts"]] or [0.0])
         prov = alignment["provenance"]
         outcome = float(score if score is not None else 0.5)
     row = db.q1("""insert into evidence(learner,tenant,source,item,activity,response,outcome,concepts,concept_provenance,confidence,misconception,graph_version)
                    values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning id, ts""",
-                (learner, p["class"], source, item, activity, response, outcome, db.J(concepts), prov, conf, misconception, g.version))
+                (learner, p["class"], source, item, activity, response, outcome, db.J(concepts), prov, conf, misconception, g.version_for(subject)))
     # learning behaviour is interpreted against the pupil's knowledge BEFORE this answer, so derive it first
     beh = B.ingest(learner, row["id"], item, concepts, source, process)
     project(learner)
@@ -58,14 +71,16 @@ def project(learner: str) -> None:
         return state.setdefault(c, {"m": 0.5, "n": 0, "ni": 0})
 
     for e in db.q("select * from evidence where learner=%s order by id", (learner,)):
-        w = 1.0 if e["concept_provenance"] == "source" else 0.6 * e["confidence"]
+        w = 1.0 if e["concept_provenance"] in ("source", "teacher") else 0.6 * e["confidence"]
+        # A teacher's mark on a piece of work carries more information than one right/wrong answer
+        base = 0.6 if e["concept_provenance"] == "teacher" else 0.4
         mc_id = g.resolve(e["misconception"]) if e["misconception"] else None
         for raw in e["concepts"]:
             c = g.resolve(raw)
             if mc_id and e["outcome"] < 0.5 and c not in g.affects.get(mc_id, []):
                 continue  # graph-based credit assignment: blame the concept the misconception actually affects
             s = st(c)
-            k = 0.4 * w / (1 + 0.12 * s["n"])
+            k = base * w / (1 + 0.12 * s["n"])
             s["m"] += k * (e["outcome"] - s["m"]); s["n"] += 1
             if e["outcome"] >= 0.5:
                 # success is weak evidence that prerequisites are in place

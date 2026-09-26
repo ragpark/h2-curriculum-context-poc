@@ -28,9 +28,12 @@ SEED = Path(__file__).resolve().parent.parent / "seed"
 
 
 # ================================================================== tagging accuracy
+ALIGN_SETS = {"heldout": "heldout_alignment.yaml", "heldout2": "heldout_alignment_2.yaml", "english": "heldout_alignment_english.yaml"}
+
+
 def _units(which: str):
-    if which in ("heldout", "heldout2"):
-        d = yaml.safe_load((SEED / ("heldout_alignment.yaml" if which == "heldout" else "heldout_alignment_2.yaml")).read_text())
+    if which in ALIGN_SETS:
+        d = yaml.safe_load((SEED / ALIGN_SETS[which]).read_text())
         return [(u["id"], u["title"], f"{u['title']}\n{u['text']}", u["gold"]) for u in d["units"]]
     mats = {m["id"]: m for m in db.q("select * from material")}
     out = []
@@ -44,8 +47,9 @@ def _units(which: str):
 def eval_alignment(mode: str | None = None, which: str = "tuning") -> dict:
     mode = mode or A.default_mode()
     units = _units(which)
+    subject = "english" if which == "english" else "maths"
     with ThreadPoolExecutor(6 if mode == "claude" else 1) as ex:
-        results = list(ex.map(lambda u: A.align(u[2], mode), units))
+        results = list(ex.map(lambda u: A.align(u[2], mode, subject), units))
     tot = {"concept": [0, 0, 0], "misconception": [0, 0, 0], "method": [0, 0], "representation": [0, 0], "offstrand": [0, 0]}
     rows = []
     for (uid, head, _, gold), res in zip(units, results):
@@ -76,7 +80,15 @@ def eval_alignment(mode: str | None = None, which: str = "tuning") -> dict:
                "representation_accuracy": round(tot["representation"][0] / tot["representation"][1], 2)}
     if tot["offstrand"][1]:
         summary["offstrand_correctly_untagged"] = f"{tot['offstrand'][0]}/{tot['offstrand'][1]}"
-    return {"set": which, "mode": mode, "units": len(rows), "summary": summary, "rows": rows}
+    out = {"set": which, "subject": subject, "mode": mode, "units": len(rows), "summary": summary, "rows": rows,
+           "finished": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime())}
+    db.meta_set(f"last_alignment_{which}_{mode}", json.dumps(out))
+    return out
+
+
+def last_alignment(which: str, mode: str) -> dict | None:
+    raw = db.meta_get(f"last_alignment_{which}_{mode}")
+    return json.loads(raw) if raw else None
 
 
 # ================================================================== hard tutor suite
@@ -141,9 +153,11 @@ _jobs: dict[str, dict] = {}
 _lock = threading.Lock()
 
 
-SUITES = {"dev": "tutor_suite.yaml", "heldout": "tutor_suite_heldout.yaml", "behaviour": "tutor_suite_behaviour.yaml"}
+SUITES = {"dev": "tutor_suite.yaml", "heldout": "tutor_suite_heldout.yaml", "behaviour": "tutor_suite_behaviour.yaml",
+          "english": "tutor_suite_english.yaml"}
 SUITE_LABELS = {"dev": "Development scenarios (used to build the fix)", "heldout": "Fresh held-out scenarios (never used to build the fix)",
-                "behaviour": "Learning behaviour: same answers, different behaviour"}
+                "behaviour": "Learning behaviour: same answers, different behaviour",
+                "english": "English (Macbeth): fresh scenarios in a web-shaped subject"}
 
 
 def suite(name: str = "dev"):
@@ -152,7 +166,7 @@ def suite(name: str = "dev"):
 
 def _context(arm: str, pupil: dict, message: str) -> dict:
     if arm == "none":
-        return {"pupil": {"name": pupil["name"], "year": 10}}
+        return {"pupil": {"name": pupil["name"], "year": S.SUBJECTS[S.subject_of_pupil(pupil["id"])]["year"]}}
     return X.assemble(pupil["id"], message=message, facets=(arm == "h2"))
 
 
@@ -176,7 +190,7 @@ def _run_one(sc, classes, pupils, crit=CRITERIA, pinfo=None):
     for arm in ARMS:
         try:
             ctx = _context(arm, pupil, sc["message"])
-            reply = T.respond(ctx, sc["message"])
+            reply = T.respond(ctx, sc["message"], S.subject_of_pupil(pupil["id"]))
             judgements = [_judge(sc, cls, pupil, reply, crit, (pinfo or {}).get(sc["pupil"])) for _ in range(2)]  # two independent passes
             scores = {c: round(sum(j[c] for j in judgements) / 2, 2) for c in crit}
             res["arms"][arm] = {"reply": reply, "scores": scores, "total": round(sum(scores.values()), 2),
@@ -269,3 +283,43 @@ def with_before_fix(result: dict | None, name: str) -> dict | None:
         result["before_fix"] = {"by_arm": b["summary"]["by_arm"], "by_category": b["summary"]["by_category"],
                                 "per_scenario": {r["id"]: r["arms"]["h2"].get("total") for r in b["results"]}}
     return result
+
+
+# ================================================================== start-up runs (for a service whose key can't be read elsewhere)
+def run_on_start(spec: str) -> None:
+    """RUN_EVALS_ON_START="align:english:claude,align:english:heuristic,tutor:english" runs each once per distinct spec,
+    in the background, and prints a one-line JSON summary of each result to the service log."""
+    import sys
+    if not spec or db.meta_get("startup_evals_done") == spec:
+        return
+
+    def work():
+        try:
+            T.ensure_demo_state()
+            for part in [x.strip() for x in spec.split(",") if x.strip()]:
+                kind, *args = part.split(":")
+                if kind == "align":
+                    r = eval_alignment(args[1] if len(args) > 1 else None, args[0])
+                    print("EVAL_RESULT " + json.dumps({"align": part, "summary": r["summary"],
+                          "misses": [x for x in r["rows"] if set(x["concepts"]["got"]) - set(x["concepts"]["expected"]) - set(x["concepts"]["acceptable"])
+                                     or set(x["concepts"]["expected"]) - set(x["concepts"]["got"]) or x["misconceptions"]["got"] != x["misconceptions"]["expected"]
+                                     or x["method"]["got"] != x["method"]["expected"] or x["representation"]["got"] != x["representation"]["expected"]]}), flush=True, file=sys.stdout)
+                elif kind == "tutor":
+                    job = start_tutor_suite(args[0])
+                    while _jobs[job["id"]]["status"] == "running":
+                        time.sleep(5)
+                    j = _jobs[job["id"]]
+                    if j["status"] == "done":
+                        res = j["result"]
+                        print("EVAL_RESULT " + json.dumps({"tutor": args[0], "summary": res["summary"]}), flush=True)
+                        for r in res["results"]:
+                            print("EVAL_ROW " + json.dumps({"id": r["id"], "cat": r["category"],
+                                  **{a: (r["arms"][a].get("scores"), r["arms"][a].get("total")) for a in ARMS},
+                                  "h2_why": r["arms"]["h2"].get("why", [""])[0], "raw_why": r["arms"]["raw"].get("why", [""])[0]}), flush=True)
+                    else:
+                        print("EVAL_ERROR " + json.dumps(j.get("error")), flush=True)
+            db.meta_set("startup_evals_done", spec)
+        except Exception as e:
+            print(f"EVAL_ERROR {type(e).__name__}: {e}", flush=True)
+
+    threading.Thread(target=work, daemon=True).start()

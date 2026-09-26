@@ -113,6 +113,16 @@ related:
   - [lf-blood, th-guilt]
   - [ctx-tragedy, ch-macbeth]
 
+# Parts of the play. In a literature course "has this been taught yet?" is mostly about how far through the text
+# the class has read, not which topic: Lady Macbeth is taught in week 2, but her sleepwalking scene is Act 5.
+# Materials and pupil messages are matched to sections by act numbers, key events and the quotations below.
+sections:
+  - {id: sec:macbeth/act-1, label: "Act 1", order: 1, keywords: ["thane of cawdor", "duncan's arrival", "the captain's report"]}
+  - {id: sec:macbeth/act-2, label: "Act 2", order: 2, keywords: ["murder of duncan", "duncan's murder", "the porter"]}
+  - {id: sec:macbeth/act-3, label: "Act 3", order: 3, keywords: ["the banquet", "banquo's murder", "banquo's ghost"]}
+  - {id: sec:macbeth/act-4, label: "Act 4", order: 4, keywords: ["the apparitions", "macduff's family", "lady macduff"]}
+  - {id: sec:macbeth/act-5, label: "Act 5", order: 5, keywords: ["sleepwalking", "birnam wood", "dunsinane", "macbeth dies", "macbeth's death", "the ending", "end of the play", "final act"]}
+
 # Key quotations (the play is public domain). act = act.scene
 quotations:
   - {id: q:macbeth/fair-foul, text: "Fair is foul, and foul is fair", speaker: Witches, act: "1.1", evidences: [th-appearance, ch-witches, lf-verse]}

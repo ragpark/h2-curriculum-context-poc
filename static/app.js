@@ -1,5 +1,5 @@
 /* Curriculum Map for AI Tutors — POC UI, plain JS, no build step. */
-const S = { status: null, graph: null, labels: {}, page: "overview", pupil: "pupil:amara", cls: "10X", mode: null,
+const S = { subject: "maths", status: null, graph: null, labels: {}, page: "overview", pupil: "pupil:amara", cls: "10X", mode: null,
   sel: null, overlay: "none", visited: new Set(), items: [], pupils: [], scenarios: [], lastExplain: null, ctxDone: false, evalDone: false };
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -22,7 +22,7 @@ async function busy(btn, fn) {
   try { return await fn(); } catch (e) { toast(e.message); console.error(e); } finally { btn.disabled = false; btn.innerHTML = html; }
 }
 function tag(facet, id, conf, opts = {}) {
-  const k = { concept: "concept", method: "method", representation: "rep", misconception: "misc" }[facet] || facet;
+  const k = { concept: "topic", method: "method", representation: "rep", misconception: "misc", section: "act" }[facet] || facet;
   const review = conf != null && conf < 0.5 ? " review" : "";
   const click = facet === "concept" && opts.click !== false ? ` clickable" data-node="${esc(id)}` : "";
   return `<span class="tag ${facet}${review}${click}" title="${esc(id)}${conf != null ? " · confidence " + conf : ""}"><span class="k">${k}</span>${esc(opts.label || lab(id))}${conf != null ? ` <span class="c">${conf.toFixed(2)}</span>` : ""}</span>`;
@@ -38,22 +38,41 @@ async function boot() {
     const n = e.target.closest("[data-node]");
     if (n) { S.sel = n.dataset.node; show("graph"); }
   });
-  [S.items, S.pupils, S.scenarios] = await Promise.all([api("/api/items"), api("/api/pupils"), api("/api/scenarios")]);
-  await loadGraph(); await refreshStatus();
+  let saved = null; try { saved = localStorage.getItem("cm-subject"); } catch {}
+  const q = new URLSearchParams(location.search).get("subject");
+  S.subject = q || saved || "maths";
+  S.items = await api("/api/items");
+  await loadSubject();
+  await refreshStatus();
   bindStatic();
+  $("#subject").value = S.subject;
+  $("#subject").onchange = async () => { S.subject = $("#subject").value; try { localStorage.setItem("cm-subject", S.subject); } catch {} await loadSubject(); await refreshStatus(); show(S.page); };
   show((location.hash || "#overview").slice(1));
   window.addEventListener("hashchange", () => { const p = location.hash.slice(1); if (p && p !== S.page) show(p); });
 }
+const SUBTITLE = { maths: "Proof of concept · KS3–4 linear equations · synthetic data only", english: "Proof of concept · KS4 English Literature: Macbeth · synthetic data only" };
+async function loadSubject() {
+  const sub = S.subject;
+  [S.pupils, S.scenarios, S.classes] = await Promise.all([api(`/api/pupils?subject=${sub}`), api(`/api/scenarios?subject=${sub}`), api(`/api/classes?subject=${sub}`)]);
+  await loadGraph();
+  if (!S.pupils.some((p) => p.id === S.pupil)) S.pupil = S.pupils[0].id;
+  if (!S.classes.some((c) => c.id === S.cls)) S.cls = S.classes[0].id;
+  S.sel = null; S.overlay = "none"; S.lastExplain = null; S.suiteLoaded = false;
+  if (sub === "english") { S.evSet = "english"; S.suite = "english"; } else if (S.suite === "english") { S.evSet = "heldout2"; S.suite = "heldout"; }
+  const cp = $("#c-pupil"); if (cp) cp.innerHTML = ""; const cm = $("#c-msg"); if (cm) cm.value = "";
+  $("#subtitle").textContent = SUBTITLE[sub] || "";
+  document.body.dataset.subject = sub;
+}
 async function loadGraph() {
-  S.graph = await api("/api/graph");
+  S.graph = await api(`/api/graph?subject=${S.subject}`);
   S.labels = {};
-  for (const k of ["concepts", "misconceptions", "methods", "representations"]) for (const n of S.graph[k]) S.labels[n.id] = n.label;
+  for (const k of ["concepts", "misconceptions", "methods", "representations", "sections"]) for (const n of S.graph[k] || []) S.labels[n.id] = n.label;
 }
 async function refreshStatus() {
   S.status = await api("/api/status");
   const st = S.status, c = st.counts;
   $("#chips").innerHTML = [
-    `<span class="chip ok"><span class="dot"></span>Map ${esc(st.graph_version)}</span>`,
+    `<span class="chip ok"><span class="dot"></span>Map ${esc(S.graph.version)}</span>`,
     `<span class="chip ${st.llm_available ? "ok" : "warn"}"><span class="dot"></span>Tagger: ${st.aligner_mode === "claude" ? "Claude" : "keyword"}</span>`,
     `<span class="chip ${st.llm_available ? "ok" : "warn"}"><span class="dot"></span>${st.llm_available ? "Tutor: " + esc(st.model) : "No Anthropic key"}</span>`,
     `<span class="chip"><span class="dot"></span>${c.alignment} tags · ${c.evidence} pupil answers</span>`,
@@ -132,7 +151,20 @@ function renderArch() {
 
 /* ------------------------------------------------------------------ graph renderer */
 const NW = 150, NH = 48, CG = 34, RG = 12, PAD = 14;
+function layoutStrands() {
+  const cs = S.graph.concepts.filter((c) => c.status === "active");
+  const strands = S.graph.strands.map((x) => x.id);
+  const pos = {}; let maxRows = 0;
+  strands.forEach((st, col) => {
+    const arr = cs.filter((c) => c.strand === st).sort((a, b) => a.layer - b.layer || a.label.localeCompare(b.label));
+    maxRows = Math.max(maxRows, arr.length);
+    arr.forEach((c, row) => (pos[c.id] = { row, col, x: PAD + col * (NW + CG), y: PAD + 22 + row * (NH + RG) }));
+  });
+  const short = (l) => l.split(/[,(]/)[0].trim();
+  return { pos, w: PAD * 2 + strands.length * (NW + CG) - CG + 60, h: PAD * 2 + 22 + maxRows * (NH + RG) - RG, heads: S.graph.strands.map((x, i) => ({ label: short(x.label), x: PAD + i * (NW + CG) })) };
+}
 function layout() {
+  if (S.graph.layout === "strands") return layoutStrands();
   const cs = S.graph.concepts.filter((c) => c.status === "active");
   const byL = {};
   cs.forEach((c) => (byL[c.layer] ??= []).push(c));
@@ -161,18 +193,34 @@ function wrap(s, n = 22) {
   return lines;
 }
 function drawGraph(svg, o = {}) {
-  const { pos, w, h } = layout();
+  const { pos, w, h, heads } = layout();
   const sel = o.selected;
   const near = new Set();
+  const related = S.graph.related || [];
   if (sel && o.dimOthers) {
     near.add(sel);
     S.graph.prerequisites.forEach((e) => { if (e.dst === sel) near.add(e.src); if (e.src === sel) near.add(e.dst); });
+    related.forEach(([a, b]) => { if (a === sel) near.add(b); if (b === sel) near.add(a); });
   }
-  let out = "";
+  let out = (heads || []).map((hd) => `<text class="strand-head" x="${hd.x + 2}" y="${PAD + 10}">${esc(hd.label)}</text>`).join("");
+  // related links (web): only for the selected topic, otherwise the picture is a hairball
+  if (sel) for (const [s1, s2] of related) {
+    if (s1 !== sel && s2 !== sel) continue;
+    const a = pos[s1], b = pos[s2]; if (!a || !b) continue;
+    const [p, q2] = a.x <= b.x ? [a, b] : [b, a];
+    const x1 = p.x + (p.col === q2.col ? NW : NW), y1 = p.y + NH / 2, x2 = p.col === q2.col ? q2.x + NW : q2.x, y2 = q2.y + NH / 2;
+    const mx = p.col === q2.col ? x1 + 40 : (x1 + x2) / 2;
+    out += `<path class="gedge rel" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`;
+  }
   for (const e of S.graph.prerequisites) {
     const a = pos[e.src], b = pos[e.dst]; if (!a || !b) continue;
-    const x1 = a.x + NW, y1 = a.y + NH / 2, x2 = b.x, y2 = b.y + NH / 2, mx = (x1 + x2) / 2;
     const cls = sel && e.dst === sel ? "hl" : sel && e.src === sel ? "hl-out" : "";
+    if (a.col === b.col) {  // same column (English writing skills): arc out to the right
+      const x = a.x + NW, y1 = a.y + NH / 2, y2 = b.y + NH / 2, bulge = 18 + 8 * Math.abs(a.row - b.row);
+      out += `<path class="gedge ${cls}" d="M${x},${y1} C${x + bulge},${y1} ${x + bulge},${y2} ${x},${y2}" stroke-opacity="${0.4 + 0.6 * e.weight}"/>`;
+      continue;
+    }
+    const x1 = a.x + NW, y1 = a.y + NH / 2, x2 = b.x, y2 = b.y + NH / 2, mx = (x1 + x2) / 2;
     out += `<path class="gedge ${cls}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}" stroke-opacity="${0.4 + 0.6 * e.weight}"/>`;
   }
   for (const c of S.graph.concepts) {
@@ -191,6 +239,7 @@ function drawGraph(svg, o = {}) {
 }
 const LEGEND_MASTERY = `<span><i class="sw" style="background:var(--secure-soft);border-color:var(--secure)"></i>Secure</span><span><i class="sw" style="background:var(--developing-soft);border-color:var(--developing)"></i>Developing</span><span><i class="sw" style="background:var(--gap-soft);border-color:var(--gap)"></i>Gap</span><span><i class="sw" style="background:var(--inferred-soft);border-color:var(--inferred);border-style:dashed"></i>Inferred only</span><span><i class="sw" style="border-color:var(--border-strong)"></i>No evidence</span><span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--mc)"/></svg>Active misconception affects this concept</span>`;
 const LEGEND_COVER = `<span><i class="sw" style="background:var(--method-soft);border-color:var(--method)"></i>Taught so far</span><span><i class="sw" style="border-color:var(--method);border-style:dashed"></i>Planned</span><span><i class="sw" style="border-color:var(--border-strong)"></i>Not in scheme yet</span>`;
+const LEGEND_REL = `<span><svg width="26" height="8"><path d="M0,4 L26,4" stroke="var(--method)" stroke-width="2" stroke-dasharray="4 3"/></svg>Related to selected (click a topic)</span>`;
 const LEGEND_EDGES = `<span><svg width="26" height="8"><path d="M0,4 L26,4" stroke="var(--accent)" stroke-width="2.2"/></svg>Prerequisite of selected</span><span><svg width="26" height="8"><path d="M0,4 L26,4" stroke="var(--method)" stroke-width="2.2"/></svg>Leads to</span>`;
 
 async function overlayData(key) {
@@ -215,9 +264,9 @@ async function renderGraphPage() {
   $("#g-version").textContent = "v" + g.version;
   const active = g.concepts.filter((c) => c.status === "active");
   const dep = g.concepts.filter((c) => c.status !== "active");
-  $("#g-counts").textContent = `${active.length} concepts · ${g.prerequisites.length} prerequisite edges · ${g.misconceptions.length} misconceptions · ${g.methods.length} methods · ${g.representations.length} representations${dep.length ? ` · ${dep.length} deprecated` : ""}`;
+  $("#g-counts").textContent = `${active.length} topics · ${g.prerequisites.length} prerequisite links${g.related.length ? ` · ${g.related.length} related-topic links · ${g.quotations.length} key quotations · ${g.sections.length} acts` : ""} · ${g.misconceptions.length} misconceptions · ${g.methods.length} methods · ${g.representations.length} representations${dep.length ? ` · ${dep.length} deprecated` : ""}`;
   const ov = $("#g-overlay");
-  ov.innerHTML = `<option value="none">Overlay: none</option><option value="class:10X">Overlay: class 10X coverage</option><option value="class:10Y">Overlay: class 10Y coverage</option>` +
+  ov.innerHTML = `<option value="none">Overlay: none</option>` + S.classes.map((c) => `<option value="class:${c.id}">Overlay: class ${c.id} coverage</option>`).join("") +
     S.pupils.map((p) => `<option value="${p.id}">Overlay: ${esc(p.name)} progress</option>`).join("");
   ov.value = S.overlay;
   ov.onchange = () => { S.overlay = ov.value; drawMain(); };
@@ -231,12 +280,12 @@ async function renderGraphPage() {
     <h4 style="margin:14px 0 6px;font-size:12px;color:var(--text-3)">REPRESENTATIONS</h4>
     <div class="tags">${g.representations.map((r) => tag("representation", r.id)).join("")}</div>`;
   if (S.sel) inspect(S.sel);
-  $("#btn-release").disabled = g.version !== "2026.2";
+  $("#btn-release").disabled = S.subject !== "maths" || g.version !== "2026.2";
 }
 async function drawMain() {
   const od = await overlayData(S.overlay);
   drawGraph($("#g-svg"), { ...od, selected: S.sel, dimOthers: !!S.sel && S.overlay === "none", onClick: (id) => { S.sel = id; drawMain(); inspect(id); } });
-  $("#g-legend").innerHTML = (od.empty ? `<span class="sub">${od.empty}</span>` : od.legend) + LEGEND_EDGES;
+  $("#g-legend").innerHTML = (od.empty ? `<span class="sub">${od.empty}</span>` : od.legend) + LEGEND_EDGES + (S.graph.layout === "strands" ? LEGEND_REL : "");
 }
 async function inspect(id) {
   const d = await api(`/api/graph/node?id=${encodeURIComponent(id)}`);
@@ -248,12 +297,15 @@ async function inspect(id) {
     <div class="mono sub" style="margin:2px 0 8px">${esc(d.id)}</div>
     <div class="tags">${(d.key_stage || []).map((k) => `<span class="tag plain">${esc(k)}</span>`).join("")}<span class="tag plain">v${esc(d.graph_version)}</span>${d.status !== "active" ? `<span class="tag misconception">deprecated → ${esc(d.replaced_by)}</span>` : ""}</div>
     ${d.type === "concept" ? `
-      <h4>Prerequisites</h4>${chips(d.prerequisites)}
-      <h4>Leads to</h4>${chips(d.leads_to)}
+      ${d.strand ? `<h4>Strand</h4><div class="sub">${esc((S.graph.strands.find((x) => x.id === d.strand) || {}).label || d.strand)}</div>` : ""}
+      ${d.prerequisites.length || !d.strand ? `<h4>Prerequisites</h4>${chips(d.prerequisites)}` : ""}
+      ${d.leads_to.length || !d.strand ? `<h4>Leads to</h4>${chips(d.leads_to)}` : ""}
+      ${d.related && d.related.length ? `<h4>Related topics</h4>${chips(d.related)}` : ""}
+      ${d.quotations && d.quotations.length ? `<h4>Key quotations</h4>${d.quotations.map((q) => `<div style="margin-bottom:8px"><p class="quote">“${esc(q.text)}”</p><div class="sub">${esc(q.speaker)}, ${esc(q.act)}</div></div>`).join("")}` : ""}
       <h4>Misconceptions that affect it</h4>${d.misconceptions.length ? d.misconceptions.map((m) => `<div style="margin-bottom:6px">${tag("misconception", m.id)}<div class="sub" style="margin:3px 0 0">${esc(m.description || "")}</div></div>`).join("") : `<div class="sub">None</div>`}
       <h4>Methods that teach it</h4>${chips(d.methods, "method")}
       <h4>Links to other curricula</h4>${d.crosswalk.length ? `<table class="t">${d.crosswalk.map((x) => `<tr><td>${esc(x.scheme)}</td><td class="mono">${esc(x.id)}</td><td>${esc(x.match)}</td></tr>`).join("")}</table><div class="sub" style="margin-top:6px">Illustrative mappings. “shared-layer” IDs are placeholders for whichever shared public layer is adopted.</div>` : `<div class="sub">None</div>`}
-      <h4>Full prerequisite chain</h4><div class="sub">${d.ancestors.length} ancestor concepts, up to ${Math.max(0, ...d.ancestors.map((a) => a.depth))} steps back</div>` : ""}
+      ${d.ancestors.length || !d.strand ? `<h4>Full prerequisite chain</h4><div class="sub">${d.ancestors.length} ancestor concepts, up to ${Math.max(0, ...d.ancestors.map((a) => a.depth))} steps back</div>` : ""}` : ""}
     ${d.affects ? `<h4>Affects</h4>${chips(d.affects)}` : ""}${d.teaches ? `<h4>Teaches</h4>${chips(d.teaches)}` : ""}
     <h4>Usage</h4><dl class="kv"><dt>Tags pointing here</dt><dd>${d.usage.alignments}</dd><dt>Pupil answers tagged</dt><dd>${d.usage.evidence}</dd></dl>`;
 }
@@ -267,7 +319,7 @@ function modeSeg(el, onChange, includeAuto = true) {
   el.querySelectorAll("button").forEach((b) => (b.onclick = () => { S.mode = b.dataset.v || null; modeSeg(el, onChange, includeAuto); onChange && onChange(); }));
 }
 async function renderMaterials() {
-  const classes = await api("/api/classes");
+  const classes = S.classes;
   const seg = $("#m-class");
   seg.innerHTML = classes.map((c) => `<button data-c="${c.id}" class="${c.id === S.cls ? "on" : ""}">${c.id}</button>`).join("");
   seg.querySelectorAll("button").forEach((b) => (b.onclick = () => { S.cls = b.dataset.c; renderMaterials(); }));
@@ -284,7 +336,7 @@ async function renderMaterials() {
         <button class="btn sm" data-ingest="${esc(m.id)}">${m.ingested ? "Re-tag" : "Read & tag"}</button></div>
       <div class="mat-body">${m.units.length ? m.units.map((u) => `
         <div class="unit"><div class="h">${esc(u.heading)} <span class="mono sub">#${u.idx}</span></div><div class="b">${esc(u.body)}</div>
-          <div class="tags">${u.alignments.length ? ["concept", "method", "representation", "misconception"].flatMap((f) => u.alignments.filter((a) => a.facet === f).map((a) => tag(f, a.id, a.confidence))).join("") : `<span class="sub">No tags above threshold</span>`}</div>
+          <div class="tags">${u.alignments.length ? ["concept", "method", "representation", "misconception", "section"].flatMap((f) => u.alignments.filter((a) => a.facet === f).map((a) => tag(f, a.id, a.confidence))).join("") : `<span class="sub">No tags above threshold</span>`}</div>
           ${u.alignments[0] ? `<div class="sub" style="margin-top:4px">tagged by ${esc(u.alignments[0].provenance)} · map v${esc(u.alignments[0].graph_version)}</div>` : ""}</div>`).join("")
         : `<div class="b" style="white-space:pre-wrap;color:var(--text-2);font-size:12.5px">${esc(m.body)}</div><div class="note" style="margin-top:8px">Not tagged yet. Click <b>Read & tag</b> to split it into units and align each one.</div>`}</div>
     </div>`).join("");
@@ -305,6 +357,7 @@ async function renderMaterials() {
     <div class="tags">${cov.taught.map((c) => tag("concept", c.id, null, { label: `W${c.week} · ${c.label}` })).join("") || '<span class="sub">none</span>'}</div>
     <div class="sub" style="margin:12px 0 6px"><b>Planned</b></div>
     <div class="tags">${cov.planned.map((c) => tag("concept", c.id, null, { label: `W${c.week} · ${c.label}` })).join("") || '<span class="sub">none</span>'}</div>
+    ${cov.sections_studied ? `<div class="sub" style="margin:12px 0 6px"><b>Parts of the play studied</b></div><div class="tags">${cov.sections_studied.map((x) => `<span class="tag plain">${esc(x.label)} · from W${x.week}</span>`).join("") || '<span class="sub">none</span>'}${cov.sections_coming.map((x) => `<span class="tag plain" style="border-style:dashed">${esc(x.label)} · ${x.week ? "W" + x.week : "not planned yet"}</span>`).join("")}</div>` : ""}
     <div class="sub" style="margin:12px 0 6px"><b>Teacher's methods in taught units</b></div>
     <div class="tags">${Object.entries(methods).sort((a, b) => b[1] - a[1]).map(([id, n]) => tag("method", id, null, { label: `${lab(id)} ×${n}` })).join("") || '<span class="sub">none</span>'}</div>
     <div style="margin-top:10px"><button class="btn sm" id="btn-cov-graph">View on graph</button></div>`;
@@ -325,10 +378,15 @@ async function renderEvidence() {
   document.querySelectorAll("[data-p]").forEach((b) => (b.onclick = () => { S.pupil = b.dataset.p; S.lastExplain = null; renderEvidence(); }));
   const sc = S.scenarios.find((s) => s.pupil === S.pupil);
   $("#e-scenario").innerHTML = sc ? `<h3>Preset scenario</h3><p class="sub">${esc(sc.title)}</p><p style="margin:0 0 10px;font-size:13px;color:var(--text-2)">${esc(sc.story)}</p>
-    <div class="sub">${sc.events.filter((e) => e.item).length} item answers · ${sc.events.filter((e) => e.activity).length} markbook entries</div>
+    <div class="sub">${sc.events.filter((e) => e.concepts && e.concepts.length).length ? `${sc.events.length} pieces of teacher-marked work` : `${sc.events.filter((e) => e.item).length} item answers · ${sc.events.filter((e) => e.activity).length} markbook entries`}</div>
     <button class="btn primary" id="btn-sc" style="margin-top:10px">Run scenario</button><div class="sub" style="margin-top:6px">Replaces this pupil's evidence with the scenario.</div>` : "";
   const b = $("#btn-sc"); if (b) b.onclick = () => busy(b, async () => {
     const r = await api(`/api/scenarios/${sc.id}/run`, { method: "POST" });
+    if (r.recorded.every((x) => x.concept_provenance === "teacher")) {
+      const nMc = r.recorded.filter((x) => x.misconception).length;
+      S.lastExplain = `<b>Recorded ${r.recorded.length} pieces of marked work</b><ul><li>Each came with the topics the teacher said it covered, and a mark</li><li>${nMc} had a misconception recorded by the teacher. Where the mark was low, only the topics that misconception affects were marked down (usually a writing skill, not the character or theme)</li><li>Progress was rebuilt from all the work</li></ul>`;
+      await refreshStatus(); await renderEvidence(); return;
+    }
     const nItem = r.recorded.filter((x) => x.concept_provenance === "source").length, nAct = r.recorded.length - nItem;
     const diag = r.recorded.filter((x) => x.misconception).length;
     const acts = sc.events.map((ev, i) => [ev, r.recorded[i]]).filter(([ev]) => ev.activity);
@@ -336,7 +394,15 @@ async function renderEvidence() {
     S.lastExplain = `<b>Recorded ${r.recorded.length} answers</b><ul><li>${nItem} answers were to questions already tagged to the map</li>${nAct ? `<li>${nAct} markbook entr${nAct > 1 ? "ies" : "y"} had no topics attached. The tagger interpreted ${actTxt}. Those entries count for less, in proportion to the confidence</li>` : ""}<li>${diag} wrong answers matched a known distractor, so a misconception was diagnosed</li><li>Progress was rebuilt from all the answers, spreading evidence across the map</li>${r.recorded.some((x) => x.behaviour && x.behaviour.stored) ? `<li>How they worked was recorded for ${r.recorded.filter((x) => x.behaviour && x.behaviour.stored).length} answers and turned into learning-behaviour patterns${r.recorded.some((x) => x.behaviour && x.behaviour.discarded_session_only) ? "; emotional signals were discarded (session only)" : ""}</li>` : ""}</ul>`;
     await refreshStatus(); await renderEvidence();
   });
-  // item form
+  // forms: maths has tagged items; English has teacher-marked written work
+  const eng = S.subject === "english";
+  $("#e-card-item").hidden = eng; $("#e-card-act").hidden = eng; $("#e-card-marked").hidden = !eng;
+  if (eng && !$("#em-topics").children.length) {
+    $("#em-topics").innerHTML = S.graph.strands.map((st) => `<div class="grp">${esc(st.label)}</div>` + S.graph.concepts.filter((c) => c.strand === st.id).map((c) => `<label><input type="checkbox" value="${esc(c.id)}"${["cc:english/macbeth/th-guilt", "cc:english/macbeth/sk-language"].includes(c.id) ? " checked" : ""}>${esc(c.label)}</label>`).join("")).join("");
+    $("#em-mc").innerHTML = `<option value="">None seen</option>` + S.graph.misconceptions.map((m) => `<option value="${esc(m.id)}">${esc(m.label)}</option>`).join("");
+    $("#em-score").oninput = () => ($("#em-score-v").textContent = $("#em-score").value + "%");
+  }
+  if (!eng) $("#em-topics").innerHTML = "";
   const it = $("#e-item");
   if (!it.options.length) {
     it.innerHTML = S.items.map((i) => `<option value="${i.id}">${esc(i.prompt)}</option>`).join("");
@@ -358,7 +424,7 @@ async function renderEvidence() {
     <td class="mono">${e.id}</td><td>${esc(e.source)}</td>
     <td>${e.prompt ? `${esc(e.prompt)}<div class="sub">→ “${esc(e.response)}”</div>` : `<i>${esc(e.activity)}</i>`}${e.process ? `<div class="sub" style="margin-top:3px">How: ${esc(e.process)}</div>` : ""}</td>
     <td>${e.item ? (e.outcome >= 0.5 ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>') : pct(e.outcome)}</td>
-    <td><div class="tags">${e.concepts.map((c) => tag("concept", c.id, null, { label: c.label })).join("")}</div><div class="sub">${e.concept_provenance === "source" ? "tagged at source" : "aligned: " + esc(e.concept_provenance) + " · conf " + e.confidence} · v${esc(e.graph_version)}</div></td>
+    <td><div class="tags">${e.concepts.map((c) => tag("concept", c.id, null, { label: c.label })).join("")}</div><div class="sub">${e.concept_provenance === "source" ? "tagged at source" : e.concept_provenance === "teacher" ? "topics given by the teacher" : "aligned: " + esc(e.concept_provenance) + " · conf " + e.confidence} · v${esc(e.graph_version)}</div></td>
     <td>${e.misconception ? tag("misconception", e.misconception.id) : ""}</td></tr>`).join("")}</table>` : `<div class="empty">Empty</div>`;
 }
 const BSTAT = { support: ["gap", "pattern to support"], strength: ["secure", "strength"], mixed: ["developing", "mixed"], "too little evidence": ["", "too little evidence"] };
@@ -407,11 +473,14 @@ function explainRecord(r, prompt) {
   const g = S.graph; const pre = {};
   g.prerequisites.forEach((e) => (pre[e.dst] ??= []).push(e.src));
   const parts = [];
-  if (r.concept_provenance === "source") parts.push(`The item arrived tagged with ${r.concepts.map((c) => `<b>${esc(c.label)}</b>`).join(", ")}`);
+  if (r.concept_provenance === "teacher") parts.push(`The teacher said the work covered ${r.concepts.map((c) => `<b>${esc(c.label)}</b>`).join(", ")}${r.misconception ? `, and recorded the misconception <b>${esc(r.misconception.label)}</b>` : ""}`);
+  else if (r.concept_provenance === "source") parts.push(`The item arrived tagged with ${r.concepts.map((c) => `<b>${esc(c.label)}</b>`).join(", ")}`);
   else parts.push(`No topics were supplied. The tagger (${esc(r.concept_provenance)}) interpreted “${esc(prompt)}” as ${r.concepts.map((c) => `<b>${esc(c.label)}</b>`).join(", ") || "<b>nothing recognisable</b>"} with confidence ${r.confidence}. The evidence is weighted by that confidence`);
   if (r.outcome >= 0.5) {
     const ps = [...new Set(r.concepts.flatMap((c) => pre[c.id] || []))];
     parts.push(`Outcome ${r.concept_provenance === "source" ? "correct" : pct(r.outcome)}. Because the graph knows the prerequisites, it added weak evidence to ${ps.map((p) => `<b>${esc(lab(p))}</b>`).join(", ") || "none"}`);
+  } else if (r.misconception && r.concept_provenance === "teacher") {
+    parts.push(`Mark ${pct(r.outcome)}. Only the topics the misconception affects were marked down (graph-based credit assignment)`);
   } else if (r.misconception) {
     parts.push(`Wrong answer matched a known distractor, so it was diagnosed as <b>${esc(r.misconception.label)}</b>. Only concepts that misconception affects were marked down (graph-based credit assignment)`);
   } else parts.push(`Outcome ${pct(r.outcome)}`);
@@ -433,6 +502,9 @@ const SUGGEST = {
   "pupil:jay": ["Can you help me with 6x + 1 = 2x + 9?", "Give me a question to practise.", "I got it wrong again."],
   "pupil:gabriel": ["Can you check my working for 3x − 4 = 17? I divided by 3 first.", "What should I work on?", "Can we skip to the harder ones?"],
   "pupil:hana": ["I don't get why there are x's on both sides.", "Give me a quick quiz.", "Can you help with my homework?"],
+  "pupil:priya": ["Can you look at my paragraph on 'Out, damned spot'? I said it shows she feels guilty.", "How can I get a higher grade?", "What does 'vaulting ambition' mean?"],
+  "pupil:tom": ["Why does Macbeth kill Duncan?", "What should I say about the witches?", "What happens to Lady Macbeth at the end?"],
+  "pupil:zainab": ["Is Lady Macbeth a villain?", "Can you help me plan an essay on ambition?", "What should I work on?"],
   "pupil:farah": ["I've finished all my homework. What's next?", "Is x = 4 right for 4x + 5 = x − 7?", "Can we do something harder?"],
 };
 function renderContextPage() {
@@ -442,6 +514,8 @@ function renderContextPage() {
     ps.onchange = () => { S.pupil = ps.value; $("#c-msg").value = SUGGEST[S.pupil][0]; sugg(); };
   }
   ps.value = S.pupil;
+  if (!$("#c-msg").value) $("#c-msg").value = SUGGEST[S.pupil][0];
+  if (!SUGGEST[S.pupil]) SUGGEST[S.pupil] = ["What should I work on?"];
   if (!$("#c-msg").value) $("#c-msg").value = SUGGEST[S.pupil][0];
   $("#c-concept").innerHTML = `<option value="">Auto: align from the message</option>` + S.graph.concepts.filter((c) => c.status === "active").map((c) => `<option value="${c.id}">${esc(c.label)}</option>`).join("");
   sugg();
@@ -471,14 +545,16 @@ function renderCompare(r) {
     <div class="cmp-title"><span class="pill yes">ORGANISED BY THE MAP</span><span class="sub">~${b.approx_tokens} tokens · map v${esc(b.graph_version)}</span></div>
     ${reply(r.with_h2)}
     <div class="sec"><div class="st">Focus topic</div>${tag("concept", b.focus.id, null, { label: b.focus.label })}
-      <div class="sub" style="margin-top:4px">Request read as <b>${esc((b.request.intent || "other").replace("_", " "))}</b>${b.request.message_topic ? ` about ${esc(b.request.message_topic)}` : ""}. Focus chosen because: ${esc(b.focus.chosen_because.how)}</div>
+      <div class="sub" style="margin-top:4px">Request read as <b>${esc((b.request.intent || "other").replace("_", " "))}</b>${b.request.message_topic ? ` about ${esc(b.request.message_topic)}` : ""}${b.request.mentions && b.request.mentions.parts_of_text.length ? `, mentioning ${esc(b.request.mentions.parts_of_text.join(", "))}` : ""}. Focus chosen because: ${esc(b.focus.chosen_because.how)}</div>
       <div class="tags" style="margin-top:6px">${b.focus.crosswalk.map((x) => `<span class="tag plain">${esc(x.scheme)}: ${esc(x.id)}</span>`).join("")}</div></div>
     <div class="sec"><div class="st">Pupil progress</div>${badge(L.status)} <span class="sub">mastery ${pct(L.mastery)} · learning edge: ${esc(L.learning_edge)}</span>
       ${L.active_misconceptions.length ? `<div style="margin-top:8px">${L.active_misconceptions.map((m) => `${tag("misconception", m.id)}<div class="sub" style="margin:3px 0 0">${esc(m.description)}</div>`).join("")}</div>` : '<div class="sub" style="margin-top:6px">No active misconception on this concept</div>'}
       <div class="sub" style="margin:8px 0 4px">Overview</div><div class="tags">${L.overview.map((o) => `<span class="tag plain">${esc(o.topic)} ${badge(o.status)}</span>`).join("")}</div></div>
     <div class="sec"><div class="st">Class ${esc(C.id)}</div>${C.focus_taught ? `Focus taught in week ${C.focus_week}` : `<b>Focus not yet taught to this class</b>${C.focus_week ? ` (planned week ${C.focus_week})` : ""}`} · ${esc(C.teacher)}
       <div class="tags" style="margin-top:6px">${C.preferred_method ? tag("method", C.preferred_method.id) : ""}${C.preferred_representation ? tag("representation", C.preferred_representation.id) : ""}</div>
-      <div class="sub" style="margin-top:6px">Taught: ${esc(C.taught_so_far.join(" · "))}</div><div class="sub">Not yet: ${esc(C.not_yet_taught.join(" · ") || "none")}</div></div>
+      <div class="sub" style="margin-top:6px">Taught: ${esc(C.taught_so_far.join(" · "))}</div><div class="sub">Not yet: ${esc(C.not_yet_taught.join(" · ") || "none")}</div>
+      ${C.text_studied_so_far ? `<div class="sub" style="margin-top:6px"><b>Play studied:</b> ${esc(C.text_studied_so_far.join(", ") || "none")}${C.text_coming_up.length ? ` · <b>coming up:</b> ${esc(C.text_coming_up.join(", "))}` : ""}</div>` : ""}</div>
+    ${b.key_quotations && b.key_quotations.length ? `<div class="sec"><div class="st">Key quotations the class has studied</div>${b.key_quotations.map((q) => `<p class="quote">“${esc(q.text)}” <span class="sub" style="font-style:normal">${esc(q.speaker)}, ${esc(q.act)}</span></p>`).join("")}</div>` : ""}
     <div class="sec"><div class="st">Teacher's materials (filtered by concept, ranked by method + misconception)</div>${b.materials.length ? `<ul>${b.materials.map((m) => `<li><b>${esc(m.heading)}</b> <span class="sub">W${m.week}: ${esc(m.why)}</span></li>`).join("")}</ul>` : '<div class="sub">No aligned materials for this concept in taught weeks</div>'}</div>
     ${b.how_to_support && (b.how_to_support.patterns_to_support.length || b.how_to_support.strengths.length) ? `<div class="sec"><div class="st">How to support (learning behaviour, ${esc(b.how_to_support.based_on)})</div><ul>${b.how_to_support.patterns_to_support.map((p) => `<li><b>${esc(p.area)}:</b> ${esc(p.what_we_saw)}. <i>${esc(p.how_to_help)}</i></li>`).join("")}${b.how_to_support.strengths.map((p) => `<li><b>Strength, ${esc(p.area.toLowerCase())}:</b> ${esc(p.what_we_saw)}</li>`).join("")}</ul><div class="sub" style="margin-top:4px">${esc(b.how_to_support.rule)}</div></div>` : ""}
     <div class="sec guidance"><div class="st">Guidance for the tutor</div><ul>
@@ -486,7 +562,7 @@ function renderCompare(r) {
       ${G.teach_with.method ? `<li>Teach with <b>${esc(G.teach_with.method.label)}</b>${G.teach_with.representation ? ` using a <b>${esc(G.teach_with.representation.label)}</b>` : ""}</li>` : ""}
       ${G.avoid_methods.length ? `<li>Avoid: ${G.avoid_methods.map((m) => esc(m.label)).join(", ")}</li>` : ""}
       ${G.check_prerequisites_first.length ? `<li>Check first: ${G.check_prerequisites_first.map((p) => `${esc(p.label)} (${esc(p.status)})`).join(", ")}</li>` : ""}
-      ${G.next_step ? `<li>Next step: <b>${esc(G.next_step.action.replace("_", " "))}</b>, ${esc(G.next_step.concept.label)}: ${esc(G.next_step.why)}${(G.next_step.check_first || []).length ? `. Check first: ${G.next_step.check_first.map((x) => esc(x.label)).join(", ")}` : ""}</li>` : ""}
+      ${G.next_step ? `<li>Next step: <b>${esc(G.next_step.action.replaceAll("_", " "))}</b>, ${esc((G.next_step.concept || G.next_step.link_back_to || {}).label || G.next_step.part_of_text || "")}${G.next_step.part_of_text ? ` (${esc(G.next_step.part_of_text)})` : ""}: ${esc(G.next_step.why)}${(G.next_step.check_first || []).length ? `. Check first: ${G.next_step.check_first.map((x) => esc(x.label)).join(", ")}` : ""}</li>` : ""}
       <li>${esc(G.scope_rule)}</li></ul></div>
     <details><summary>Raw context JSON</summary><pre class="json">${esc(JSON.stringify(b, null, 2))}</pre></details></div>`;
   }
@@ -502,12 +578,17 @@ function renderEvaluate() {
     el.innerHTML = opts.map(([v, l, dis]) => `<button data-v="${v}" class="${S[key] === v ? "on" : ""}" ${dis ? 'disabled title="Set ANTHROPIC_API_KEY to enable"' : ""}>${l}</button>`).join("");
     el.querySelectorAll("button").forEach((b) => (b.onclick = () => { S[key] = b.dataset.v; renderEvaluate(); }));
   };
-  seg($("#ev-set"), [["heldout2", "Held-out 2 (12)"], ["heldout", "Held-out 1 (14)"], ["tuning", "Tuning (14)"]], "evSet");
-  seg($("#ev-suite"), [["heldout", "Fresh held-out"], ["dev", "Development"], ["behaviour", "Learning behaviour"]], "suite");
+  seg($("#ev-set"), S.subject === "english" ? [["english", "English: Macbeth (12)"]] : [["heldout2", "Held-out 2 (12)"], ["heldout", "Held-out 1 (14)"], ["tuning", "Tuning (14)"]], "evSet");
+  seg($("#ev-suite"), S.subject === "english" ? [["english", "English: Macbeth (10)"]] : [["heldout", "Fresh held-out"], ["dev", "Development"], ["behaviour", "Learning behaviour"]], "suite");
   $("#ev-suite").querySelectorAll("button").forEach((btn) => btn.addEventListener("click", () => { S.suiteLoaded = false; renderEvaluate(); }));
   seg($("#ev-mode"), [["heuristic", "Keyword tagger"], ["claude", "Claude tagger", !llm]], "evMode");
-  $("#ev-align-sub").textContent = { heldout2: "Held-out 2: written before the latest tagger change and never used to adjust it — the honest figure.", heldout: "Held-out 1: its misses were used to diagnose the latest tagger change, so it is no longer clean.", tuning: "Tuning set: the 14 units the tagger was adjusted against. Expect flattering numbers." }[S.evSet];
+  $("#ev-align-sub").textContent = { heldout2: "Held-out 2: written before the latest tagger change and never used to adjust it — the honest figure.", heldout: "Held-out 1: its misses were used to diagnose the latest tagger change, so it is no longer clean.", tuning: "Tuning set: the 14 units the tagger was adjusted against. Expect flattering numbers.", english: "English (Macbeth): 12 units written before any English tagging was run, including two that are not about Macbeth and should get no topics. Never used to adjust anything." }[S.evSet];
   $("#btn-ev-tutor").disabled = !llm;
+  const ak = S.evSet + ":" + S.evMode;
+  if (S.alignLoaded !== ak) {
+    S.alignLoaded = ak;
+    api(`/api/eval/alignment/latest?set=${S.evSet}&mode=${S.evMode}`).then((d) => { if (d && d.summary) renderAlignEval(d); else $("#ev-align").innerHTML = `<div class="empty">No run yet for this set. Click Run.</div>`; });
+  }
   if (!S.suiteLoaded) {
     S.suiteLoaded = true;
     api(`/api/eval/tutor/latest?suite=${S.suite}`).then((d) => { if (d && d.summary) renderTutorEval(d); else if (!llm) $("#ev-tutor").innerHTML = `<div class="note">Needs <code>ANTHROPIC_API_KEY</code>.</div>`; else $("#ev-tutor").innerHTML = `<div class="empty">No run yet for this set. Click Run.</div>`; });
@@ -523,14 +604,14 @@ function renderAlignEval(d) {
     else ok = multi ? JSON.stringify([...o.expected].sort()) === JSON.stringify([...o.got].sort()) : o.expected === o.got;
     return `<td><span class="${ok ? "ok" : "bad"}">${ok ? "✓" : "✗"}</span> ${ok ? `<span class="sub">${esc(f(o.got))}</span>` : `<div class="sub">expected: ${esc(f(o.expected))}${o.acceptable && o.acceptable.length ? ` (also OK: ${esc(f(o.acceptable))})` : ""}</div><div class="sub">got: ${esc(f(o.got))}</div>`}</td>`;
   };
-  $("#ev-align").innerHTML = `<div class="sub" style="margin-bottom:8px"><b>${d.set === "heldout" ? "Held-out set" : "Tuning set"}</b> · ${d.mode === "claude" ? "Claude tagger" : "keyword tagger"} · ${d.units} units${s.offstrand_correctly_untagged ? ` · off-topic units correctly left untagged: <b>${s.offstrand_correctly_untagged}</b>` : ""}</div>
+  $("#ev-align").innerHTML = `<div class="sub" style="margin-bottom:8px"><b>${({ heldout: "Held-out set 1", heldout2: "Held-out set 2", tuning: "Tuning set", english: "English (Macbeth) held-out set" })[d.set] || d.set}</b> · ${d.mode === "claude" ? "Claude tagger" : "keyword tagger"} · ${d.units} units${s.offstrand_correctly_untagged ? ` · off-topic units correctly left untagged: <b>${s.offstrand_correctly_untagged}</b>` : ""}</div>
     <div class="kpis">${k(s.concepts.precision, "Concept tags correct")}${k(s.concepts.recall, "Expected concepts found")}${k(s.misconceptions.precision, "Misconception tags correct")}${k(s.misconceptions.recall, "Misconceptions found")}${k(s.method_accuracy, "Method right")}${k(s.representation_accuracy, "Representation right")}</div>
     <details style="margin-top:12px"><summary>Per-unit results</summary><div class="tbl-wrap"><table class="t" style="margin-top:8px"><tr><th>Unit</th><th>Concepts</th><th>Method</th><th>Representation</th><th>Misconceptions</th></tr>
     ${d.rows.map((r) => `<tr><td><b>${esc(r.heading)}</b><div class="mono sub">${esc(r.unit)}</div>${r.rationale ? `<div class="sub" style="margin-top:4px"><i>${esc(r.rationale)}</i></div>` : ""}</td>${cell(r.concepts, true)}${cell(r.method)}${cell(r.representation)}${cell(r.misconceptions, true)}</tr>`).join("")}</table></div></details>`;
 }
 const ARM_COL = { none: "var(--text-3)", raw: "var(--developing)", h2: "var(--accent)" };
 const ARM_SHORT = { none: "No context", raw: "Raw data", h2: "Map" };
-const CAT = { gives_up: "Isla: asks before trying, stops after errors", repeats_method: "Jay: keeps going, repeats the same method", method_conflict: "Teacher uses a different method (class 10Y)", non_revealing: "Request doesn't reveal the problem", jump_ahead: "Temptation to jump ahead", control: "Controls" };
+const CAT = { specific: "Asks about something specific", gives_up: "Isla: asks before trying, stops after errors", repeats_method: "Jay: keeps going, repeats the same method", method_conflict: "Teacher uses a different method (10Y / 11F)", non_revealing: "Request doesn't reveal the problem", jump_ahead: "Temptation to jump ahead", control: "Controls" };
 const CRIT = { support: "Responds to how the pupil learns", diagnosis: "Diagnosis", method: "Teacher's method", scope: "Respects what's been taught", next_step: "Next step", grounding: "True to pupil & class" };
 function renderTutorEval(d) {
   if (d.error) { $("#ev-tutor").innerHTML = `<div class="note warn">${esc(d.error)}</div>`; return; }
@@ -619,6 +700,13 @@ function bindStatic() {
     const i = S.items.find((x) => x.id === $("#e-item").value);
     const r = await api("/api/evidence", { method: "POST", body: { learner: S.pupil, source: $("#e-src").value, item: i.id, response: $("#e-resp").value, mode: S.mode, process: processFor(i, $("#e-resp").value) } });
     S.lastExplain = explainRecord(r.recorded, i.prompt); await refreshStatus(); await renderEvidence();
+  });
+  $("#btn-em").onclick = (e) => busy(e.currentTarget, async () => {
+    const concepts = [...document.querySelectorAll("#em-topics input:checked")].map((x) => x.value);
+    if (!concepts.length) throw new Error("Tick at least one topic");
+    const act = $("#em-act").value;
+    const r = await api("/api/evidence", { method: "POST", body: { learner: S.pupil, source: "Teacher marking", activity: act, score: $("#em-score").value / 100, concepts, misconception: $("#em-mc").value || null } });
+    S.lastExplain = explainRecord(r.recorded, act); await refreshStatus(); await renderEvidence();
   });
   $("#btn-e-act").onclick = (e) => busy(e.currentTarget, async () => {
     const act = $("#e-act").value;

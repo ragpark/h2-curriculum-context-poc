@@ -53,6 +53,9 @@ create table if not exists node (
   id text primary key, type text not null, label text not null, description text,
   key_stage jsonb default '[]', keywords jsonb default '[]',
   graph_version text not null, status text not null default 'active', replaced_by text);
+alter table node add column if not exists subject text not null default 'maths';
+alter table node add column if not exists strand text;
+alter table node add column if not exists extra jsonb default '{}';
 create table if not exists edge (
   src text not null, rel text not null, dst text not null, weight real default 1.0,
   primary key (src, rel, dst));
@@ -63,6 +66,7 @@ create table if not exists crosswalk (
 -- FIXTURES (synthetic school data)
 create table if not exists item (id text primary key, prompt text, concepts jsonb, answer text, distractors jsonb);
 create table if not exists class (id text primary key, teacher text, current_week int, scheme text);
+alter table class add column if not exists subject text not null default 'maths';
 create table if not exists pupil (id text primary key, name text, class text);
 create table if not exists material (id text primary key, class text, week int, title text, body text, ingested boolean default false);
 

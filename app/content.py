@@ -5,6 +5,7 @@ from collections import Counter
 from . import align as A
 from . import db
 from . import graph as G
+from . import seed as S
 from .textvec import cosine, embed
 
 CONF_MIN = 0.5  # alignments below this go to the (optional) teacher review queue
@@ -27,18 +28,19 @@ def ingest(material_id: str, mode: str | None = None) -> dict:
     if not m:
         raise KeyError(material_id)
     g = G.get()
+    subject = S.subject_of_class(m["class"])
     db.ex("delete from alignment where subject like %s", (material_id + "#%",))
     db.ex("delete from content_unit where material_id=%s", (material_id,))
     out = []
     for idx, (head, body) in enumerate(split_units(m["body"])):
         uid = f"{material_id}#{idx}"
         text = f"{head}\n{body}"
-        res = A.align(f"{m['title']}\n{text}", mode)  # material title gives the unit its lesson context
+        res = A.align(f"{m['title']}\n{text}", mode, subject)  # material title gives the unit its lesson context
         db.ex("insert into content_unit values(%s,%s,%s,%s,%s,%s,%s,%s)",
               (uid, material_id, m["class"], m["week"], idx, head, body, db.J(embed(text))))
         for r in A.flatten(res):
             db.ex("insert into alignment(subject,subject_kind,target,facet,confidence,provenance,graph_version) values(%s,'content',%s,%s,%s,%s,%s)",
-                  (uid, r["target"], r["facet"], r["confidence"], res["provenance"], g.version))
+                  (uid, r["target"], r["facet"], r["confidence"], res["provenance"] if r["facet"] not in ("section", "quotation") else "text-match-v1", g.version_for(subject)))
         out.append({"unit": uid, "heading": head, "alignment": res})
     db.ex("update material set ingested=true where id=%s", (material_id,))
     return {"material": material_id, "units": out}
@@ -85,8 +87,19 @@ def coverage(class_id: str) -> dict:
         bucket = taught if r["week"] <= c["current_week"] else planned
         bucket[cid] = min(bucket.get(cid, 99), r["week"])
     planned = {k: v for k, v in planned.items() if k not in taught}
-    return {"class": c, "taught": [g.ref(k, week=v) for k, v in sorted(taught.items(), key=lambda x: x[1])],
-            "planned": [g.ref(k, week=v) for k, v in sorted(planned.items(), key=lambda x: x[1])]}
+    out = {"class": c, "taught": [g.ref(k, week=v) for k, v in sorted(taught.items(), key=lambda x: x[1])],
+           "planned": [g.ref(k, week=v) for k, v in sorted(planned.items(), key=lambda x: x[1])]}
+    secs = db.q("""select a.target, min(u.week) week from alignment a join content_unit u on u.id=a.subject
+                   where u.class=%s and a.facet='section' group by a.target""", (class_id,))
+    if secs or g.sections(c["subject"]):
+        # Which parts of the text has the class studied? A section is 'studied' once any taught lesson covers it.
+        # A play is read in order, so every act up to the furthest one a taught lesson reached counts as studied.
+        first = {r["target"]: r["week"] for r in secs}
+        order = {n["id"]: (n.get("extra") or {}).get("order", 0) for n in g.sections(c["subject"])}
+        reached = max([order[t] for t, w in first.items() if w <= c["current_week"] and t in order] or [0])
+        out["sections_studied"] = [g.ref(n["id"], week=first.get(n["id"])) for n in g.sections(c["subject"]) if order[n["id"]] <= reached]
+        out["sections_coming"] = [g.ref(n["id"], week=first.get(n["id"])) for n in g.sections(c["subject"]) if order[n["id"]] > reached]
+    return out
 
 
 def preferred_method(class_id: str, concept: str) -> dict:

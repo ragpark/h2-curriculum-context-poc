@@ -27,6 +27,7 @@ STATIC = Path(__file__).resolve().parent.parent / "static"
 @contextlib.asynccontextmanager
 async def lifespan(app):
     S.ensure()
+    E.run_on_start(os.environ.get("RUN_EVALS_ON_START", ""))
     async with mcp.session_manager.run():
         yield
 
@@ -74,15 +75,26 @@ def status():
     counts = {t: db.q1(f"select count(*) n from {t}")["n"] for t in
               ("node", "edge", "crosswalk", "content_unit", "alignment", "evidence", "learner_state", "learner_misconception")}
     counts["concepts"] = db.q1("select count(*) n from node where type='concept' and status='active'")["n"]
-    return {"graph_version": G.get().version, "aligner_mode": A.default_mode(), "llm_available": llm.available(),
+    return {"graph_version": G.get().version, "graph_versions": {k: G.get().version_for(k) for k in S.SUBJECTS}, "aligner_mode": A.default_mode(), "llm_available": llm.available(),
             "model": llm.model() if llm.available() else None, "counts": counts,
             "mcp_path": "/mcp/", "public_url": os.environ.get("RAILWAY_PUBLIC_DOMAIN")}
 
 
-# ---------------------------------------------------------------- graph (H2)
+# ---------------------------------------------------------------- subjects & graph (H2)
+@app.get("/api/subjects")
+def subjects():
+    g = G.get()
+    return [{"id": k, "label": v["label"], "layout": v["layout"], "graph_version": g.version_for(k),
+             "concepts": len(g.of_type("concept", subject=k)),
+             "classes": [c["id"] for c in db.q("select id from class where subject=%s order by id", (k,))]}
+            for k, v in S.SUBJECTS.items()]
+
+
 @app.get("/api/graph")
-def graph():
-    return G.get().to_json()
+def graph(subject: str = "maths"):
+    if subject not in S.SUBJECTS:
+        raise HTTPException(400, "unknown subject")
+    return G.get().to_json(subject)
 
 
 @app.get("/api/graph/node")
@@ -100,17 +112,18 @@ def node(id: str):
 class AlignIn(BaseModel):
     text: str
     mode: str | None = None
+    subject: str = "maths"
 
 
 @app.post("/api/align")
 def align(body: AlignIn):
-    return A.align(body.text, body.mode)
+    return A.align(body.text, body.mode, body.subject)
 
 
 # ---------------------------------------------------------------- H3 materials
 @app.get("/api/classes")
-def classes():
-    return db.q("select * from class order by id")
+def classes(subject: str | None = None):
+    return db.q("select * from class where (%s::text is null or subject=%s) order by id", (subject, subject))
 
 
 @app.get("/api/materials")
@@ -158,13 +171,14 @@ def items():
 
 
 @app.get("/api/pupils")
-def pupils():
-    return db.q("select * from pupil order by id")
+def pupils(subject: str | None = None):
+    return db.q("""select p.*, c.subject from pupil p join class c on c.id=p.class
+                   where (%s::text is null or c.subject=%s) order by p.id""", (subject, subject))
 
 
 @app.get("/api/scenarios")
-def scenarios():
-    return S.scenarios()
+def scenarios(subject: str | None = None):
+    return S.scenarios(subject)
 
 
 class EvidenceIn(BaseModel):
@@ -176,11 +190,14 @@ class EvidenceIn(BaseModel):
     score: float | None = None
     mode: str | None = None
     process: list[dict] | None = None
+    concepts: list[str] | None = None
+    misconception: str | None = None
 
 
 @app.post("/api/evidence")
 def evidence(e: EvidenceIn):
-    r = L.record(e.learner, source=e.source, item=e.item, response=e.response, activity=e.activity, score=e.score, mode=e.mode, process=e.process)
+    r = L.record(e.learner, source=e.source, item=e.item, response=e.response, activity=e.activity, score=e.score, mode=e.mode,
+                 process=e.process, concepts=e.concepts, misconception=e.misconception)
     return {"recorded": r, "learner": L.view(e.learner)}
 
 
@@ -241,9 +258,14 @@ def tutor(c: ContextIn):
 # ---------------------------------------------------------------- evaluation & admin
 @app.post("/api/eval/alignment")
 def eval_alignment(mode: str | None = None, set: str = "tuning"):
-    if set not in ("tuning", "heldout", "heldout2"):
-        raise HTTPException(400, "set must be tuning, heldout or heldout2")
+    if set not in ("tuning", "heldout", "heldout2", "english"):
+        raise HTTPException(400, "set must be tuning, heldout, heldout2 or english")
     return E.eval_alignment(mode, set)
+
+
+@app.get("/api/eval/alignment/latest")
+def eval_alignment_latest(set: str = "english", mode: str = "claude"):
+    return E.last_alignment(set, mode) or {}
 
 
 @app.post("/api/eval/tutor")

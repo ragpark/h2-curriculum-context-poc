@@ -31,14 +31,15 @@ mcp.settings.streamable_http_path = "/"
 def get_learning_context(learner_id: str, message: str = "", concept_id: str = "") -> dict:
     """Assemble the tutor briefing for one pupil question: focus topic, the pupil's progress and misconceptions,
     the class teacher's method and representation, relevant teacher materials, and next-step guidance.
-    learner_id e.g. 'pupil:amara'. Provide the pupil's message and/or a concept ID."""
+    Works for any subject on the map (maths: 'pupil:amara'…; English/Macbeth: 'pupil:priya', 'pupil:tom', 'pupil:zainab').
+    Provide the pupil's message and/or a concept ID."""
     return X.assemble(learner_id, concept=concept_id or None, message=message or None, facets=True)
 
 
 @mcp.tool()
 def get_prerequisites(concept_id: str) -> dict:
-    """Prerequisite chain, misconceptions, methods and crosswalks for a curriculum concept ID
-    (e.g. 'cc:maths/alg/lin-eq-both-sides')."""
+    """Prerequisite chain, related topics, key quotations, misconceptions, methods and crosswalks for a curriculum
+    concept ID (e.g. 'cc:maths/alg/lin-eq-both-sides' or 'cc:english/macbeth/ch-lady')."""
     d = G.get().node_detail(G.get().resolve(concept_id))
     return d or {"error": f"unknown concept {concept_id}"}
 
@@ -50,18 +51,22 @@ def find_teacher_materials(class_id: str, concept_id: str, query: str = "", meth
 
 
 @mcp.tool()
-def align_text(text: str) -> dict:
-    """Tag free text against the curriculum graph (concepts, method, representation, misconceptions)."""
-    return A.align(text)
+def align_text(text: str, subject: str = "maths") -> dict:
+    """Tag free text against the curriculum graph (concepts, method, representation, misconceptions).
+    subject: 'maths' or 'english' (Macbeth; also returns the acts and key quotations the text refers to)."""
+    return A.align(text, subject=subject)
 
 
 @mcp.tool()
 def record_evidence(learner_id: str, source: str, item_id: str = "", response: str = "", activity: str = "", score: float = -1,
-                    process: list[dict] | None = None) -> dict:
+                    process: list[dict] | None = None, concept_ids: list[str] | None = None, misconception_id: str = "") -> dict:
     """Record a pupil's answer. Either item_id + response (a question tagged to the map) or activity + score 0–1
     (untagged; the tagging service interprets it). Optional 'process': events observed while answering, e.g.
     [{"type":"hint_requested","t":3},{"type":"attempt","t":40,"answer":"x = 4","correct":true},{"type":"confidence","t":42,"rating":2}].
     Types: attempt, hint_requested, answer_revised, checked, plan_stated, confidence (1-4), abandoned, affect (session only, never stored).
+    For marked written work (e.g. an English paragraph), give activity + score + concept_ids (the topics it covered)
+    and optionally misconception_id (e.g. 'mc:english/retelling').
     Updates the pupil's progress and learning-behaviour patterns."""
     return L.record(learner_id, source=source, item=item_id or None, response=response or None,
-                    activity=activity or None, score=None if score < 0 else score, process=process)
+                    activity=activity or None, score=None if score < 0 else score, process=process,
+                    concepts=concept_ids or None, misconception=misconception_id or None)

@@ -12,8 +12,10 @@
 <header class="topbar">
   <div class="brand">
     <div class="brand-mark">CM</div>
-    <div><h1>Curriculum Map for AI Tutors</h1><p>Proof of concept · KS3–4 linear equations · synthetic data only</p></div>
+    <div><h1>Curriculum Map for AI Tutors</h1><p id="subtitle">Proof of concept · KS3–4 linear equations · synthetic data only</p></div>
   </div>
+  <label class="subject-pick" title="Switch between the two curriculum maps">Subject
+    <select class="input" id="subject"><option value="maths">Maths: linear equations</option><option value="english">English: Macbeth</option></select></label>
   <div class="status-chips" id="chips"></div>
   <button class="btn sm" id="btn-help-top" title="What is this and how do I use it?">? Help</button>
 </header>
@@ -73,7 +75,8 @@
       <div class="page-head">
         <div class="eyebrow">Curriculum map</div>
         <h2>The shared curriculum map</h2>
-        <p>Concepts laid out left to right by prerequisite depth. Misconceptions, methods and representations are first-class nodes linked to concepts. Select a topic to see what it builds on, what it leads to, its links to other curricula and how much is tagged to it. Use the overlay to see a class's coverage or a pupil's progress on the same map.</p>
+        <p class="only-english">English is a web, not a ladder. Topics sit in five strands: context, characters, themes, language and form, and writing skills. Only the writing skills build on each other (the curved links on the right). Everything else is connected by <b>related-topic</b> links: click a topic to see them, with the key quotations that evidence it. Misconceptions, methods and representations are linked to topics, as in maths. Use the overlay to see a class's coverage or a pupil's progress.</p>
+        <p class="only-maths">Concepts laid out left to right by prerequisite depth. Misconceptions, methods and representations are first-class nodes linked to concepts. Select a topic to see what it builds on, what it leads to, its links to other curricula and how much is tagged to it. Use the overlay to see a class's coverage or a pupil's progress on the same map.</p>
       </div>
       <div class="card" style="margin-bottom:16px">
         <div class="card-head">
@@ -172,7 +175,16 @@
         </div>
         <div class="stack">
           <div class="card" id="e-scenario"></div>
-          <div class="card">
+          <div class="card" id="e-card-marked" hidden>
+            <h3>Record marked work</h3>
+            <p class="sub">A piece of written work the teacher has marked: the task, the topics it covered, the mark and, if the teacher saw one, a misconception.</p>
+            <div class="field"><label>Task</label><input class="input" id="em-act" value="Paragraph: How does Shakespeare present guilt in Act 2 Scene 2?"></div>
+            <div class="field" style="margin-top:8px"><label>Topics it covered (tick one or more)</label><div id="em-topics" class="topic-picks"></div></div>
+            <div class="field" style="margin-top:8px"><label>Mark <span id="em-score-v">50%</span></label><input type="range" id="em-score" min="0" max="100" value="50"></div>
+            <div class="field" style="margin-top:8px"><label>Misconception the teacher saw</label><select class="input" id="em-mc"></select></div>
+            <button class="btn primary" style="margin-top:10px" id="btn-em">Record marked work</button>
+          </div>
+          <div class="card" id="e-card-item">
             <h3>Record an answer</h3>
             <p class="sub">A question already tagged to the map. Wrong answers that match a known distractor are diagnosed as a misconception.</p>
             <div class="field"><label>Item</label><select class="input" id="e-item"></select></div>
@@ -188,7 +200,7 @@
             <div class="field" style="margin-top:8px"><label>Source</label><select class="input" id="e-src"><option>Vendor X tutor</option><option>Homework platform</option><option>Classroom quiz</option></select></div>
             <button class="btn primary" style="margin-top:10px" id="btn-e-item">Record answer</button>
           </div>
-          <div class="card">
+          <div class="card" id="e-card-act">
             <h3>Record a markbook entry</h3>
             <p class="sub">No concept IDs, just an activity title and a score. The tagging service works out what it covered.</p>
             <div class="field"><label>Activity</label><input class="input" id="e-act" value="Quiz: expanding brackets and simplifying"></div>
@@ -260,6 +272,7 @@
           <a href="#help" data-scroll="h-start">Start here: a 5-minute tour</a>
           <a href="#help" data-scroll="h-pages">What each page does</a>
           <a href="#help" data-scroll="h-pupils">Meet the pupils</a>
+          <a href="#help" data-scroll="h-english">English: Macbeth</a>
           <a href="#help" data-scroll="h-read">How to read the colours and labels</a>
           <a href="#help" data-scroll="h-results">How to read the test results</a>
           <a href="#help" data-scroll="h-limits">What this can't tell you</a>
@@ -318,6 +331,28 @@
               <tr><td><b>Jay</b></td><td>10X</td><td>Never asks for help and keeps going, but repeats the same wrong method. Very sure of answers that are wrong.</td></tr>
             </table>
             <p class="sub" style="margin-top:8px">Isla and Jay gave <b>exactly the same answers</b>. Only the way they worked is different. They are there to test whether a tutor can tell the difference.</p>
+          </article>
+
+          <article class="card" id="h-english">
+            <h3>The second subject: English, Macbeth</h3>
+            <p>Maths was the easy case: topics come in a clear order, like rungs on a ladder. English literature is not like that. Lady Macbeth, ambition and blood imagery are not steps; they are all connected to each other, and a pupil can meet them in any order. So we built a second map to test whether the idea still works. Use the <b>Subject</b> box at the top of the page to switch.</p>
+            <h4>How the English map is different</h4>
+            <ul>
+              <li><b>Five groups instead of a ladder:</b> the play's background (context), characters, themes, language and form, and writing skills.</li>
+              <li><b>“Related” links instead of “you need this first”.</b> Click a topic and dotted lines show what it connects to. Only the writing skills build on each other: you need to pick good quotations before you can analyse them.</li>
+              <li><b>Key quotations are on the map</b>, each linked to the characters and themes it shows.</li>
+              <li><b>The acts of the play are on the map.</b> In English, “has this been taught?” is mostly about <em>how far through the play</em> the class has read. Lady Macbeth is taught in week 2, but her sleepwalking scene is in Act 5, which the class reaches in week 6.</li>
+              <li><b>Pupil evidence is marked written work</b>, not right-or-wrong answers: the task, the topics it covered, the mark, and the mistake the teacher noticed, if any.</li>
+            </ul>
+            <h4>The classes and pupils</h4>
+            <p>Both Year 11 classes are in week 5 of Macbeth. Ms Adeyemi (11E) teaches pupils to start with a one-sentence argument, then zoom in on single words. Mr Doyle (11F) teaches PETAL paragraphs: Point, Evidence, Technique, Analysis, Link.</p>
+            <table class="t help-table">
+              <tr><th>Pupil</th><th>Class</th><th>What's going on</th></tr>
+              <tr><td><b>Priya</b></td><td>11E</td><td>Knows the play and her quotations very well, but tells the story instead of explaining how Shakespeare's words work.</td></tr>
+              <tr><td><b>Tom</b></td><td>11E</td><td>Good at picking apart words, but adds historical facts that don't help his point, and writes about characters as if they were real people.</td></tr>
+              <tr><td><b>Zainab</b></td><td>11F</td><td>Neat PETAL paragraphs, but sees Lady Macbeth only as evil, and doesn't move beyond the extract to the rest of the play.</td></tr>
+            </table>
+            <p class="sub" style="margin-top:8px">A mistake about a writing skill, such as retelling the story, matters whatever the question is about. So the tutor briefing mentions it even when the pupil asks about a character or a quotation.</p>
           </article>
 
           <article class="card" id="h-read">

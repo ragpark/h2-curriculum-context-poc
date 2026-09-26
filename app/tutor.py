@@ -11,25 +11,33 @@ from . import learner as L
 from . import llm
 from . import seed as S
 
-TUTOR_SYSTEM = """You are an AI maths tutor working one-to-one with a Year 10 pupil in an English secondary school.
+TUTOR_SYSTEM_TMPL = """You are {role}.
 You are given a CONTEXT object assembled by the school's platform. Use it to personalise your reply.
 Reply in under 140 words, British English, one small step at a time, and end with a single question for the pupil.
 Do not mention the context object, IDs or the platform."""
 
 
-def respond(ctx: dict, message: str) -> str:
+def system_prompt(subject: str = "maths") -> str:
+    return TUTOR_SYSTEM_TMPL.format(role=S.SUBJECTS[subject]["tutor"])
+
+
+TUTOR_SYSTEM = system_prompt("maths")
+
+
+def respond(ctx: dict, message: str, subject: str = "maths") -> str:
     prompt = f"CONTEXT:\n{json.dumps(ctx, indent=1, default=str)}\n\nPUPIL: {message}"
-    return llm.complete(prompt, system=TUTOR_SYSTEM, max_tokens=400, temperature=0.3)
+    return llm.complete(prompt, system=system_prompt(subject), max_tokens=400, temperature=0.3)
 
 
 def compare(learner: str, message: str, concept: str | None = None, mode: str | None = None) -> dict:
     with_h2 = X.assemble(learner, concept=concept, message=message, facets=True, mode=mode)
     without = X.assemble(learner, concept=concept, message=message, facets=False, mode=mode)
+    subject = S.subject_of_pupil(learner)
     out = {"with_h2": {"context": with_h2}, "without_h2": {"context": without}, "llm": llm.available(), "model": llm.model() if llm.available() else None}
     if llm.available():
         with ThreadPoolExecutor(2) as ex:
-            fa = ex.submit(respond, with_h2, message)
-            fb = ex.submit(respond, without, message)
+            fa = ex.submit(respond, with_h2, message, subject)
+            fb = ex.submit(respond, without, message, subject)
             for key, fut in (("with_h2", fa), ("without_h2", fb)):
                 try:
                     out[key]["response"] = fut.result()
@@ -54,5 +62,6 @@ def run_scenario(sid: str, mode: str | None = None) -> dict:
     out = []
     for e in sc["events"]:
         out.append(L.record(sc["pupil"], source=e["source"], item=e.get("item"), response=e.get("response"),
-                            activity=e.get("activity"), score=e.get("score"), mode=mode, process=e.get("process")))
+                            activity=e.get("activity"), score=e.get("score"), mode=mode, process=e.get("process"),
+                            concepts=e.get("concepts") or None, misconception=e.get("misconception")))
     return {"scenario": sc, "recorded": out, "learner": L.view(sc["pupil"])}

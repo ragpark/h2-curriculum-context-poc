@@ -1,0 +1,139 @@
+{
+ "note": "Run 2026-09-26 19:16 UTC, before the English scope fix (claude-sonnet-5). Summary and per-scenario map totals as logged.",
+ "summary": {
+  "by_arm": {
+   "none": {
+    "diagnosis": 1.55,
+    "method": 1.0,
+    "scope": 1.85,
+    "next_step": 1.5,
+    "grounding": 1.15,
+    "total": 7.05
+   },
+   "raw": {
+    "diagnosis": 2.6,
+    "method": 2.0,
+    "scope": 2.05,
+    "next_step": 2.5,
+    "grounding": 0.8,
+    "total": 9.95
+   },
+   "h2": {
+    "diagnosis": 2.7,
+    "method": 2.8,
+    "scope": 2.65,
+    "next_step": 2.8,
+    "grounding": 1.95,
+    "total": 12.9
+   }
+  },
+  "by_category": {
+   "specific": {
+    "none": 9.75,
+    "raw": 10.62,
+    "h2": 13.62,
+    "n": 4
+   },
+   "non_revealing": {
+    "none": 5.75,
+    "raw": 11.25,
+    "h2": 10.75,
+    "n": 2
+   },
+   "jump_ahead": {
+    "none": 6.5,
+    "raw": 10.75,
+    "h2": 14.0,
+    "n": 2
+   },
+   "method_conflict": {
+    "none": 3.5,
+    "raw": 6.5,
+    "h2": 12.5,
+    "n": 2
+   }
+  }
+ },
+ "results": [
+  {
+   "id": "enh-leah-quote",
+   "arms": {
+    "h2": {
+     "total": 14.0
+    }
+   }
+  },
+  {
+   "id": "enh-leah-depth",
+   "arms": {
+    "h2": {
+     "total": 11.0
+    }
+   }
+  },
+  {
+   "id": "enh-leah-tomorrow",
+   "arms": {
+    "h2": {
+     "total": 13.5
+    }
+   }
+  },
+  {
+   "id": "enh-owen-unsex",
+   "arms": {
+    "h2": {
+     "total": 13.0
+    }
+   }
+  },
+  {
+   "id": "enh-owen-duncan",
+   "arms": {
+    "h2": {
+     "total": 11.5
+    }
+   }
+  },
+  {
+   "id": "enh-owen-mock",
+   "arms": {
+    "h2": {
+     "total": 10.5
+    }
+   }
+  },
+  {
+   "id": "enh-priya-fair",
+   "arms": {
+    "h2": {
+     "total": 13.5
+    }
+   }
+  },
+  {
+   "id": "enh-tom-intro",
+   "arms": {
+    "h2": {
+     "total": 14.0
+    }
+   }
+  },
+  {
+   "id": "enh-tom-template",
+   "arms": {
+    "h2": {
+     "total": 13.5
+    }
+   }
+  },
+  {
+   "id": "enh-zainab-guilt",
+   "arms": {
+    "h2": {
+     "total": 14.5
+    }
+   }
+  }
+ ]
+}

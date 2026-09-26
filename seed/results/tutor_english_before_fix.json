@@ -1,0 +1,139 @@
+{
+ "note": "Run 2026-09-26 17:10 UTC, before the English scope fix (claude-sonnet-5). Summary and per-scenario map totals as logged.",
+ "summary": {
+  "by_arm": {
+   "none": {
+    "diagnosis": 1.4,
+    "method": 1.35,
+    "scope": 1.7,
+    "next_step": 1.4,
+    "grounding": 1.4,
+    "total": 7.25
+   },
+   "raw": {
+    "diagnosis": 2.75,
+    "method": 2.0,
+    "scope": 1.75,
+    "next_step": 2.35,
+    "grounding": 1.4,
+    "total": 10.25
+   },
+   "h2": {
+    "diagnosis": 2.45,
+    "method": 2.8,
+    "scope": 2.75,
+    "next_step": 2.4,
+    "grounding": 2.2,
+    "total": 12.6
+   }
+  },
+  "by_category": {
+   "specific": {
+    "none": 10.33,
+    "raw": 10.5,
+    "h2": 14.0,
+    "n": 3
+   },
+   "non_revealing": {
+    "none": 6.5,
+    "raw": 10.83,
+    "h2": 9.33,
+    "n": 3
+   },
+   "jump_ahead": {
+    "none": 6.25,
+    "raw": 9.0,
+    "h2": 14.5,
+    "n": 2
+   },
+   "method_conflict": {
+    "none": 4.75,
+    "raw": 10.25,
+    "h2": 13.5,
+    "n": 2
+   }
+  }
+ },
+ "results": [
+  {
+   "id": "en-priya-check",
+   "arms": {
+    "h2": {
+     "total": 14.5
+    }
+   }
+  },
+  {
+   "id": "en-priya-revise",
+   "arms": {
+    "h2": {
+     "total": 4.0
+    }
+   }
+  },
+  {
+   "id": "en-priya-start",
+   "arms": {
+    "h2": {
+     "total": 12.5
+    }
+   }
+  },
+  {
+   "id": "en-priya-ending",
+   "arms": {
+    "h2": {
+     "total": 14.5
+    }
+   }
+  },
+  {
+   "id": "en-tom-witches",
+   "arms": {
+    "h2": {
+     "total": 13.0
+    }
+   }
+  },
+  {
+   "id": "en-tom-context",
+   "arms": {
+    "h2": {
+     "total": 14.5
+    }
+   }
+  },
+  {
+   "id": "en-tom-spot",
+   "arms": {
+    "h2": {
+     "total": 14.5
+    }
+   }
+  },
+  {
+   "id": "en-zainab-lady",
+   "arms": {
+    "h2": {
+     "total": 14.5
+    }
+   }
+  },
+  {
+   "id": "en-zainab-practice",
+   "arms": {
+    "h2": {
+     "total": 12.5
+    }
+   }
+  },
+  {
+   "id": "en-zainab-grade",
+   "arms": {
+    "h2": {
+     "total": 11.5
+    }
+   }
+  }
+ ]
+}

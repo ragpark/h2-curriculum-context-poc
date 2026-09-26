@@ -129,6 +129,37 @@ def _web(subject) -> bool:
     return bool(S.SUBJECTS.get(subject, {}).get("cross_cutting"))
 
 
+def scope(g, cls, cov) -> tuple[dict, dict]:
+    """What is in scope for this class: {concept: week} taught and planned.
+
+    Ladder subjects (maths): a topic is taught once a dated, taught lesson is tagged with it.
+    Web subjects (English): that rule fails, because skills are practised in every lesson but are rarely a lesson's
+    main tag, and characters and themes recur across the whole play. So:
+      • cross-cutting strands (writing skills) are always in scope;
+      • any other topic is in scope if a taught lesson names it, or unless every key quotation that evidences it
+        sits in a part of the play the class has not reached yet (then it is planned for when the class gets there)."""
+    taught = {c["id"]: c["week"] for c in cov["taught"]}
+    planned = {c["id"]: c["week"] for c in cov["planned"]}
+    subject = cls["subject"]
+    if not _web(subject):
+        return taught, planned
+    cross = set(S.SUBJECTS[subject].get("cross_cutting") or [])
+    studied = {x["id"] for x in cov.get("sections_studied", [])}
+    coming = {x["id"]: x.get("week") for x in cov.get("sections_coming", [])}
+    t, p = {}, {}
+    for n in g.of_type("concept", subject=subject):
+        c = n["id"]
+        if n.get("strand") in cross:
+            t[c] = taught.get(c, 1)
+            continue
+        secs = {g.section_of.get(q) for q in g.evidenced_by.get(c, [])} - {None}
+        if c not in taught and secs and not secs & studied:  # a taught lesson naming the topic always wins
+            p[c] = min([coming.get(x) or cls["current_week"] + 1 for x in secs])
+        else:
+            t[c] = taught.get(c, cls["current_week"])
+    return t, p
+
+
 def learning_edge(g, sm, active_mc, taught: dict, subject: str = "maths") -> str | None:
     """Earliest concept in the taught sequence that this pupil has not secured (or that an active misconception affects).
 
@@ -165,7 +196,7 @@ def plan_focus(p, cls, message, mode):
     active = L.active_misconceptions(p["id"])
     cov = C.coverage(cls["id"])
     subject = cls["subject"]
-    taught = {c["id"]: c["week"] for c in cov["taught"]}
+    taught, _ = scope(g, cls, cov)
     read = read_message(message or "", mode, subject) if message else {"intent": "other", "concept": None, "confidence": 0.0}
     edge = learning_edge(g, sm, active, taught, subject)
     if read["concept"] and read["intent"] in ("specific", "check_answer", "explain_method", "stuck", "practice") and read["confidence"] >= 0.5:
@@ -244,8 +275,8 @@ def _with_h2(p, cls, concept, message, mode):
     relevant_mc = [m for m in active if m in g.affected_by.get(focus, []) or any(g.strand(c) in cross for c in g.affects.get(m, []))]
     other_mc = [m for m in active if m not in relevant_mc]
     cov = C.coverage(cls["id"])
-    taught = {c["id"]: c["week"] for c in cov["taught"]}
-    planned = {c["id"]: c["week"] for c in cov["planned"]}
+    taught, planned = scope(g, cls, cov)
+    lessons = {c["id"]: c["week"] for c in cov["taught"]}  # topics named in taught lessons (what the class actually did)
 
     def ls(cid):
         s = sm.get(cid)
@@ -294,7 +325,7 @@ def _with_h2(p, cls, concept, message, mode):
         "class": {
             "id": cls["id"], "teacher": cls["teacher"], "current_week": cls["current_week"],
             "focus_taught": focus in taught, "focus_week": taught.get(focus) or planned.get(focus),
-            "taught_so_far": [f"Wk{w} {g.label(c)}" for c, w in sorted(taught.items(), key=lambda x: x[1])],
+            "taught_so_far": [f"Wk{w} {g.label(c)}" for c, w in sorted((taught if subject == "maths" else lessons).items(), key=lambda x: x[1])],
             "not_yet_taught": [f"Wk{w} {g.label(c)}" for c, w in sorted(planned.items(), key=lambda x: x[1])],
             "preferred_method": pref["method"], "preferred_representation": pref["representation"],
         },
@@ -324,7 +355,8 @@ def _with_h2(p, cls, concept, message, mode):
         pack["guidance"]["scope_rule"] = (
             f"The class has studied {', '.join(pack['class']['text_studied_so_far']) or 'none of the play yet'}"
             + (f"; still to come: {', '.join(pack['class']['text_coming_up'])}" if pack['class']['text_coming_up'] else "")
-            + ". Pupils may have read ahead: you can discuss later parts of the play, but say they are coming up in class and link back to what has been studied. Prefer quotations from the parts studied.")
+            + ". Writing skills are practised throughout the course, and any character, theme or context topic can be discussed using the parts studied."
+            + " Pupils may have read ahead: you can discuss later parts of the play, but say they are coming up in class and link back to what has been studied. Prefer quotations from the parts studied.")
     pack["guidance"]["next_step"] = next_step(g, sm, focus, focus_secure, taught, planned, subject, edge, mentioned_coming)
     pack["approx_tokens"] = len(json.dumps(pack)) // 4
     return pack

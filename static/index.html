@@ -15,6 +15,7 @@
     <div><h1>Curriculum Map for AI Tutors</h1><p>Proof of concept · KS3–4 linear equations · synthetic data only</p></div>
   </div>
   <div class="status-chips" id="chips"></div>
+  <button class="btn sm" id="btn-help-top" title="What is this and how do I use it?">? Help</button>
 </header>
 
 <div class="layout">
@@ -27,6 +28,7 @@
     <button data-page="evaluate"><span class="num">5</span>Evaluate</button>
     <div class="sep"></div>
     <button data-page="connect"><span class="num">⌁</span>Connect a tutor</button>
+    <button data-page="help"><span class="num">?</span>Help and glossary</button>
     <div class="foot">No real pupil data. Pupils, classes and teachers are fictional.</div>
   </nav>
 
@@ -37,6 +39,7 @@
         <div class="eyebrow">How the arrangement works</div>
         <h2>One shared curriculum map, with teaching materials and pupil progress both linked to it</h2>
         <p>The curriculum map is a shared description of the subject: its topics, what depends on what, common misconceptions and teaching methods. Teacher's materials and pupils' answers are both tagged against the same map, so an AI tutor can see the pupil, the teacher and the curriculum together in one briefing. Click any box to see that part in action.</p>
+        <p class="sub" style="margin-top:6px"><b>New here?</b> <a href="#help" data-go-help>Read the help page</a> first: it explains everything in plain language, with a glossary.</p>
         <p class="sub" style="margin-top:6px">In the programme's terms: the curriculum map is H2, pupil progress is H1 and teacher's materials is H3.</p>
       </div>
       <div class="card" style="margin-bottom:16px">
@@ -238,6 +241,185 @@
           </div>
           <div id="ev-tutor-progress"></div>
           <div id="ev-tutor"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HELP -->
+    <section class="page" id="page-help">
+      <div class="page-head">
+        <div class="eyebrow">Help</div>
+        <h2>How to use this prototype, and how to read what you see</h2>
+        <p>Everything here is made up: the pupils, the classes and the teachers. Nothing you do can affect a real pupil, so click around freely. <b>Reset</b> on the Overview page puts everything back to the start.</p>
+      </div>
+
+      <div class="help">
+        <nav class="help-toc card" aria-label="Help contents">
+          <b>On this page</b>
+          <a href="#help" data-scroll="h-what">What is this for?</a>
+          <a href="#help" data-scroll="h-start">Start here: a 5-minute tour</a>
+          <a href="#help" data-scroll="h-pages">What each page does</a>
+          <a href="#help" data-scroll="h-pupils">Meet the pupils</a>
+          <a href="#help" data-scroll="h-read">How to read the colours and labels</a>
+          <a href="#help" data-scroll="h-results">How to read the test results</a>
+          <a href="#help" data-scroll="h-limits">What this can't tell you</a>
+          <a href="#help" data-scroll="h-glossary">Glossary</a>
+        </nav>
+
+        <div class="help-body">
+          <article class="card" id="h-what">
+            <h3>What is this for?</h3>
+            <p>Imagine a supply teacher walking into your classroom. They know their maths. But they don't know your pupils. They don't know who keeps getting the same thing wrong, how <em>you</em> explained it last week, or what you haven't taught yet.</p>
+            <p>An AI tutor is in the same position. It is clever, but it walks in cold every time.</p>
+            <p>This prototype tests one idea for fixing that: <b>give the tutor a set of class notes before it helps a pupil</b>. To make those notes useful, everything is organised around one shared <b>curriculum map</b>. The map is a list of the topics in the subject, showing what comes before what and the mistakes pupils often make.</p>
+            <div class="help-callout">
+              <b>The big question:</b> does a tutor give better help when its notes are organised around the curriculum map, compared with a pile of the pupil's answers and some worksheets? The <b>Evaluate</b> page tests exactly that.
+            </div>
+          </article>
+
+          <article class="card" id="h-start">
+            <h3>Start here: a 5-minute tour</h3>
+            <ol class="help-steps">
+              <li><b>Go to Overview and press “Run the whole demo”.</b> This fills the prototype with the made-up class's worksheets and the pupils' answers. It takes a few seconds.</li>
+              <li><b>Open “Curriculum map”.</b> Each box is a topic. Lines show which topics you need first. Click a box to see common mistakes for that topic and how it can be taught.</li>
+              <li><b>Open “Teacher's materials”.</b> Click a worksheet to open it. Under each part you will see coloured labels. The computer added these by reading the worksheet: which topic it teaches, which method it uses, and which mistakes it tackles.</li>
+              <li><b>Open “Pupil progress” and choose Amara.</b> The map now shows what she can do (green) and where she is stuck (red). She keeps making the same sign mistake.</li>
+              <li><b>Open “Tutor briefing”.</b> Press “Assemble &amp; ask tutor”. On the left is what a tutor gets from a <em>pile</em> of Amara's answers. On the right is the same information <em>organised by the map</em>. Compare the two.</li>
+              <li><b>Open “Evaluate”.</b> This shows how well the prototype did when tested. See “How to read the test results” below.</li>
+            </ol>
+          </article>
+
+          <article class="card" id="h-pages">
+            <h3>What each page does</h3>
+            <table class="t help-table">
+              <tr><td><b>Overview</b></td><td>A picture of how the parts fit together, and buttons to fill or reset the demo.</td></tr>
+              <tr><td><b>Curriculum map</b></td><td>The shared list of topics, the order they build in, common mistakes and ways of teaching them. It also shows the <em>learning-behaviour framework</em>: the habits that help pupils learn, like checking their work or keeping going. You can see what happens when the map is updated to a new version.</td></tr>
+              <tr><td><b>Teacher's materials</b></td><td>Worksheets from two made-up classes. The prototype reads them and labels each part. You can paste in your own text and see how it gets labelled.</td></tr>
+              <tr><td><b>Pupil progress</b></td><td>Each pupil's answers, what the prototype thinks they can and can't do yet, the mistakes they keep making, and how they tend to work. You can add answers yourself and watch the picture change.</td></tr>
+              <tr><td><b>Tutor briefing</b></td><td>What an AI tutor would be told before helping a pupil, side by side: a pile of raw information versus the same information organised by the map. With AI switched on, you also see what the tutor says in each case.</td></tr>
+              <tr><td><b>Evaluate</b></td><td>The results of testing: how accurate the labelling is, and how good the tutor's help is with different kinds of notes.</td></tr>
+              <tr><td><b>Connect a tutor</b></td><td>For technical colleagues: how another AI tutor could plug in and use the map.</td></tr>
+            </table>
+          </article>
+
+          <article class="card" id="h-pupils">
+            <h3>Meet the pupils</h3>
+            <p>All nine pupils are made up. Each one was designed to show something different. Classes 10X (Ms Okafor) and 10Y (Mr Hale) are both in week 4 of a unit on solving equations. Ms Okafor teaches with <b>the balance method</b>: do the same to both sides. Mr Hale teaches <b>“change side, change sign”</b>.</p>
+            <table class="t help-table">
+              <tr><th>Pupil</th><th>Class</th><th>What's going on</th></tr>
+              <tr><td><b>Amara</b></td><td>10X</td><td>Fine on easier equations, but keeps making the same sign mistake when x is on both sides.</td></tr>
+              <tr><td><b>Ben</b></td><td>10X</td><td>Good at equations, but multiplies only the first term in a bracket and gets muddled with negative numbers.</td></tr>
+              <tr><td><b>Chloe</b></td><td>10X</td><td>Just starting. We only have one quiz mark for her.</td></tr>
+              <tr><td><b>Gabriel</b></td><td>10X</td><td>Does steps in the wrong order: divides before he takes away.</td></tr>
+              <tr><td><b>Dev</b></td><td>10Y</td><td>Forgets to change the sign when he moves a term, which matters in his teacher's method.</td></tr>
+              <tr><td><b>Farah</b></td><td>10Y</td><td>Secure on everything so far and wants more. Brackets haven't been taught yet.</td></tr>
+              <tr><td><b>Hana</b></td><td>10Y</td><td>Reads “=” as “the answer is”, not “both sides are equal”.</td></tr>
+              <tr><td><b>Isla</b></td><td>10X</td><td>Asks for help before she has tried, and stops after one mistake. Says she is unsure even when she is right.</td></tr>
+              <tr><td><b>Jay</b></td><td>10X</td><td>Never asks for help and keeps going, but repeats the same wrong method. Very sure of answers that are wrong.</td></tr>
+            </table>
+            <p class="sub" style="margin-top:8px">Isla and Jay gave <b>exactly the same answers</b>. Only the way they worked is different. They are there to test whether a tutor can tell the difference.</p>
+          </article>
+
+          <article class="card" id="h-read">
+            <h3>How to read the colours and labels</h3>
+            <h4>On the map</h4>
+            <div class="legend" style="margin:0 0 8px">
+              <span><i class="sw" style="background:var(--secure-soft);border-color:var(--secure)"></i>Secure: they can do this</span>
+              <span><i class="sw" style="background:var(--developing-soft);border-color:var(--developing)"></i>Developing: getting there</span>
+              <span><i class="sw" style="background:var(--gap-soft);border-color:var(--gap)"></i>Gap: struggling</span>
+              <span><i class="sw" style="background:var(--inferred-soft);border-color:var(--inferred);border-style:dashed"></i>Probably fine: we haven't seen it directly, but they can do things that build on it</span>
+              <span><i class="sw" style="border-color:var(--border-strong)"></i>No information yet</span>
+              <span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--mc)"/></svg>An orange dot means a mistake they keep making affects this topic</span>
+            </div>
+            <p>When you look at a class instead of a pupil, <b>green</b> means already taught and a <b>dashed outline</b> means coming later.</p>
+            <h4>Coloured labels on worksheets and answers</h4>
+            <div class="tags" style="margin-bottom:8px">
+              <span class="tag concept"><span class="k">concept</span>a topic</span>
+              <span class="tag method"><span class="k">method</span>a way of teaching it</span>
+              <span class="tag representation"><span class="k">rep</span>a picture or model used</span>
+              <span class="tag misconception"><span class="k">misc</span>a common mistake</span>
+            </div>
+            <p><b>The small number on a label</b> shows how sure the computer is, from 0 (a wild guess) to 1 (certain). 0.9 is very sure; 0.5 is a coin toss. A label with a <b>dashed outline</b> means “not sure, a person should check this”.</p>
+            <h4>Learning behaviour</h4>
+            <p><span class="badge gap">pattern to support</span> means we have seen the same unhelpful habit a few times, so the tutor should help with it. <span class="badge secure">strength</span> means a helpful habit we have seen a few times. These describe <b>what we have seen recently</b>, not what the pupil is like. They fade if they stop happening.</p>
+          </article>
+
+          <article class="card" id="h-results">
+            <h3>How to read the test results (Evaluate page)</h3>
+            <h4>The tutor test</h4>
+            <p>We gave the same AI tutor the same pupil question three times, each time with different notes:</p>
+            <ol class="help-steps">
+              <li><b>No classroom context:</b> the tutor knows nothing about the pupil or class.</li>
+              <li><b>Raw classroom data:</b> the tutor gets a pile of the pupil's recent answers and any worksheets that share words with the question.</li>
+              <li><b>Organised by the map:</b> the same information, sorted using the curriculum map, plus clear advice on what to focus on.</li>
+            </ol>
+            <p>Another AI then marked each reply without knowing which notes the tutor had. It gave <b>up to 3 marks</b> for each of five things, so <b>up to 15 in total</b>:</p>
+            <table class="t help-table">
+              <tr><td><b>Diagnosis</b></td><td>Did it spot what this pupil actually needs?</td></tr>
+              <tr><td><b>Teacher's method</b></td><td>Did it explain things the way the class teacher does?</td></tr>
+              <tr><td><b>Respects what's been taught</b></td><td>Did it avoid jumping ahead to topics the class hasn't done yet?</td></tr>
+              <tr><td><b>Next step</b></td><td>Was the suggested next step right for this pupil?</td></tr>
+              <tr><td><b>True to pupil &amp; class</b></td><td>Was everything it said about the pupil and class actually true?</td></tr>
+            </table>
+            <p>The learning-behaviour test adds a sixth: <b>did it respond to how this pupil learns?</b> For example, did it ask Isla to have a go before giving a hint?</p>
+            <div class="help-callout">
+              <b>Three things to keep in mind:</b>
+              <ul>
+                <li><b>Small differences don't mean much.</b> If you run the same test twice, scores move by about 1 mark. Only pay attention to differences bigger than that.</li>
+                <li><b>“Fresh” questions matter most.</b> We improved the prototype using one set of test questions. Doing well on those is a bit like marking your own homework. So we also wrote a <b>fresh</b> set before making any changes, and only checked it afterwards. Trust the fresh results most.</li>
+                <li><b>The marker is an AI, not a teacher.</b> It sometimes gets things wrong. Treat its marks as a useful first look, not a final verdict.</li>
+              </ul>
+            </div>
+            <h4>The labelling test</h4>
+            <p>We labelled some worksheets by hand, then checked how often the computer agreed. <b>“Concept tags correct: 93%”</b> means that out of every 100 topic labels the computer added, about 93 were right. <b>“Expected concepts found: 100%”</b> means it didn't miss any of the topics we expected. Again, the <b>Held-out</b> set is the fairest test, because those worksheets were never used to improve the computer's labelling.</p>
+            <h4>What the results say so far</h4>
+            <p>Any classroom information makes the tutor's help much better: scores roughly double. Organising that information with the map helps a bit more, most clearly in getting the tutor to teach the way the class teacher does. A map that picks the wrong focus makes the help <em>worse</em>, so getting the map right matters.</p>
+          </article>
+
+          <article class="card" id="h-limits">
+            <h3>What this can't tell you</h3>
+            <ul class="help-list">
+              <li><b>Whether real pupils learn more.</b> Everyone here is made up.</li>
+              <li><b>Whether teachers would agree with the marks.</b> The marking was done by an AI.</li>
+              <li><b>Whether it works beyond one maths topic.</b> Only solving equations has been mapped so far.</li>
+              <li><b>How it behaves with lots of messy, real data.</b> Each made-up pupil has only a handful of tidy answers. Real schools have far more, from many different apps, and that is where the map may matter most.</li>
+            </ul>
+          </article>
+
+          <article class="card" id="h-glossary">
+            <h3>Glossary</h3>
+            <dl class="glossary">
+              <dt>AI tutor</dt><dd>A computer program that chats with a pupil to help them learn, a bit like a teaching assistant.</dd>
+              <dt>Curriculum map</dt><dd>One shared list of the topics in a subject, showing which topics come first, the mistakes pupils often make and ways to teach each one. It's the same for every school.</dd>
+              <dt>Topic (concept)</dt><dd>One thing pupils learn, such as “solve equations with x on both sides”.</dd>
+              <dt>Builds on / comes before</dt><dd>A topic you need first. You need two-step equations before equations with x on both sides.</dd>
+              <dt>Misconception</dt><dd>A common mistaken idea, such as forgetting to change the sign when moving a number across the equals sign.</dd>
+              <dt>Teaching method</dt><dd>A way of teaching a topic, such as the balance method or “change side, change sign”.</dd>
+              <dt>Representation</dt><dd>A picture or model used to explain, such as a bar model or algebra tiles.</dd>
+              <dt>Classroom context</dt><dd>The facts about one class and one pupil: what they answered, what the teacher taught and when, and the teacher's own worksheets. Different in every school.</dd>
+              <dt>Raw classroom data</dt><dd>Classroom context handed over as a pile, without sorting it.</dd>
+              <dt>Tag / tagging</dt><dd>A label that links a worksheet or an answer to a place on the map, like putting the right postcode on a letter.</dd>
+              <dt>Tagger</dt><dd>The part of the prototype that reads text and adds tags. There are two: a simple one that looks for key words, and a cleverer one that uses AI.</dd>
+              <dt>How sure (confidence)</dt><dd>A number from 0 to 1 showing how sure the computer is about a label. Higher means more sure.</dd>
+              <dt>Needs checking</dt><dd>A label the computer wasn't sure about, shown with a dashed outline so a person can check it.</dd>
+              <dt>Tutor briefing</dt><dd>The notes a tutor is given before it helps a pupil with one question.</dd>
+              <dt>Learning edge</dt><dd>The earliest topic the class has been taught that this pupil hasn't got yet. The best place to help next.</dd>
+              <dt>Secure / Developing / Gap</dt><dd>Can do it / getting there / struggling. Worked out from the pupil's answers.</dd>
+              <dt>Probably fine</dt><dd>We haven't seen the pupil do this directly, but they can do harder things that build on it.</dd>
+              <dt>Taught so far / Not yet taught</dt><dd>What this class has covered by this week, and what's coming later, taken from the dates on the teacher's materials.</dd>
+              <dt>Learning behaviour</dt><dd>How a pupil goes about learning: whether they plan, check their work, keep going, ask for help sensibly and know how sure to be. It's about <em>how</em> they learn, not <em>what</em> they know.</dd>
+              <dt>Pattern to support / Strength</dt><dd>An unhelpful or helpful habit we have seen a few times recently. Never a fixed label for the pupil.</dd>
+              <dt>Session only</dt><dd>Information that is used while the pupil is working and then thrown away, such as signs of frustration. It is never saved.</dd>
+              <dt>Teacher confirmed</dt><dd>A pattern a teacher has checked and agrees with. Only these would ever be shared beyond the tutor.</dd>
+              <dt>Scenario</dt><dd>A made-up pupil question used for testing, such as “I got it wrong again”.</dd>
+              <dt>Development / Fresh (held-out) questions</dt><dd>Development questions were used while improving the prototype. Fresh questions were written first and kept aside, so they give a fairer test.</dd>
+              <dt>AI marker</dt><dd>A second AI that marks the tutor's replies against notes written in advance, without knowing which version of the tutor wrote them.</dd>
+              <dt>Map version</dt><dd>The map gets updated from time to time, like a new edition of a textbook. Old answers still count after an update.</dd>
+              <dt>Links to other curricula</dt><dd>How a topic on the map matches up with, for example, the GCSE subject content.</dd>
+              <dt>Made up (synthetic)</dt><dd>Invented for testing. No real pupils, classes or teachers are involved.</dd>
+              <dt>H1, H2, H3</dt><dd>Programme shorthand. H2 is the curriculum map, H1 is pupil progress, H3 is teachers' materials.</dd>
+            </dl>
+          </article>
         </div>
       </div>
     </section>

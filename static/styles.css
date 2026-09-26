@@ -252,3 +252,32 @@ details summary { cursor: pointer; font-size: 12.5px; color: var(--text-2); }
 .topbar { overflow: hidden; }
 .grid > *, .stack { min-width: 0; }
 .tag .k { white-space: nowrap; flex: none; }
+
+/* ---------- help ---------- */
+.help { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 16px; align-items: start; }
+.help-toc { position: sticky; top: 76px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.help-toc a { color: var(--text-2); text-decoration: none; padding: 3px 0; }
+.help-toc a:hover { color: var(--accent-text); }
+.help-body { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.help-body h3 { font-size: 17px; margin: 0 0 8px; }
+.help-body h4 { font-size: 13px; margin: 16px 0 6px; color: var(--text-2); text-transform: uppercase; letter-spacing: .04em; }
+.help-body p, .help-body li { font-size: 14.5px; line-height: 1.6; max-width: 760px; }
+.help-body p { margin: 0 0 10px; }
+.help-steps { margin: 0 0 10px; padding-left: 22px; }
+.help-steps li + li, .help-list li + li { margin-top: 8px; }
+.help-list { margin: 0; padding-left: 20px; }
+.help-callout { background: var(--accent-soft); border-radius: 8px; padding: 12px 14px; margin: 8px 0 4px; font-size: 14px; line-height: 1.55; }
+.help-callout ul { margin: 6px 0 0; padding-left: 20px; }
+.help-table td { font-size: 14px; }
+.help-table td:first-child { white-space: nowrap; }
+.glossary { display: grid; grid-template-columns: minmax(150px, 220px) 1fr; margin: 0; }
+.glossary dt { font-weight: 650; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.glossary dd { margin: 0; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 14px; line-height: 1.55; color: var(--text-2); }
+#btn-help-top { margin-left: 8px; flex: none; }
+@media (max-width: 900px) {
+  .help { grid-template-columns: 1fr; }
+  .help-toc { position: static; }
+  .glossary { grid-template-columns: 1fr; }
+  .glossary dt { border-bottom: 0; padding-bottom: 0; }
+  .help-table td:first-child { white-space: normal; }
+}

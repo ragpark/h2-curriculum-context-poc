@@ -65,7 +65,7 @@ function show(page) {
   S.page = page; S.visited.add(page); history.replaceState(null, "", "#" + page);
   document.querySelectorAll(".page").forEach((p) => p.classList.toggle("active", p.id === "page-" + page));
   document.querySelectorAll("#nav button").forEach((b) => b.classList.toggle("active", b.dataset.page === page));
-  ({ overview: renderOverview, graph: renderGraphPage, materials: renderMaterials, evidence: renderEvidence, context: renderContextPage, evaluate: renderEvaluate, connect: renderConnect }[page])();
+  ({ overview: renderOverview, graph: renderGraphPage, materials: renderMaterials, evidence: renderEvidence, context: renderContextPage, evaluate: renderEvaluate, connect: renderConnect, help: renderHelp }[page])();
   window.scrollTo({ top: 0 });
 }
 
@@ -569,6 +569,15 @@ async function runTutorSuite(btn) {
   finally { btn.disabled = false; }
 }
 
+/* ------------------------------------------------------------------ help */
+function renderHelp() {
+  document.querySelectorAll("[data-scroll]").forEach((a) => (a.onclick = (e) => {
+    e.preventDefault();
+    const t = document.getElementById(a.dataset.scroll);
+    if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 72, behavior: "smooth" });
+  }));
+}
+
 /* ------------------------------------------------------------------ connect */
 function renderConnect() {
   const url = location.origin + "/mcp/";
@@ -582,6 +591,8 @@ function renderConnect() {
 
 /* ------------------------------------------------------------------ static bindings */
 function bindStatic() {
+  $("#btn-help-top").onclick = () => show("help");
+  document.querySelectorAll("[data-go-help]").forEach((a) => (a.onclick = (e) => { e.preventDefault(); show("help"); }));
   $("#btn-prepare").onclick = (e) => busy(e.currentTarget, async () => { await api("/api/demo/prepare", { method: "POST" }); await refreshStatus(); toast("Materials tagged and scenarios recorded"); show("context"); });
   $("#btn-reset").onclick = (e) => busy(e.currentTarget, async () => { await api("/api/admin/reset", { method: "POST" }); await loadGraph(); S.sel = null; S.overlay = "none"; S.lastExplain = null; S.ctxDone = S.evalDone = false; await refreshStatus(); toast("Demo reset to graph 2026.2 with no alignments or evidence"); show("overview"); });
   $("#btn-release").onclick = (e) => busy(e.currentTarget, async () => {

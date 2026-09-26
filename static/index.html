@@ -89,6 +89,7 @@
             <p class="sub">These make the map useful for teaching, not just sequencing.</p>
             <div id="g-others"></div>
           </div>
+          <div class="card" id="g-behaviour"></div>
           <div class="card">
             <div class="card-head">
               <div><h3>Versioning: simulate a new release of the map</h3>
@@ -163,6 +164,7 @@
             <div class="card"><h3>Progress by topic</h3><p class="sub">Estimates from the pupil's own answers, plus weaker evidence inferred from later topics</p><div id="e-states"></div></div>
             <div class="card"><h3>Misconceptions</h3><p class="sub">Strength builds with each diagnosed error and fades with later successes</p><div id="e-mcs"></div></div>
           </div>
+          <div class="card" id="e-beh"></div>
           <div class="card"><h3>Pupil answers log</h3><p class="sub">Only ever added to. Every row records its source, how it was tagged and the map version.</p><div class="tbl-wrap" id="e-log"></div></div>
         </div>
         <div class="stack">
@@ -172,6 +174,14 @@
             <p class="sub">A question already tagged to the map. Wrong answers that match a known distractor are diagnosed as a misconception.</p>
             <div class="field"><label>Item</label><select class="input" id="e-item"></select></div>
             <div class="field" style="margin-top:8px"><label>Pupil's response</label><select class="input" id="e-resp"></select></div>
+            <div class="row" style="margin-top:8px">
+              <div class="field"><label>How did they work?</label><select class="input" id="e-proc">
+                <option value="">Not recorded</option><option value="tried">Tried it straight away</option><option value="hint_first">Asked for a hint before trying</option>
+                <option value="gave_up">Stopped after a wrong attempt</option><option value="repeated">Tried again with the same answer</option>
+                <option value="self_corrected">Corrected their own answer</option><option value="checked">Checked their answer</option><option value="planned">Said their approach first</option>
+                <option value="frustrated">Tried, and said they were frustrated</option></select></div>
+              <div class="field" style="flex:0 1 150px"><label>How sure were they?</label><select class="input" id="e-conf"><option value="">Not asked</option><option value="1">1 · guessing</option><option value="2">2 · unsure</option><option value="3">3 · fairly sure</option><option value="4">4 · certain</option></select></div>
+            </div>
             <div class="field" style="margin-top:8px"><label>Source</label><select class="input" id="e-src"><option>Vendor X tutor</option><option>Homework platform</option><option>Classroom quiz</option></select></div>
             <button class="btn primary" style="margin-top:10px" id="btn-e-item">Record answer</button>
           </div>

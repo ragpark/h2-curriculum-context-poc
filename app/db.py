@@ -91,6 +91,17 @@ create index if not exists evidence_learner on evidence (learner, id);
 create table if not exists learner_state (
   learner text, concept text, mastery real, n_direct int, n_inferred int, status text,
   primary key (learner, concept));
+-- LEARNING BEHAVIOUR (process events -> episode indicators -> construct patterns)
+create table if not exists behaviour_event (
+  id bigserial primary key, learner text not null, episode bigint not null, item text, concepts jsonb,
+  type text not null, t real, payload jsonb, source text, ts timestamptz default now());
+create index if not exists behaviour_event_learner on behaviour_event (learner, episode);
+create table if not exists learner_indicator (
+  id bigserial primary key, learner text not null, episode bigint not null, indicator text not null,
+  construct text not null, polarity int not null, concept text, detail text);
+create table if not exists learner_construct (
+  learner text, construct text, score real, n int, positives int, negatives int, status text,
+  summary text, teacher_confirmed boolean default false, primary key (learner, construct));
 create table if not exists learner_misconception (
   learner text, misconception text, strength real, count int,
   primary key (learner, misconception));

@@ -222,6 +222,7 @@ async function renderGraphPage() {
   ov.value = S.overlay;
   ov.onchange = () => { S.overlay = ov.value; drawMain(); };
   await drawMain();
+  renderBehaviourFramework();
   $("#g-others").innerHTML = `
     <h4 style="margin:4px 0 6px;font-size:12px;color:var(--text-3)">MISCONCEPTIONS → concepts they affect</h4>
     <div class="tbl-wrap"><table class="t">${g.misconceptions.map((m) => `<tr><td style="width:45%">${tag("misconception", m.id)}<div class="sub" style="margin:4px 0 0">${esc(m.description || "")}</div></td><td><div class="tags">${m.affects.map((c) => tag("concept", c)).join("")}</div></td></tr>`).join("")}</table></div>
@@ -332,7 +333,7 @@ async function renderEvidence() {
     const diag = r.recorded.filter((x) => x.misconception).length;
     const acts = sc.events.map((ev, i) => [ev, r.recorded[i]]).filter(([ev]) => ev.activity);
     const actTxt = acts.map(([ev, rec]) => `“${esc(ev.activity)}” as ${rec.concepts.map((c) => `<b>${esc(c.label)}</b>`).join(", ") || "nothing recognisable"} (confidence ${rec.confidence})`).join("; ");
-    S.lastExplain = `<b>Recorded ${r.recorded.length} answers</b><ul><li>${nItem} answers were to questions already tagged to the map</li>${nAct ? `<li>${nAct} markbook entr${nAct > 1 ? "ies" : "y"} had no IDs. The aligner interpreted ${actTxt}. Those entries count for less, in proportion to the confidence</li>` : ""}<li>${diag} wrong answers matched a known distractor, so a misconception was diagnosed</li><li>The learner model was rebuilt from the whole log, spreading evidence across the graph</li></ul>`;
+    S.lastExplain = `<b>Recorded ${r.recorded.length} answers</b><ul><li>${nItem} answers were to questions already tagged to the map</li>${nAct ? `<li>${nAct} markbook entr${nAct > 1 ? "ies" : "y"} had no topics attached. The tagger interpreted ${actTxt}. Those entries count for less, in proportion to the confidence</li>` : ""}<li>${diag} wrong answers matched a known distractor, so a misconception was diagnosed</li><li>Progress was rebuilt from all the answers, spreading evidence across the map</li>${r.recorded.some((x) => x.behaviour && x.behaviour.stored) ? `<li>How they worked was recorded for ${r.recorded.filter((x) => x.behaviour && x.behaviour.stored).length} answers and turned into learning-behaviour patterns${r.recorded.some((x) => x.behaviour && x.behaviour.discarded_session_only) ? "; emotional signals were discarded (session only)" : ""}</li>` : ""}</ul>`;
     await refreshStatus(); await renderEvidence();
   });
   // item form
@@ -349,15 +350,54 @@ async function renderEvidence() {
   drawGraph($("#e-svg"), { ...od, onClick: (id) => { S.sel = id; S.overlay = S.pupil; show("graph"); } });
   $("#e-legend").innerHTML = LEGEND_MASTERY;
   $("#e-states").innerHTML = lv.state.length ? `<table class="t">${lv.state.map((s) => `<tr><td>${esc(s.label)}</td><td>${badge(s.status)}</td><td style="width:90px">${bar(s.mastery, statusColor(s.status))}<div class="sub">${pct(s.mastery)}</div></td><td class="sub" title="direct / inferred evidence">${s.n_direct}d · ${s.n_inferred}i</td></tr>`).join("")}</table>` : `<div class="empty">No estimates yet</div>`;
+  renderBehaviour(await api(`/api/learners/${S.pupil}/behaviour`));
   $("#e-mcs").innerHTML = lv.misconceptions.length ? lv.misconceptions.map((m) => `<div style="margin-bottom:12px">${tag("misconception", m.id)} ${m.active ? badge("gap").replace(">gap<", ">active<") : badge("faded")}
       <div class="row" style="align-items:center;margin-top:6px"><div style="flex:1">${bar(m.strength, "var(--mc)")}</div><span class="sub">strength ${pct(m.strength)} · seen ${m.count}×</span></div>
       <div class="sub" style="margin-top:4px">Affects: ${m.affects.map((c) => esc(c.label)).join(", ")}</div></div>`).join("") : `<div class="empty">None diagnosed</div>`;
   $("#e-log").innerHTML = lv.evidence.length ? `<table class="t"><tr><th>#</th><th>Source</th><th>Evidence</th><th>Outcome</th><th>Concepts (how tagged)</th><th>Misconception</th></tr>${lv.evidence.map((e) => `<tr>
     <td class="mono">${e.id}</td><td>${esc(e.source)}</td>
-    <td>${e.prompt ? `${esc(e.prompt)}<div class="sub">→ “${esc(e.response)}”</div>` : `<i>${esc(e.activity)}</i>`}</td>
+    <td>${e.prompt ? `${esc(e.prompt)}<div class="sub">→ “${esc(e.response)}”</div>` : `<i>${esc(e.activity)}</i>`}${e.process ? `<div class="sub" style="margin-top:3px">How: ${esc(e.process)}</div>` : ""}</td>
     <td>${e.item ? (e.outcome >= 0.5 ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>') : pct(e.outcome)}</td>
     <td><div class="tags">${e.concepts.map((c) => tag("concept", c.id, null, { label: c.label })).join("")}</div><div class="sub">${e.concept_provenance === "source" ? "tagged at source" : "aligned: " + esc(e.concept_provenance) + " · conf " + e.confidence} · v${esc(e.graph_version)}</div></td>
     <td>${e.misconception ? tag("misconception", e.misconception.id) : ""}</td></tr>`).join("")}</table>` : `<div class="empty">Empty</div>`;
+}
+const BSTAT = { support: ["gap", "pattern to support"], strength: ["secure", "strength"], mixed: ["developing", "mixed"], "too little evidence": ["", "too little evidence"] };
+function renderBehaviour(b) {
+  const el = $("#e-beh");
+  const pats = b.patterns;
+  el.innerHTML = `<div class="card-head"><div><h3>Learning behaviour</h3><p class="sub">How this pupil learns, worked out from what tools observed during each answer. Recent patterns, not fixed traits.</p></div></div>
+    ${pats.length ? `<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">${pats.map((p) => `<div class="sec">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${esc(p.label)}</b> <span class="badge ${BSTAT[p.status][0]}">${BSTAT[p.status][1]}</span></div>
+      <div class="sub" style="margin:4px 0">${esc(p.summary)} · from ${p.n} observation${p.n > 1 ? "s" : ""}</div>
+      ${p.status === "support" ? `<div style="font-size:12.5px"><b>How to help:</b> ${esc(p.support)}</div>` : ""}
+      ${p.status === "support" || p.status === "strength" ? `<button class="btn sm" style="margin-top:8px" data-confirm="${esc(p.construct)}" data-v="${p.teacher_confirmed ? "0" : "1"}">${p.teacher_confirmed ? "✓ Teacher confirmed · undo" : "Teacher: confirm this pattern"}</button>` : ""}
+    </div>`).join("")}</div>` : `<div class="empty">No learning-behaviour data yet. Run a preset scenario (Isla and Jay have it), or record an answer with "How did they work?".</div>`}
+    ${b.indicators.length ? `<details style="margin-top:10px"><summary>What was observed, question by question (${b.indicators.length})</summary><table class="t" style="margin-top:6px">${b.indicators.map((i) => `<tr><td class="${i.polarity > 0 ? "ok" : "bad"}">${i.polarity > 0 ? "+" : "−"}</td><td>${esc(i.label)}<div class="sub">${esc(i.detail)}</div></td><td class="sub">${esc(i.construct)}</td><td class="sub">${esc(i.topic || "")}</td></tr>`).join("")}</table></details>` : ""}
+    <div class="note" style="margin-top:10px"><b>What is kept, and who sees it.</b> Emotional signals such as frustration: this session only, never stored. Patterns: recent, and fade if not seen again. Shared beyond the tutoring tool: only patterns a teacher has confirmed (${b.shared.length} for this pupil).</div>`;
+  el.querySelectorAll("[data-confirm]").forEach((btn) => (btn.onclick = () => busy(btn, async () => {
+    renderBehaviour(await api(`/api/learners/${S.pupil}/behaviour/${btn.dataset.confirm}/confirm`, { method: "POST", body: { confirmed: btn.dataset.v === "1" } }));
+  })));
+}
+async function renderBehaviourFramework() {
+  const f = await api("/api/behaviour/framework");
+  const byC = {}; f.indicators.forEach((i) => (byC[i.construct] ??= []).push(i));
+  $("#g-behaviour").innerHTML = `<h3>Learning-behaviour framework</h3><p class="sub">A second, small framework alongside the map: how pupils learn, not what they know. Every observation is still recorded against a topic on the map, because behaviour only means something relative to what the pupil already knows.</p>
+    <div class="tbl-wrap"><table class="t">${f.constructs.map((c) => `<tr><td style="width:30%"><b>${esc(c.label)}</b><div class="sub">${esc(c.description)}</div></td><td>${(byC[c.id] || []).map((i) => `<div class="sub"><span class="${i.polarity > 0 ? "ok" : "bad"}">${i.polarity > 0 ? "+" : "−"}</span> ${esc(i.label)}</div>`).join("")}</td><td class="sub" style="width:34%"><i>${esc(c.support)}</i></td></tr>`).join("")}</table></div>`;
+}
+function processFor(item, response) {
+  const v = $("#e-proc").value, conf = $("#e-conf").value, ok = response === item.answer;
+  const P = [];
+  const att = (t, ans, c) => P.push({ type: "attempt", t, answer: ans, correct: c });
+  if (v === "tried" || v === "" && conf) att(30, response, ok);
+  if (v === "hint_first") { P.push({ type: "hint_requested", t: 3 }); att(40, response, ok); }
+  if (v === "gave_up") { att(40, response, ok); P.push({ type: "abandoned", t: 50 }); }
+  if (v === "repeated") { att(30, response, ok); att(70, response, ok); }
+  if (v === "self_corrected") { P.push({ type: "answer_revised", t: 35 }); att(40, response, ok); }
+  if (v === "checked") { att(30, response, ok); P.push({ type: "checked", t: 45 }); }
+  if (v === "planned") { P.push({ type: "plan_stated", t: 5 }); att(35, response, ok); }
+  if (v === "frustrated") { att(40, response, ok); P.push({ type: "affect", t: 45, signal: "frustration" }); }
+  if (conf) P.push({ type: "confidence", t: 60, rating: +conf });
+  return P.length ? P : null;
 }
 function fillResp() {
   const i = S.items.find((x) => x.id === $("#e-item").value);
@@ -375,7 +415,11 @@ function explainRecord(r, prompt) {
   } else if (r.misconception) {
     parts.push(`Wrong answer matched a known distractor, so it was diagnosed as <b>${esc(r.misconception.label)}</b>. Only concepts that misconception affects were marked down (graph-based credit assignment)`);
   } else parts.push(`Outcome ${pct(r.outcome)}`);
-  parts.push("The learner state was rebuilt from the full evidence log");
+  parts.push("The pupil's progress was rebuilt from all their answers");
+  const bh = r.behaviour || {};
+  if (bh.indicators && bh.indicators.length) parts.push(`How they worked: ${bh.indicators.map((i) => `<b>${esc(i.label.toLowerCase())}</b> (${esc(i.construct)})`).join("; ")}`);
+  else if (bh.stored) parts.push("How they worked was recorded, but nothing in it counts for or against a learning behaviour (for example, an early hint on a brand-new topic is reasonable)");
+  if (bh.discarded_session_only) parts.push(`${bh.discarded_session_only} emotional signal discarded: session only, never stored`);
   return `<b>What the map did with this answer</b><ul>${parts.map((p) => `<li>${p}</li>`).join("")}</ul>`;
 }
 
@@ -385,6 +429,10 @@ const SUGGEST = {
   "pupil:ben": ["Can you help me with 3(x + 2) = 21?", "I don't get how to expand −2(x − 3).", "What should I practise next?"],
   "pupil:chloe": ["What's an inverse operation?", "Can you help me solve x + 9 = 14?", "What should I practise next?"],
   "pupil:dev": ["I keep getting 5x + 3 = 2x + 12 wrong. Can you help?", "How do I solve 7x − 2 = 3x + 10?", "Can you give me a question to practise?"],
+  "pupil:isla": ["Can you help me with 6x + 1 = 2x + 9?", "Give me a question to practise.", "I got it wrong again."],
+  "pupil:jay": ["Can you help me with 6x + 1 = 2x + 9?", "Give me a question to practise.", "I got it wrong again."],
+  "pupil:gabriel": ["Can you check my working for 3x − 4 = 17? I divided by 3 first.", "What should I work on?", "Can we skip to the harder ones?"],
+  "pupil:hana": ["I don't get why there are x's on both sides.", "Give me a quick quiz.", "Can you help with my homework?"],
   "pupil:farah": ["I've finished all my homework. What's next?", "Is x = 4 right for 4x + 5 = x − 7?", "Can we do something harder?"],
 };
 function renderContextPage() {
@@ -432,6 +480,7 @@ function renderCompare(r) {
       <div class="tags" style="margin-top:6px">${C.preferred_method ? tag("method", C.preferred_method.id) : ""}${C.preferred_representation ? tag("representation", C.preferred_representation.id) : ""}</div>
       <div class="sub" style="margin-top:6px">Taught: ${esc(C.taught_so_far.join(" · "))}</div><div class="sub">Not yet: ${esc(C.not_yet_taught.join(" · ") || "none")}</div></div>
     <div class="sec"><div class="st">Teacher's materials (filtered by concept, ranked by method + misconception)</div>${b.materials.length ? `<ul>${b.materials.map((m) => `<li><b>${esc(m.heading)}</b> <span class="sub">W${m.week}: ${esc(m.why)}</span></li>`).join("")}</ul>` : '<div class="sub">No aligned materials for this concept in taught weeks</div>'}</div>
+    ${b.how_to_support && (b.how_to_support.patterns_to_support.length || b.how_to_support.strengths.length) ? `<div class="sec"><div class="st">How to support (learning behaviour, ${esc(b.how_to_support.based_on)})</div><ul>${b.how_to_support.patterns_to_support.map((p) => `<li><b>${esc(p.area)}:</b> ${esc(p.what_we_saw)}. <i>${esc(p.how_to_help)}</i></li>`).join("")}${b.how_to_support.strengths.map((p) => `<li><b>Strength, ${esc(p.area.toLowerCase())}:</b> ${esc(p.what_we_saw)}</li>`).join("")}</ul><div class="sub" style="margin-top:4px">${esc(b.how_to_support.rule)}</div></div>` : ""}
     <div class="sec guidance"><div class="st">Guidance for the tutor</div><ul>
       <li>${esc(G.diagnosis)}</li>
       ${G.teach_with.method ? `<li>Teach with <b>${esc(G.teach_with.method.label)}</b>${G.teach_with.representation ? ` using a <b>${esc(G.teach_with.representation.label)}</b>` : ""}</li>` : ""}
@@ -454,7 +503,7 @@ function renderEvaluate() {
     el.querySelectorAll("button").forEach((b) => (b.onclick = () => { S[key] = b.dataset.v; renderEvaluate(); }));
   };
   seg($("#ev-set"), [["heldout2", "Held-out 2 (12)"], ["heldout", "Held-out 1 (14)"], ["tuning", "Tuning (14)"]], "evSet");
-  seg($("#ev-suite"), [["heldout", "Fresh held-out scenarios"], ["dev", "Development scenarios"]], "suite");
+  seg($("#ev-suite"), [["heldout", "Fresh held-out"], ["dev", "Development"], ["behaviour", "Learning behaviour"]], "suite");
   $("#ev-suite").querySelectorAll("button").forEach((btn) => btn.addEventListener("click", () => { S.suiteLoaded = false; renderEvaluate(); }));
   seg($("#ev-mode"), [["heuristic", "Keyword tagger"], ["claude", "Claude tagger", !llm]], "evMode");
   $("#ev-align-sub").textContent = { heldout2: "Held-out 2: written before the latest tagger change and never used to adjust it — the honest figure.", heldout: "Held-out 1: its misses were used to diagnose the latest tagger change, so it is no longer clean.", tuning: "Tuning set: the 14 units the tagger was adjusted against. Expect flattering numbers." }[S.evSet];
@@ -481,8 +530,8 @@ function renderAlignEval(d) {
 }
 const ARM_COL = { none: "var(--text-3)", raw: "var(--developing)", h2: "var(--accent)" };
 const ARM_SHORT = { none: "No context", raw: "Raw data", h2: "Map" };
-const CAT = { method_conflict: "Teacher uses a different method (class 10Y)", non_revealing: "Request doesn't reveal the problem", jump_ahead: "Temptation to jump ahead", control: "Controls" };
-const CRIT = { diagnosis: "Diagnosis", method: "Teacher's method", scope: "Respects what's been taught", next_step: "Next step", grounding: "True to pupil & class" };
+const CAT = { gives_up: "Isla: asks before trying, stops after errors", repeats_method: "Jay: keeps going, repeats the same method", method_conflict: "Teacher uses a different method (class 10Y)", non_revealing: "Request doesn't reveal the problem", jump_ahead: "Temptation to jump ahead", control: "Controls" };
+const CRIT = { support: "Responds to how the pupil learns", diagnosis: "Diagnosis", method: "Teacher's method", scope: "Respects what's been taught", next_step: "Next step", grounding: "True to pupil & class" };
 function renderTutorEval(d) {
   if (d.error) { $("#ev-tutor").innerHTML = `<div class="note warn">${esc(d.error)}</div>`; return; }
   const sm = d.summary, arms = ["none", "raw", "h2"], max = sm.max_total;
@@ -557,7 +606,7 @@ function bindStatic() {
   });
   $("#btn-e-item").onclick = (e) => busy(e.currentTarget, async () => {
     const i = S.items.find((x) => x.id === $("#e-item").value);
-    const r = await api("/api/evidence", { method: "POST", body: { learner: S.pupil, source: $("#e-src").value, item: i.id, response: $("#e-resp").value, mode: S.mode } });
+    const r = await api("/api/evidence", { method: "POST", body: { learner: S.pupil, source: $("#e-src").value, item: i.id, response: $("#e-resp").value, mode: S.mode, process: processFor(i, $("#e-resp").value) } });
     S.lastExplain = explainRecord(r.recorded, i.prompt); await refreshStatus(); await renderEvidence();
   });
   $("#btn-e-act").onclick = (e) => busy(e.currentTarget, async () => {

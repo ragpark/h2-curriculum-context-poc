@@ -1,0 +1,65 @@
+# Learning-behaviour framework (illustrative). A second, small framework alongside the curriculum map.
+# Constructs are cross-curricular; every observation is still recorded against a topic on the map,
+# because behaviour only means something relative to what the pupil already knows.
+#
+# Three levels: observed events (raw) -> indicators (one episode = one pupil on one question) -> constructs (patterns).
+# Constructs are held tentatively: they need several episodes, weight recent ones, and fade if not re-observed.
+version: "0.1"
+
+constructs:
+  - id: bh:planning
+    label: Planning
+    description: Thinks about an approach before starting.
+    support: "Ask them to say their first step before they write anything."
+  - id: bh:monitoring
+    label: Monitoring and checking
+    description: Notices errors and checks answers.
+    support: "Build in a check step: substitute the answer back into the original equation."
+  - id: bh:self-assessment
+    label: Self-assessment accuracy
+    description: How well their confidence matches how they actually did.
+    support: "Before revealing whether an answer is right, ask how sure they are and why; compare afterwards."
+  - id: bh:persistence
+    label: Persistence after difficulty
+    description: Keeps going after an error rather than stopping.
+    support: "Break the task into one small step at a time, and name the effort when they try again after an error."
+  - id: bh:help-seeking
+    label: Help-seeking
+    description: Uses help strategically — after a genuine attempt, not instead of one.
+    support: "Ask for a first attempt before offering a hint; give the smallest hint that unblocks them."
+  - id: bh:strategy-adaptation
+    label: Adapting strategy
+    description: Changes approach when the current one is not working.
+    support: "When the same error repeats, stop and compare their method with a worked example rather than setting more of the same."
+
+# polarity: +1 supports the construct, -1 counts against it. Rules are implemented in app/behaviour.py.
+indicators:
+  - {id: bi:tried-before-help, label: "Made an attempt before asking for help", construct: bh:help-seeking, polarity: 1}
+  - {id: bi:help-without-trying, label: "Asked for a hint before trying, on a topic they already know", construct: bh:help-seeking, polarity: -1}
+  - {id: bi:hint-overuse, label: "Used three or more hints on one question", construct: bh:help-seeking, polarity: -1}
+  - {id: bi:persisted, label: "Tried again after an error", construct: bh:persistence, polarity: 1}
+  - {id: bi:gave-up, label: "Stopped after an error", construct: bh:persistence, polarity: -1}
+  - {id: bi:repeated-method, label: "Repeated the same wrong answer or error", construct: bh:strategy-adaptation, polarity: -1}
+  - {id: bi:changed-approach, label: "Changed approach after an error and succeeded", construct: bh:strategy-adaptation, polarity: 1}
+  - {id: bi:self-corrected, label: "Corrected their own answer before submitting", construct: bh:monitoring, polarity: 1}
+  - {id: bi:checked-answer, label: "Checked their answer", construct: bh:monitoring, polarity: 1}
+  - {id: bi:overconfident, label: "Very sure of an answer that was wrong", construct: bh:self-assessment, polarity: -1}
+  - {id: bi:underconfident, label: "Unsure of an answer that was right", construct: bh:self-assessment, polarity: -1}
+  - {id: bi:calibrated, label: "Confidence matched how they did", construct: bh:self-assessment, polarity: 1}
+  - {id: bi:planned, label: "Described an approach before the first step", construct: bh:planning, polarity: 1}
+
+# Observable event types a tool can send with an answer (the 'process' of an episode).
+events:
+  - {type: attempt, fields: [answer, correct]}
+  - {type: hint_requested, fields: [level]}
+  - {type: answer_revised, fields: [from, to]}
+  - {type: checked, fields: []}
+  - {type: plan_stated, fields: [text]}
+  - {type: confidence, fields: [rating]}        # 1 (guessing) to 4 (certain)
+  - {type: abandoned, fields: []}
+  - {type: affect, fields: [signal]}            # e.g. frustration. SESSION ONLY: never stored.
+
+retention:
+  session_only: "Emotional signals (affect). Used in the moment, discarded at ingestion, never stored."
+  recent_patterns: "Indicators and construct estimates. Weighted to the last few weeks and fade if not re-observed."
+  shared: "Only patterns a teacher has confirmed are shared beyond the tutoring tool."

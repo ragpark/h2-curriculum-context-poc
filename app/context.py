@@ -7,6 +7,7 @@ import json
 import re
 
 from . import align as A
+from . import behaviour as B
 from . import content as C
 from . import db
 from . import graph as G
@@ -43,7 +44,8 @@ def _without_h2(p, cls, concept, message, mode):
     log = []
     for e in db.q("select * from evidence where learner=%s order by id desc limit 8", (p["id"],)):
         if e["item"]:
-            log.append(f"{e['source']}: \"{items[e['item']]['prompt']}\" → \"{e['response']}\" ({'correct' if e['outcome'] >= 0.5 else 'incorrect'})")
+            proc = B.process_summary(e["id"])
+            log.append(f"{e['source']}: \"{items[e['item']]['prompt']}\" → \"{e['response']}\" ({'correct' if e['outcome'] >= 0.5 else 'incorrect'})" + (f" [{proc}]" if proc else ""))
         else:
             log.append(f"{e['source']}: \"{e['activity']}\" — {round(e['outcome'] * 100)}%")
     query = message or (G.get().label(concept) if concept else "")
@@ -249,6 +251,7 @@ def _with_h2(p, cls, concept, message, mode):
             "preferred_method": pref["method"], "preferred_representation": pref["representation"],
         },
         "materials": mats,
+        "how_to_support": B.briefing(p["id"]),
         "guidance": {
             "diagnosis": diagnosis,
             "teach_with": {"method": pref["method"], "representation": pref["representation"]},

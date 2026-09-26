@@ -108,6 +108,8 @@ pupils:
   - {id: pupil:farah, name: "Farah (synthetic)", class: "10Y"}
   - {id: pupil:gabriel, name: "Gabriel (synthetic)", class: "10X"}
   - {id: pupil:hana, name: "Hana (synthetic)", class: "10Y"}
+  - {id: pupil:isla, name: "Isla (synthetic)", class: "10X"}
+  - {id: pupil:jay, name: "Jay (synthetic)", class: "10X"}
 
 # Preset evidence scenarios. 'item' evidence carries concept IDs (aligned source);
 # 'activity' evidence is an untagged markbook entry the aligner must interpret.
@@ -190,3 +192,26 @@ scenarios:
       - {source: "Vendor X tutor", item: item:bs-4, response: "No — the answer should be 7"}
       - {source: "Vendor X tutor", item: item:bs-1, response: "x = 3"}
       - {source: "Vendor X tutor", item: item:bs-4, response: "No — the answer should be 7"}
+  # ---- Same answers, different learning behaviour. 'process' = events a tool observed during each answer (t = seconds).
+  - id: gives-up-quickly
+    title: "Asks for help before trying, stops after an error"
+    pupil: pupil:isla
+    story: "Same answers as Jay. Asks for hints before trying, even on topics she knows, stops after one error, and underestimates herself when she is right."
+    events:
+      - {source: "Vendor X tutor", item: item:two-1, response: "x = 4", process: [{type: hint_requested, t: 3}, {type: attempt, t: 40, answer: "x = 4", correct: true}, {type: confidence, t: 42, rating: 1}]}
+      - {source: "Vendor X tutor", item: item:two-2, response: "x = 7", process: [{type: hint_requested, t: 4}, {type: hint_requested, t: 12}, {type: hint_requested, t: 20}, {type: attempt, t: 55, answer: "x = 7", correct: true}]}
+      - {source: "Vendor X tutor", item: item:clt-1, response: "3x + 7", process: [{type: attempt, t: 30, answer: "3x + 7", correct: true}, {type: confidence, t: 32, rating: 1}]}
+      - {source: "Vendor X tutor", item: item:bs-1, response: "x = 5", process: [{type: attempt, t: 50, answer: "x = 5", correct: false}, {type: abandoned, t: 58}]}
+      - {source: "Vendor X tutor", item: item:bs-2, response: "x = 1.2", process: [{type: hint_requested, t: 2}, {type: attempt, t: 45, answer: "x = 1.2", correct: false}, {type: abandoned, t: 50}]}
+      - {source: "Vendor X tutor", item: item:bs-3, response: "x = 4", process: [{type: attempt, t: 60, answer: "x = 4", correct: false}, {type: affect, t: 62, signal: "frustration"}, {type: abandoned, t: 65}]}
+  - id: repeats-same-method
+    title: "Keeps going but repeats the same method"
+    pupil: pupil:jay
+    story: "Same answers as Isla. Never asks for help and keeps trying, but repeats the same wrong method, and is very sure of answers that are wrong."
+    events:
+      - {source: "Vendor X tutor", item: item:two-1, response: "x = 4", process: [{type: attempt, t: 25, answer: "x = 4", correct: true}, {type: confidence, t: 27, rating: 4}]}
+      - {source: "Vendor X tutor", item: item:two-2, response: "x = 7", process: [{type: attempt, t: 30, answer: "x = 7", correct: true}, {type: confidence, t: 31, rating: 4}]}
+      - {source: "Vendor X tutor", item: item:clt-1, response: "3x + 7", process: [{type: attempt, t: 20, answer: "3x + 7", correct: true}, {type: confidence, t: 21, rating: 4}]}
+      - {source: "Vendor X tutor", item: item:bs-1, response: "x = 5", process: [{type: attempt, t: 35, answer: "x = 5", correct: false}, {type: attempt, t: 70, answer: "x = 5", correct: false}, {type: attempt, t: 110, answer: "x = 5", correct: false}, {type: confidence, t: 112, rating: 4}]}
+      - {source: "Vendor X tutor", item: item:bs-2, response: "x = 1.2", process: [{type: attempt, t: 40, answer: "x = 1.2", correct: false}, {type: attempt, t: 80, answer: "x = 1.2", correct: false}, {type: confidence, t: 82, rating: 4}]}
+      - {source: "Vendor X tutor", item: item:bs-3, response: "x = 4", process: [{type: attempt, t: 45, answer: "x = 4", correct: false}, {type: attempt, t: 90, answer: "x = 4", correct: false}, {type: confidence, t: 92, rating: 4}]}

@@ -1,6 +1,7 @@
 """H1 pipeline: evidence → (align if untagged) → append-only store → learner-model projection with graph propagation."""
 from . import align as A
 from . import db
+from . import behaviour as B
 from . import graph as G
 
 SECURE, DEVELOPING = 0.7, 0.4
@@ -12,7 +13,8 @@ def _norm(s):
 
 
 def record(learner: str, *, source: str, item: str | None = None, response: str | None = None,
-           activity: str | None = None, score: float | None = None, mode: str | None = None) -> dict:
+           activity: str | None = None, score: float | None = None, mode: str | None = None,
+           process: list[dict] | None = None) -> dict:
     g = G.get()
     p = db.q1("select * from pupil where id=%s", (learner,))
     if not p:
@@ -38,8 +40,10 @@ def record(learner: str, *, source: str, item: str | None = None, response: str 
     row = db.q1("""insert into evidence(learner,tenant,source,item,activity,response,outcome,concepts,concept_provenance,confidence,misconception,graph_version)
                    values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning id, ts""",
                 (learner, p["class"], source, item, activity, response, outcome, db.J(concepts), prov, conf, misconception, g.version))
+    # learning behaviour is interpreted against the pupil's knowledge BEFORE this answer, so derive it first
+    beh = B.ingest(learner, row["id"], item, concepts, source, process)
     project(learner)
-    return {"evidence_id": row["id"], "outcome": outcome, "concepts": [g.ref(c) for c in concepts],
+    return {"evidence_id": row["id"], "behaviour": beh, "outcome": outcome, "concepts": [g.ref(c) for c in concepts],
             "concept_provenance": prov, "confidence": conf,
             "misconception": g.ref(misconception) if misconception else None, "alignment": alignment}
 
@@ -108,7 +112,7 @@ def view(learner: str) -> dict:
                       "activity": e["activity"], "response": e["response"], "outcome": e["outcome"],
                       "concepts": [g.ref(c) for c in e["concepts"]], "concept_provenance": e["concept_provenance"],
                       "confidence": e["confidence"], "misconception": g.ref(e["misconception"]) if e["misconception"] else None,
-                      "graph_version": e["graph_version"], "ts": e["ts"].isoformat()} for e in ev],
+                      "graph_version": e["graph_version"], "ts": e["ts"].isoformat(), "process": B.process_summary(e["id"])} for e in ev],
     }
 
 
@@ -122,4 +126,5 @@ def active_misconceptions(learner: str) -> list[str]:
 
 def clear(learner: str):
     db.ex("delete from evidence where learner=%s", (learner,))
+    B.clear(learner)
     project(learner)

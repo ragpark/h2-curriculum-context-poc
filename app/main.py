@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from . import align as A
+from . import behaviour as B
 from . import content as C
 from . import context as X
 from . import db
@@ -164,11 +165,12 @@ class EvidenceIn(BaseModel):
     activity: str | None = None
     score: float | None = None
     mode: str | None = None
+    process: list[dict] | None = None
 
 
 @app.post("/api/evidence")
 def evidence(e: EvidenceIn):
-    r = L.record(e.learner, source=e.source, item=e.item, response=e.response, activity=e.activity, score=e.score, mode=e.mode)
+    r = L.record(e.learner, source=e.source, item=e.item, response=e.response, activity=e.activity, score=e.score, mode=e.mode, process=e.process)
     return {"recorded": r, "learner": L.view(e.learner)}
 
 
@@ -180,6 +182,26 @@ def run_scenario(sid: str, mode: str | None = None):
 @app.get("/api/learners/{lid}")
 def learner(lid: str):
     return L.view(lid)
+
+
+@app.get("/api/behaviour/framework")
+def behaviour_framework():
+    return B.framework()
+
+
+@app.get("/api/learners/{lid}/behaviour")
+def learner_behaviour(lid: str):
+    return B.view(lid) | {"briefing": B.briefing(lid), "shared": B.shared(lid)}
+
+
+class ConfirmIn(BaseModel):
+    confirmed: bool = True
+
+
+@app.post("/api/learners/{lid}/behaviour/{construct:path}/confirm")
+def confirm_pattern(lid: str, construct: str, body: ConfirmIn):
+    B.set_confirmed(lid, construct, body.confirmed)
+    return B.view(lid) | {"briefing": B.briefing(lid), "shared": B.shared(lid)}
 
 
 @app.post("/api/learners/{lid}/clear")

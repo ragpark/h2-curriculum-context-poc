@@ -60,11 +60,11 @@ def gold():
     return _y("gold_alignments.yaml")["gold"]
 
 
-SEED_VERSION = "3"  # bump when fixtures change; the database is reseeded on next start
+SEED_VERSION = "4"  # bump when fixtures change; the database is reseeded on next start
 
 
 def reset():
-    db.ex("delete from alignment; delete from evidence; delete from learner_state; delete from learner_misconception;")
+    db.ex("delete from alignment; delete from evidence; delete from learner_state; delete from learner_misconception; delete from behaviour_event; delete from learner_indicator; delete from learner_construct;")
     load_graph()
     load_fixtures()
     db.meta_set("seeded", "yes")

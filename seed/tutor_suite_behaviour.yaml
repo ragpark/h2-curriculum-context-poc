@@ -1,0 +1,26 @@
+# Learning-behaviour test. Isla and Jay gave IDENTICAL answers; only their learning behaviour differs.
+# A good tutor should respond differently to each. Scored with an extra criterion: 'support'.
+# Note: the fixtures were designed together with the indicator rules, so this tests the pipeline end to end,
+# not generalisation to unseen behaviour.
+extra_criteria: [support]
+classes:
+  "10X":
+    teacher: "Ms Okafor"
+    method: "Balance method (do the same to both sides), with bar models"
+    avoid: "'Change side, change sign' / 'moving' terms across the equals sign"
+    taught: "Wk1 inverse operations and one-step equations; Wk2 two-step equations (balance, bar model); Wk3 collecting like terms; Wk4 unknowns on both sides (balance, bar model)"
+    not_yet_taught: "Wk5 expanding brackets and equations with brackets; Wk6 inequalities"
+pupils:
+  pupil:isla:
+    behaviour: "Asks for hints before trying, even on topics she already knows; stops after one error; says she is unsure even when she is right."
+    good_support: "Ask her to try a first step herself before any hint; one small step at a time; acknowledge the effort when she tries again after an error; point out when she is right."
+  pupil:jay:
+    behaviour: "Never asks for help and keeps trying, but repeats the same wrong method; is very sure of answers that are wrong."
+    good_support: "Stop him repeating the same method: compare his working with a worked example to find the error; build in a check by substitution; ask how sure he is before revealing the answer."
+scenarios:
+  - {id: isla-help, category: gives_up, pupil: pupil:isla, message: "Can you help me with 6x + 1 = 2x + 9?", need: "Sign error on unknowns on both sides; asks for help before trying and stops after errors", good_next: "Get her to attempt the first balance step herself, then one step at a time"}
+  - {id: jay-help, category: repeats_method, pupil: pupil:jay, message: "Can you help me with 6x + 1 = 2x + 9?", need: "Sign error on unknowns on both sides; repeats the same wrong method and is overconfident", good_next: "Compare his method with a balance worked example to locate the sign error, then check by substitution"}
+  - {id: isla-practise, category: gives_up, pupil: pupil:isla, message: "Give me a question to practise.", need: "Same as above", good_next: "A both-sides question broken into small steps, asking her to try each step first"}
+  - {id: jay-practise, category: repeats_method, pupil: pupil:jay, message: "Give me a question to practise.", need: "Same as above", good_next: "A both-sides question with a prompt to check the sign step and substitute back; ask how sure he is"}
+  - {id: isla-wrong, category: gives_up, pupil: pupil:isla, message: "I got it wrong again.", need: "Same as above; at risk of giving up", good_next: "Normalise the error, encourage one more try at a single step, and give the smallest hint only after she tries"}
+  - {id: jay-wrong, category: repeats_method, pupil: pupil:jay, message: "I got it wrong again.", need: "Same as above; will likely repeat the same method", good_next: "Stop and look at his method rather than setting another question; find the sign step together"}

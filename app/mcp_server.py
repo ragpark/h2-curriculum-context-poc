@@ -40,8 +40,12 @@ def align_text(text: str) -> dict:
 
 
 @mcp.tool()
-def record_evidence(learner_id: str, source: str, item_id: str = "", response: str = "", activity: str = "", score: float = -1) -> dict:
-    """Record a piece of learning evidence. Either item_id + response (aligned item) or activity + score 0–1
-    (untagged activity; the alignment service interprets it). Updates the learner model."""
+def record_evidence(learner_id: str, source: str, item_id: str = "", response: str = "", activity: str = "", score: float = -1,
+                    process: list[dict] | None = None) -> dict:
+    """Record a pupil's answer. Either item_id + response (a question tagged to the map) or activity + score 0–1
+    (untagged; the tagging service interprets it). Optional 'process': events observed while answering, e.g.
+    [{"type":"hint_requested","t":3},{"type":"attempt","t":40,"answer":"x = 4","correct":true},{"type":"confidence","t":42,"rating":2}].
+    Types: attempt, hint_requested, answer_revised, checked, plan_stated, confidence (1-4), abandoned, affect (session only, never stored).
+    Updates the pupil's progress and learning-behaviour patterns."""
     return L.record(learner_id, source=source, item=item_id or None, response=response or None,
-                    activity=activity or None, score=None if score < 0 else score)
+                    activity=activity or None, score=None if score < 0 else score, process=process)

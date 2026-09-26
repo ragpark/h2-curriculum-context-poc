@@ -112,7 +112,7 @@ grounding — are its claims about the pupil and class true?
   2 claims are consistent with the facts but vague
   3 accurately uses specific facts about the pupil or class (their error pattern, a real class resource or example)
 
-GROUND TRUTH (written by the class teacher's team; the tutor did not necessarily have it)
+{extra_rubric}GROUND TRUTH (written by the class teacher's team; the tutor did not necessarily have it)
 Class {cls}: teacher {teacher}.
   Teacher's method: {method}
   Avoid: {avoid}
@@ -120,21 +120,30 @@ Class {cls}: teacher {teacher}.
   NOT yet taught: {not_yet}
 Pupil: {pupil}
   Actual need: {need}
-  A good next step: {good_next}
+  A good next step: {good_next}{extra_truth}
 
 PUPIL MESSAGE: {message}
 
 TUTOR REPLY:
 \"\"\"{reply}\"\"\"
 
-Return ONLY JSON: {{"diagnosis":n,"method":n,"scope":n,"next_step":n,"grounding":n,"why":"one sentence citing the reply"}}"""
+Return ONLY JSON: {json_line}"""
+
+SUPPORT_RUBRIC = """support — does it respond to HOW this pupil learns (their learning behaviour), not just what they know?
+  0 works against it (e.g. hands a hint straight away to a pupil who asks before trying; sets more of the same to a pupil stuck repeating a method)
+  1 generic encouragement only
+  2 somewhat adapted to the pupil's learning behaviour
+  3 clearly and appropriately adapted to this pupil's learning behaviour, without labelling the pupil
+
+"""
 
 _jobs: dict[str, dict] = {}
 _lock = threading.Lock()
 
 
-SUITES = {"dev": "tutor_suite.yaml", "heldout": "tutor_suite_heldout.yaml"}
-SUITE_LABELS = {"dev": "Development scenarios (used to build the fix)", "heldout": "Fresh held-out scenarios (never used to build the fix)"}
+SUITES = {"dev": "tutor_suite.yaml", "heldout": "tutor_suite_heldout.yaml", "behaviour": "tutor_suite_behaviour.yaml"}
+SUITE_LABELS = {"dev": "Development scenarios (used to build the fix)", "heldout": "Fresh held-out scenarios (never used to build the fix)",
+                "behaviour": "Learning behaviour: same answers, different behaviour"}
 
 
 def suite(name: str = "dev"):
@@ -147,15 +156,19 @@ def _context(arm: str, pupil: dict, message: str) -> dict:
     return X.assemble(pupil["id"], message=message, facets=(arm == "h2"))
 
 
-def _judge(sc, cls, pupil, reply) -> dict:
+def _judge(sc, cls, pupil, reply, crit, pinfo=None) -> dict:
+    extra_rubric = SUPPORT_RUBRIC if "support" in crit else ""
+    extra_truth = (f"\n  Learning behaviour: {pinfo['behaviour']}\n  Good support: {pinfo['good_support']}" if pinfo else "")
+    json_line = "{" + ",".join(f'"{c}":n' for c in crit) + ',"why":"one sentence citing the reply"}'
     prompt = RUBRIC.format(cls=pupil["class"], teacher=cls["teacher"], method=cls["method"], avoid=cls["avoid"],
                            taught=cls["taught"], not_yet=cls["not_yet_taught"], pupil=pupil["name"],
-                           need=sc["need"], good_next=sc["good_next"], message=sc["message"], reply=reply)
+                           need=sc["need"], good_next=sc["good_next"], message=sc["message"], reply=reply,
+                           extra_rubric=extra_rubric, extra_truth=extra_truth, json_line=json_line)
     out = A._parse_json(llm.complete(prompt, system="You are a strict, fair assessor of tutoring. Output JSON only.", max_tokens=300))
-    return {c: max(0, min(3, int(out.get(c, 0)))) for c in CRITERIA} | {"why": out.get("why", "")}
+    return {c: max(0, min(3, int(out.get(c, 0)))) for c in crit} | {"why": out.get("why", "")}
 
 
-def _run_one(sc, classes, pupils):
+def _run_one(sc, classes, pupils, crit=CRITERIA, pinfo=None):
     pupil = pupils[sc["pupil"]]
     cls = classes[pupil["class"]]
     res = {"id": sc["id"], "category": sc["category"], "pupil": pupil["name"], "class": pupil["class"],
@@ -164,8 +177,8 @@ def _run_one(sc, classes, pupils):
         try:
             ctx = _context(arm, pupil, sc["message"])
             reply = T.respond(ctx, sc["message"])
-            judgements = [_judge(sc, cls, pupil, reply) for _ in range(2)]  # two independent passes
-            scores = {c: round(sum(j[c] for j in judgements) / 2, 2) for c in CRITERIA}
+            judgements = [_judge(sc, cls, pupil, reply, crit, (pinfo or {}).get(sc["pupil"])) for _ in range(2)]  # two independent passes
+            scores = {c: round(sum(j[c] for j in judgements) / 2, 2) for c in crit}
             res["arms"][arm] = {"reply": reply, "scores": scores, "total": round(sum(scores.values()), 2),
                                 "why": [j["why"] for j in judgements], "context_tokens": len(json.dumps(ctx, default=str)) // 4}
         except Exception as e:
@@ -173,11 +186,11 @@ def _run_one(sc, classes, pupils):
     return res
 
 
-def _aggregate(results):
+def _aggregate(results, crit=CRITERIA):
     ok = [r for r in results if all("scores" in r["arms"].get(a, {}) for a in ARMS)]
-    agg = {a: {c: round(sum(r["arms"][a]["scores"][c] for r in ok) / max(1, len(ok)), 2) for c in CRITERIA} for a in ARMS}
+    agg = {a: {c: round(sum(r["arms"][a]["scores"][c] for r in ok) / max(1, len(ok)), 2) for c in crit} for a in ARMS}
     for a in ARMS:
-        agg[a]["total"] = round(sum(agg[a][c] for c in CRITERIA), 2)
+        agg[a]["total"] = round(sum(agg[a][c] for c in crit), 2)
     cats = {}
     for r in ok:
         cats.setdefault(r["category"], []).append(r)
@@ -186,7 +199,7 @@ def _aggregate(results):
     for r in ok:
         d = r["arms"]["h2"]["total"] - r["arms"]["raw"]["total"]
         wins["h2_vs_raw"]["win" if d > 0.25 else "loss" if d < -0.25 else "tie"] += 1
-    return {"by_arm": agg, "by_category": by_cat, "head_to_head": wins, "scored_scenarios": len(ok), "max_total": 3 * len(CRITERIA)}
+    return {"by_arm": agg, "by_category": by_cat, "head_to_head": wins, "scored_scenarios": len(ok), "max_total": 3 * len(crit)}
 
 
 def start_tutor_suite(name: str = "dev") -> dict:
@@ -210,14 +223,16 @@ def start_tutor_suite(name: str = "dev") -> dict:
             job["total"] = len(s["scenarios"])
             results = []
 
+            crit = CRITERIA + tuple(s.get("extra_criteria", []))
+
             def one(sc):
-                r = _run_one(sc, s["classes"], pupils)
+                r = _run_one(sc, s["classes"], pupils, crit, s.get("pupils"))
                 job["done"] += 1
                 return r
 
             with ThreadPoolExecutor(4) as ex:
                 results = list(ex.map(one, s["scenarios"]))
-            out = {"suite": name, "suite_label": SUITE_LABELS[name], "model": llm.model(), "arms": ARM_LABELS, "criteria": CRITERIA, "summary": _aggregate(results),
+            out = {"suite": name, "suite_label": SUITE_LABELS[name], "model": llm.model(), "arms": ARM_LABELS, "criteria": crit, "summary": _aggregate(results, crit),
                    "results": results, "finished": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()),
                    "seconds": round(time.time() - job["started"])}
             db.meta_set(f"last_tutor_suite_{name}", json.dumps(out))

@@ -49,8 +49,9 @@ def compare(learner: str, message: str, concept: str | None = None, mode: str | 
 # ------------------------------------------------------------------ demo state
 def ensure_demo_state():
     """Make sure materials are ingested and scenario evidence exists, so the demo works from any tab."""
-    if db.q1("select count(*) n from content_unit")["n"] == 0:
-        C.ingest_all()
+    # Tag every material not yet fully tagged (a restart part-way through tagging leaves some untagged)
+    for m in db.q("select id from material where not ingested order by class, week"):
+        C.ingest(m["id"])
     for sc in S.scenarios():
         if db.q1("select count(*) n from evidence where learner=%s", (sc["pupil"],))["n"] == 0:
             run_scenario(sc["id"])

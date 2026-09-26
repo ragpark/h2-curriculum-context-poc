@@ -36,7 +36,9 @@ def ingest(material_id: str, mode: str | None = None) -> dict:
         uid = f"{material_id}#{idx}"
         text = f"{head}\n{body}"
         res = A.align(f"{m['title']}\n{text}", mode, subject)  # material title gives the unit its lesson context
-        db.ex("insert into content_unit values(%s,%s,%s,%s,%s,%s,%s,%s)",
+        db.ex("""insert into content_unit values(%s,%s,%s,%s,%s,%s,%s,%s) on conflict (id) do update set
+                  material_id=excluded.material_id, class=excluded.class, week=excluded.week, idx=excluded.idx,
+                  heading=excluded.heading, body=excluded.body, embedding=excluded.embedding""",
               (uid, material_id, m["class"], m["week"], idx, head, body, db.J(embed(text))))
         for r in A.flatten(res):
             db.ex("insert into alignment(subject,subject_kind,target,facet,confidence,provenance,graph_version) values(%s,'content',%s,%s,%s,%s,%s)",

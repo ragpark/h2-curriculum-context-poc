@@ -294,7 +294,14 @@ def run_on_start(spec: str) -> None:
         return
 
     def work():
+        import psycopg
         try:
+            # Railway overlaps old and new containers during a deploy: only one may do start-up work at a time.
+            # The lock is tied to this connection, so it is released if this container is shut down.
+            lock = psycopg.connect(db.DATABASE_URL, autocommit=True)
+            lock.execute("select pg_advisory_lock(424242)")
+            if db.meta_get("startup_evals_done") == spec:
+                return
             T.ensure_demo_state()
             for part in [x.strip() for x in spec.split(",") if x.strip()]:
                 kind, *args = part.split(":")

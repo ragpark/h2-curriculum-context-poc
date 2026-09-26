@@ -70,10 +70,10 @@ def heuristic(text: str) -> dict:
 PROMPT = """You are the alignment service for a curriculum knowledge graph. Tag the TEXT below using ONLY the IDs listed.
 
 Rules:
-- concepts: 1–3 concept IDs the text actually teaches, practises or assesses (primary first). Do not tag concepts merely mentioned as a future step.
-- method: the ONE teaching method the text uses, or null if none is evident.
-- representation: the ONE visual/concrete representation used, or null.
-- misconceptions: misconception IDs the text explicitly addresses, warns about, or reveals. Empty list if none.
+- concepts: the concept(s) the text is mainly teaching, practising or assessing — usually ONE, primary first, at most 3. Do NOT tag a prerequisite the text merely uses along the way (e.g. negative numbers inside an expanding example), a concept only mentioned as a future step, or a neighbouring concept that is not the point of the text.
+- method: the ONE teaching method the text explicitly uses, or null if none is evident.
+- representation: the ONE visual/concrete representation the text explicitly uses or asks pupils to draw, or null. A word such as "balance" used as a metaphor is not a representation unless scales are drawn or pictured.
+- misconceptions: ONLY misconceptions the text explicitly names, warns against, or shows as erroneous working. Do NOT tag a misconception just because the topic is prone to it. Empty list is the common case.
 - confidence: 0–1 for each tag.
 Return ONLY JSON: {{"concepts":[{{"id":"...","confidence":0.9}}],"method":{{"id":"...","confidence":0.8}}|null,"representation":{{...}}|null,"misconceptions":[{{"id":"...","confidence":0.7}}],"rationale":"one sentence"}}
 

@@ -104,6 +104,8 @@ pupils:
   - {id: pupil:amara, name: "Amara (synthetic)", class: "10X"}
   - {id: pupil:ben, name: "Ben (synthetic)", class: "10X"}
   - {id: pupil:chloe, name: "Chloe (synthetic)", class: "10X"}
+  - {id: pupil:dev, name: "Dev (synthetic)", class: "10Y"}
+  - {id: pupil:farah, name: "Farah (synthetic)", class: "10Y"}
 
 # Preset evidence scenarios. 'item' evidence carries concept IDs (aligned source);
 # 'activity' evidence is an untagged markbook entry the aligner must interpret.
@@ -142,3 +144,26 @@ scenarios:
     story: "Only a single markbook entry so far — the aligner has to interpret an untagged activity title."
     events:
       - {source: "Teacher markbook", activity: "Starter quiz: inverse operations and one-step equations", score: 0.8}
+  - id: forgets-to-change-sign
+    title: "Class 10Y: forgets to change the sign"
+    pupil: pupil:dev
+    story: "Taught 'change side, change sign'. Secure on two-step equations, but on both-sides equations he moves terms without changing their sign."
+    events:
+      - {source: "Homework platform", item: item:two-1, response: "x = 4"}
+      - {source: "Homework platform", item: item:two-2, response: "x = 7"}
+      - {source: "Homework platform", item: item:clt-1, response: "3x + 7"}
+      - {source: "Vendor X tutor", item: item:bs-1, response: "x = 5"}
+      - {source: "Vendor X tutor", item: item:bs-2, response: "x = 1.2"}
+      - {source: "Vendor X tutor", item: item:bs-3, response: "x = 4"}
+  - id: secure-and-ahead
+    title: "Class 10Y: secure and wants more"
+    pupil: pupil:farah
+    story: "Secure on everything the class has covered so far. Brackets are next in the scheme but have not been taught yet."
+    events:
+      - {source: "Homework platform", item: item:two-1, response: "x = 4"}
+      - {source: "Homework platform", item: item:two-2, response: "x = 7"}
+      - {source: "Homework platform", item: item:clt-1, response: "3x + 7"}
+      - {source: "Vendor X tutor", item: item:bs-1, response: "x = 3"}
+      - {source: "Vendor X tutor", item: item:bs-2, response: "x = 3"}
+      - {source: "Vendor X tutor", item: item:bs-3, response: "x = −4"}
+      - {source: "Vendor X tutor", item: item:dir-1, response: "6"}

@@ -1,0 +1,61 @@
+# HELD-OUT tagging set. Written after the tagger was tuned and never used to adjust it.
+# Wording deliberately differs from the tuning materials. Includes off-strand units that should get NO concept tags.
+# acceptable_concepts: defensible extra tags that are not counted as false positives (but are not required).
+# Answers written by the POC author; a real pilot should have teachers write them.
+units:
+  - id: ho-01
+    title: "Year 9 starter — think of a number"
+    text: "I think of a number, multiply it by 3 and then subtract 5. My answer is 16. Write this as an equation and find my number."
+    gold: {concepts: [cc:maths/alg/form-equations], acceptable_concepts: [cc:maths/alg/lin-eq-two-step], method: null, representation: null, misconceptions: []}
+  - id: ho-02
+    title: "Practical — the sweet-bag scales"
+    text: "On the left pan there are 4 identical bags of sweets and 2 loose sweets. On the right pan there is 1 bag and 11 loose sweets. The pans balance. Take the same thing off each pan until you can work out how many sweets are in one bag. Draw the scales after every step."
+    gold: {concepts: [cc:maths/alg/lin-eq-both-sides], acceptable_concepts: [cc:maths/alg/form-equations], method: md:maths/alg/balance, representation: rp:balance-scales, misconceptions: []}
+  - id: ho-03
+    title: "Spot the mistake"
+    text: "Jamie says 3(x − 4) = 3x − 4. Explain what Jamie has done wrong and write the correct expansion."
+    gold: {concepts: [cc:maths/alg/expand-single], acceptable_concepts: [], method: null, representation: null, misconceptions: [mc:maths/alg/partial-expansion]}
+  - id: ho-04
+    title: "Hinge question"
+    text: "Which is the solution of −3x > 12? A) x > −4  B) x < −4  C) x > 4  D) x < 4. Pupils who choose A have forgotten what happens to the sign when you divide by a negative number."
+    gold: {concepts: [cc:maths/alg/lin-inequalities], acceptable_concepts: [], method: null, representation: null, misconceptions: [mc:maths/alg/inequality-flip]}
+  - id: ho-05
+    title: "Physics link — rearranging"
+    text: "Rearrange v = u + at to make a the subject. Write down the operation you undo at each step."
+    gold: {concepts: [cc:maths/alg/rearrange-formulae], acceptable_concepts: [], method: null, representation: null, misconceptions: []}
+  - id: ho-06
+    title: "Tiles task"
+    text: "Build 2(x + 3) with your algebra tiles. How many x tiles and how many unit tiles do you need? Write the expression without brackets."
+    gold: {concepts: [cc:maths/alg/expand-single], acceptable_concepts: [], method: null, representation: rp:algebra-tiles, misconceptions: []}
+  - id: ho-07
+    title: "Fractions in equations"
+    text: "Solve x/4 + 3 = 7. Remember to multiply every term by 4, not just the fraction."
+    gold: {concepts: [cc:maths/alg/lin-eq-fractions], acceptable_concepts: [], method: null, representation: null, misconceptions: [mc:maths/alg/fraction-partial]}
+  - id: ho-08
+    title: "Graphs lesson"
+    text: "Complete a table of values for y = 2x + 1 for x from −2 to 3, then plot the line on the grid."
+    gold: {concepts: [cc:maths/alg/straight-line-graphs], acceptable_concepts: [cc:maths/alg/substitution], method: null, representation: rp:graph, misconceptions: []}
+  - id: ho-09
+    title: "Pairs of equations"
+    text: "Solve 2x + y = 11 and x − y = 1 by adding the two equations so that y disappears."
+    gold: {concepts: [cc:maths/alg/simultaneous-linear], acceptable_concepts: [], method: md:maths/alg/elimination, representation: null, misconceptions: []}
+  - id: ho-10
+    title: "Geometry warm-up"
+    text: "Find the area of a triangle with a base of 8 cm and a perpendicular height of 5 cm."
+    gold: {concepts: [], acceptable_concepts: [], method: null, representation: null, misconceptions: []}
+  - id: ho-11
+    title: "Ratio starter"
+    text: "Write the ratio 12 : 18 in its simplest form. Then share £45 in the ratio 2 : 3."
+    gold: {concepts: [], acceptable_concepts: [], method: null, representation: null, misconceptions: []}
+  - id: ho-12
+    title: "Negatives recap"
+    text: "Work out −7 + 3, −2 × −5 and 6 − (−4). Remember: two negatives multiplied together give a positive."
+    gold: {concepts: [cc:maths/num/directed-numbers], acceptable_concepts: [], method: null, representation: null, misconceptions: [mc:maths/num/neg-times-neg]}
+  - id: ho-13
+    title: "Stretch task"
+    text: "Solve 5(x − 2) = 3(x + 4). Expand both brackets first, then get the x terms together."
+    gold: {concepts: [cc:maths/alg/lin-eq-brackets], acceptable_concepts: [cc:maths/alg/expand-single, cc:maths/alg/lin-eq-both-sides], method: null, representation: null, misconceptions: []}
+  - id: ho-14
+    title: "Exit ticket"
+    text: "Solve 9 − 2x = 3x − 1. Next to each line, write what you did to both sides."
+    gold: {concepts: [cc:maths/alg/lin-eq-both-sides], acceptable_concepts: [], method: md:maths/alg/balance, representation: null, misconceptions: []}

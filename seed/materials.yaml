@@ -97,3 +97,36 @@ materials:
       ## Quick method for both sides
       For 5x + 3 = 2x + 12 use change side, change sign: move the 2x over so it becomes −2x, and move the +3 over so it becomes −3.
       So 3x = 9 and x = 3.
+
+  - id: mat:10y-w2-two-step
+    class: "10Y"
+    week: 2
+    title: "10Y Week 2 — Two-step equations: change side, change sign"
+    body: |
+      ## Two-step equations the quick way
+      To solve 2x + 3 = 11, move the +3 to the other side, where it becomes −3: 2x = 8.
+      Then the ×2 moves over and becomes ÷2: x = 4. Change side, change sign — every time.
+
+  - id: mat:10y-w3-like-terms
+    class: "10Y"
+    week: 3
+    title: "10Y Week 3 — Simplifying by collecting like terms"
+    body: |
+      ## Collect the x terms and the numbers
+      Simplify 5x + 3 − 2x + 4 by grouping like terms: 3x + 7. Only terms with the same letter can be combined.
+
+  - id: mat:10y-w4-hwk
+    class: "10Y"
+    week: 4
+    title: "10Y Week 4 homework — x on both sides"
+    body: |
+      ## Homework: change side, change sign
+      Solve 7x − 2 = 3x + 10 and 4x + 5 = x − 7. When a term changes side, change its sign. Check your answer by substituting it back in.
+
+  - id: mat:10y-w5-brackets
+    class: "10Y"
+    week: 5
+    title: "10Y Week 5 — Equations with brackets (planned)"
+    body: |
+      ## Expand, then solve
+      Expand the bracket first: 3(x + 2) = 21 becomes 3x + 6 = 21. Then change side, change sign: 3x = 15, x = 5.

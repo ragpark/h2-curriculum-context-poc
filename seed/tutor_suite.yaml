@@ -1,0 +1,89 @@
+# Hard tutor test suite. Ground truth is written BY HAND from the (synthetic) classroom facts below,
+# independently of what the H2 context pack says — so the judge is not simply rewarding agreement with H2.
+classes:
+  "10X":
+    teacher: "Ms Okafor"
+    method: "Balance method (do the same to both sides), with bar models"
+    avoid: "'Change side, change sign' / 'moving' terms across the equals sign"
+    taught: "Wk1 inverse operations and one-step equations (function machines); Wk2 two-step equations (balance, bar model); Wk3 collecting like terms (algebra tiles); Wk4 unknowns on both sides (balance, bar model; worksheet 'Common mistake: why the sign changes'; homework 'Mixed practice: both sides')"
+    not_yet_taught: "Wk5 expanding brackets (grid method) and equations with brackets; Wk6 inequalities"
+  "10Y":
+    teacher: "Mr Hale"
+    method: "'Change side, change sign'"
+    avoid: "Switching to a different method (e.g. the balance method) as the main explanation without linking it to 'change side, change sign'"
+    taught: "Wk2 two-step equations (change side, change sign); Wk3 collecting like terms; Wk4 unknowns on both sides (change side, change sign; homework 'x on both sides')"
+    not_yet_taught: "Wk5 equations with brackets"
+
+scenarios:
+  - id: dev-help
+    category: method_conflict
+    pupil: pupil:dev
+    message: "I keep getting 5x + 3 = 2x + 12 wrong. Can you help?"
+    need: "Forgets to change the sign when a term moves side (repeated on both-sides equations)"
+    good_next: "Rework this one with him, then more both-sides practice with negative terms"
+  - id: dev-practice
+    category: method_conflict
+    pupil: pupil:dev
+    message: "Can you give me a question to practise?"
+    need: "Practice on unknowns on both sides, targeting remembering to change the sign"
+    good_next: "A both-sides equation with a term that must change sign, then a check by substitution"
+  - id: dev-howto
+    category: method_conflict
+    pupil: pupil:dev
+    message: "How do I solve 7x − 2 = 3x + 10?"
+    need: "Forgets to change the sign when a term moves side"
+    good_next: "Solve it step by step in his teacher's method, stressing the sign change, then check by substitution"
+  - id: amara-practice
+    category: non_revealing
+    pupil: pupil:amara
+    message: "Can you set me a question to practise?"
+    need: "Sign error when moving terms across the equals sign, on unknowns-on-both-sides equations"
+    good_next: "A both-sides equation, worked with the balance method (do the same to both sides)"
+  - id: amara-stuck
+    category: non_revealing
+    pupil: pupil:amara
+    message: "I'm stuck on my homework."
+    need: "Homework is on unknowns on both sides; her known difficulty is the sign error when moving terms"
+    good_next: "Ask which question or start on a both-sides example, using the balance method"
+  - id: ben-revision
+    category: non_revealing
+    pupil: pupil:ben
+    message: "Can we do some revision before my test?"
+    need: "Secure on the equations taught so far; weak on negative numbers (believes negative × negative is negative). His bracket-expanding errors are in material not yet taught to the class"
+    good_next: "Revise taught equations work and negative numbers; do not treat brackets as revision"
+  - id: chloe-start
+    category: non_revealing
+    pupil: pupil:chloe
+    message: "I don't really get algebra. Where should I start?"
+    need: "Only evidence: a starter quiz on inverse operations and one-step equations (80%). Early in the strand"
+    good_next: "Start from inverse operations / one-step equations (function machines), then two-step. Not both-sides yet"
+  - id: amara-harder
+    category: jump_ahead
+    pupil: pupil:amara
+    message: "These are boring. Can we do something harder?"
+    need: "Still makes the sign error on the current topic, so she is not ready to move on"
+    good_next: "Harder both-sides equations (e.g. with negatives) to consolidate; brackets only if clearly flagged as next week's topic"
+  - id: farah-next
+    category: jump_ahead
+    pupil: pupil:farah
+    message: "I've finished all my homework. What's next?"
+    need: "Secure on everything taught; brackets not yet taught to 10Y"
+    good_next: "Stretch within taught content, or an explicitly flagged preview of brackets starting from expanding"
+  - id: ben-inequalities
+    category: jump_ahead
+    pupil: pupil:ben
+    message: "Can you teach me inequalities?"
+    need: "Inequalities not yet taught (Wk6). Ben is weak on negative numbers, which inequalities rely on (dividing by a negative)"
+    good_next: "Acknowledge it comes later; if previewing, check negative numbers first"
+  - id: ben-brackets
+    category: control
+    pupil: pupil:ben
+    message: "Can you help me with 3(x + 2) = 21?"
+    need: "Multiplies only the first term in a bracket (writes 3x + 2). Brackets not yet taught to the class"
+    good_next: "Help, but first check he multiplies every term in the bracket; note it is next week's topic"
+  - id: farah-check
+    category: control
+    pupil: pupil:farah
+    message: "Is x = 4 right for 4x + 5 = x − 7?"
+    need: "No, x = −4. Farah is secure on this topic, so this is most likely a one-off slip, not a persistent misconception"
+    good_next: "Check by substitution; treat as a slip, not a misconception"

@@ -11,6 +11,7 @@ from . import align as A
 from . import content as C
 from . import context as X
 from . import db
+from . import evals as E
 from . import graph as G
 from . import learner as L
 from . import llm
@@ -207,13 +208,30 @@ def tutor(c: ContextIn):
 
 # ---------------------------------------------------------------- evaluation & admin
 @app.post("/api/eval/alignment")
-def eval_alignment(mode: str | None = None):
-    return T.eval_alignment(mode)
+def eval_alignment(mode: str | None = None, set: str = "tuning"):
+    if set not in ("tuning", "heldout"):
+        raise HTTPException(400, "set must be tuning or heldout")
+    return E.eval_alignment(mode, set)
 
 
 @app.post("/api/eval/tutor")
-def eval_tutor():
-    return T.eval_tutor()
+def eval_tutor_start():
+    return E.start_tutor_suite()
+
+
+@app.get("/api/eval/tutor/latest")
+def eval_tutor_latest():
+    return E.last_tutor_suite() or {}
+
+
+@app.get("/api/eval/tutor/{jid}")
+def eval_tutor_job(jid: str):
+    return E.job_status(jid)
+
+
+@app.get("/api/eval/tutor-suite")
+def eval_tutor_suite_def():
+    return E.suite()
 
 
 @app.post("/api/demo/prepare")

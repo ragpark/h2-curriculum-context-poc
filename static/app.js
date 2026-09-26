@@ -384,6 +384,8 @@ const SUGGEST = {
   "pupil:amara": ["I got 5x + 3 = 2x + 12 wrong again, I got x = 5. Can you help?", "How do I solve 7x − 2 = 3x + 10?", "What should I practise next?"],
   "pupil:ben": ["Can you help me with 3(x + 2) = 21?", "I don't get how to expand −2(x − 3).", "What should I practise next?"],
   "pupil:chloe": ["What's an inverse operation?", "Can you help me solve x + 9 = 14?", "What should I practise next?"],
+  "pupil:dev": ["I keep getting 5x + 3 = 2x + 12 wrong. Can you help?", "How do I solve 7x − 2 = 3x + 10?", "Can you give me a question to practise?"],
+  "pupil:farah": ["I've finished all my homework. What's next?", "Is x = 4 right for 4x + 5 = x − 7?", "Can we do something harder?"],
 };
 function renderContextPage() {
   const ps = $("#c-pupil");
@@ -442,38 +444,75 @@ function renderCompare(r) {
 }
 
 /* ------------------------------------------------------------------ evaluate */
-S.evMode = "heuristic";
+S.evMode = "claude"; S.evSet = "heldout";
 function renderEvaluate() {
-  const el = $("#ev-mode"), llm = S.status.llm_available;
-  el.innerHTML = [["heuristic", "Heuristic"], ["claude", "Claude"]].map(([v, l]) => `<button data-v="${v}" class="${S.evMode === v ? "on" : ""}" ${v === "claude" && !llm ? 'disabled title="Set ANTHROPIC_API_KEY to enable"' : ""}>${l}</button>`).join("");
-  el.querySelectorAll("button").forEach((b) => (b.onclick = () => { S.evMode = b.dataset.v; renderEvaluate(); }));
-  if (!llm) $("#ev-tutor").innerHTML = $("#ev-tutor").innerHTML || `<div class="note">Needs <code>ANTHROPIC_API_KEY</code>. Set it on the Railway service and this runs 5 pupil turns through both arms, then scores them blind.</div>`;
+  const llm = S.status.llm_available;
+  if (!llm && S.evMode === "claude") S.evMode = "heuristic";
+  const seg = (el, opts, key, after) => {
+    el.innerHTML = opts.map(([v, l, dis]) => `<button data-v="${v}" class="${S[key] === v ? "on" : ""}" ${dis ? 'disabled title="Set ANTHROPIC_API_KEY to enable"' : ""}>${l}</button>`).join("");
+    el.querySelectorAll("button").forEach((b) => (b.onclick = () => { S[key] = b.dataset.v; renderEvaluate(); }));
+  };
+  seg($("#ev-set"), [["heldout", "Held-out (14)"], ["tuning", "Tuning set (14)"]], "evSet");
+  seg($("#ev-mode"), [["heuristic", "Keyword tagger"], ["claude", "Claude tagger", !llm]], "evMode");
+  $("#ev-align-sub").textContent = S.evSet === "heldout" ? "Held-out: new units, different wording, 2 off-topic units that should get no tags. Never used for tuning." : "Tuning set: the 14 units the tagger was adjusted against. Expect flattering numbers.";
   $("#btn-ev-tutor").disabled = !llm;
+  if (!S.suiteLoaded) {
+    S.suiteLoaded = true;
+    api("/api/eval/tutor/latest").then((d) => { if (d && d.summary) renderTutorEval(d); else if (!llm) $("#ev-tutor").innerHTML = `<div class="note">Needs <code>ANTHROPIC_API_KEY</code>.</div>`; else $("#ev-tutor").innerHTML = `<div class="empty">No run yet. Click Run.</div>`; });
+  }
 }
 function renderAlignEval(d) {
   const s = d.summary;
   const k = (v, l) => `<div class="kpi"><div class="v">${v == null ? "–" : Math.round(v * 100) + "%"}</div><div class="l">${l}</div></div>`;
+  const f = (x) => (x == null ? "—" : Array.isArray(x) ? (x.length ? x.map(lab).join(", ") : "none") : lab(x));
   const cell = (o, multi) => {
-    const ok = multi ? JSON.stringify([...o.expected].sort()) === JSON.stringify([...o.got].sort()) : o.expected === o.got;
-    const f = (x) => (x == null ? "—" : Array.isArray(x) ? (x.length ? x.map(lab).join(", ") : "—") : lab(x));
-    return `<td><span class="${ok ? "ok" : "bad"}">${ok ? "✓" : "✗"}</span> ${ok ? `<span class="sub">${esc(f(o.got))}</span>` : `<div class="sub">expected: ${esc(f(o.expected))}</div><div class="sub">got: ${esc(f(o.got))}</div>`}</td>`;
+    let ok;
+    if (multi && o.acceptable) { const good = new Set([...o.expected, ...o.acceptable]); ok = o.got.every((g) => good.has(g)) && o.expected.every((e) => o.got.includes(e)); }
+    else ok = multi ? JSON.stringify([...o.expected].sort()) === JSON.stringify([...o.got].sort()) : o.expected === o.got;
+    return `<td><span class="${ok ? "ok" : "bad"}">${ok ? "✓" : "✗"}</span> ${ok ? `<span class="sub">${esc(f(o.got))}</span>` : `<div class="sub">expected: ${esc(f(o.expected))}${o.acceptable && o.acceptable.length ? ` (also OK: ${esc(f(o.acceptable))})` : ""}</div><div class="sub">got: ${esc(f(o.got))}</div>`}</td>`;
   };
-  $("#ev-align").innerHTML = `<div class="sub" style="margin-bottom:8px">Mode: <b>${esc(d.mode)}</b> · ${d.units} units</div>
-    <div class="kpis">${k(s.concepts.precision, "Concept precision")}${k(s.concepts.recall, "Concept recall")}${k(s.misconceptions.precision, "Misconception precision")}${k(s.misconceptions.recall, "Misconception recall")}${k(s.method_accuracy, "Method accuracy")}${k(s.representation_accuracy, "Representation accuracy")}</div>
-    ${d.rows.find((r) => r.fallback_reason) ? `<div class="note warn" style="margin-top:8px">${esc(d.rows.find((r) => r.fallback_reason).fallback_reason)}</div>` : ""}
+  $("#ev-align").innerHTML = `<div class="sub" style="margin-bottom:8px"><b>${d.set === "heldout" ? "Held-out set" : "Tuning set"}</b> · ${d.mode === "claude" ? "Claude tagger" : "keyword tagger"} · ${d.units} units${s.offstrand_correctly_untagged ? ` · off-topic units correctly left untagged: <b>${s.offstrand_correctly_untagged}</b>` : ""}</div>
+    <div class="kpis">${k(s.concepts.precision, "Concept tags correct")}${k(s.concepts.recall, "Expected concepts found")}${k(s.misconceptions.precision, "Misconception tags correct")}${k(s.misconceptions.recall, "Misconceptions found")}${k(s.method_accuracy, "Method right")}${k(s.representation_accuracy, "Representation right")}</div>
     <details style="margin-top:12px"><summary>Per-unit results</summary><div class="tbl-wrap"><table class="t" style="margin-top:8px"><tr><th>Unit</th><th>Concepts</th><th>Method</th><th>Representation</th><th>Misconceptions</th></tr>
-    ${d.rows.map((r) => `<tr><td><b>${esc(r.heading)}</b><div class="mono sub">${esc(r.unit)}</div></td>${cell(r.concepts, true)}${cell(r.method)}${cell(r.representation)}${cell(r.misconceptions, true)}</tr>`).join("")}</table></div></details>`;
+    ${d.rows.map((r) => `<tr><td><b>${esc(r.heading)}</b><div class="mono sub">${esc(r.unit)}</div>${r.rationale ? `<div class="sub" style="margin-top:4px"><i>${esc(r.rationale)}</i></div>` : ""}</td>${cell(r.concepts, true)}${cell(r.method)}${cell(r.representation)}${cell(r.misconceptions, true)}</tr>`).join("")}</table></div></details>`;
 }
+const ARM_COL = { none: "var(--text-3)", raw: "var(--developing)", h2: "var(--accent)" };
+const ARM_SHORT = { none: "No context", raw: "Raw data", h2: "H2 pack" };
+const CAT = { method_conflict: "Teacher uses a different method (class 10Y)", non_revealing: "Request doesn't reveal the problem", jump_ahead: "Temptation to jump ahead", control: "Controls" };
+const CRIT = { diagnosis: "Diagnosis", method: "Teacher's method", scope: "Respects what's been taught", next_step: "Next step", grounding: "True to pupil & class" };
 function renderTutorEval(d) {
   if (d.error) { $("#ev-tutor").innerHTML = `<div class="note warn">${esc(d.error)}</div>`; return; }
-  const names = { targets_misconception: "Targets the misconception", method_consistency: "Uses the teacher's method", within_scope: "Stays within taught scope", next_step: "Sensible next step" };
-  const rows = d.criteria.map((c) => `<tr><td>${names[c]}</td><td style="width:32%">${bar(d.summary.without_h2[c] / 2, "var(--text-3)")}<span class="sub">${d.summary.without_h2[c]} / 2</span></td><td style="width:32%">${bar(d.summary.with_h2[c] / 2, "var(--accent)")}<span class="sub">${d.summary.with_h2[c]} / 2</span></td></tr>`).join("");
-  $("#ev-tutor").innerHTML = `<div class="kpis" style="margin-bottom:12px"><div class="kpi"><div class="v">${d.summary.without_h2.total_of_8}</div><div class="l">Without H2 · mean score out of 8</div></div><div class="kpi"><div class="v" style="color:var(--accent-text)">${d.summary.with_h2.total_of_8}</div><div class="l">With H2 · mean score out of 8</div></div></div>
-    <table class="t"><tr><th>Criterion</th><th>Without H2</th><th>With H2</th></tr>${rows}</table>
-    <details style="margin-top:12px"><summary>Per-scenario replies and judge notes</summary>${d.results.map((r) => `<div class="sec" style="margin-top:8px"><div class="st">${esc((S.pupils.find((p) => p.id === r.learner) || {}).name || r.learner)}</div><b>“${esc(r.message)}”</b>
-      ${r.error ? `<div class="note warn">${esc(r.error)}</div>` : `<div class="sub">Focus: ${esc(r.focus)} · judge: ${esc(r.notes || "")}</div>
-      <div class="grid g2" style="margin-top:8px"><div><div class="sub"><b>Without H2</b> · ${Object.values(r.scores.without_h2).reduce((a, b) => a + b, 0)}/8</div><div class="reply">${esc(r.responses.without_h2)}</div></div>
-      <div><div class="sub"><b>With H2</b> · ${Object.values(r.scores.with_h2).reduce((a, b) => a + b, 0)}/8</div><div class="reply">${esc(r.responses.with_h2)}</div></div></div>`}</div>`).join("")}</details>`;
+  const sm = d.summary, arms = ["none", "raw", "h2"], max = sm.max_total;
+  const tiles = arms.map((a) => `<div class="kpi"><div class="v" style="color:${ARM_COL[a]}">${sm.by_arm[a].total}<span class="sub" style="font-size:13px"> / ${max}</span></div><div class="l">${esc(d.arms[a])}</div></div>`).join("");
+  const crit = `<table class="t"><tr><th>Criterion (0–3)</th>${arms.map((a) => `<th>${ARM_SHORT[a]}</th>`).join("")}</tr>${d.criteria.map((c) => `<tr><td>${CRIT[c]}</td>${arms.map((a) => `<td style="width:22%">${bar(sm.by_arm[a][c] / 3, ARM_COL[a])}<span class="sub">${sm.by_arm[a][c]}</span></td>`).join("")}</tr>`).join("")}</table>`;
+  const cats = `<table class="t"><tr><th>Scenario group</th><th>n</th>${arms.map((a) => `<th>${ARM_SHORT[a]}</th>`).join("")}<th>H2 − raw</th></tr>${Object.entries(sm.by_category).map(([c, v]) => { const dlt = +(v.h2 - v.raw).toFixed(2); return `<tr><td>${CAT[c] || c}</td><td>${v.n}</td>${arms.map((a) => `<td>${v[a]}</td>`).join("")}<td class="${dlt > 0.25 ? "ok" : dlt < -0.25 ? "bad" : ""}"><b>${dlt > 0 ? "+" : ""}${dlt}</b></td></tr>`; }).join("")}</table>`;
+  const h = sm.head_to_head.h2_vs_raw;
+  const rows = d.results.map((r) => {
+    if (arms.some((a) => !r.arms[a] || r.arms[a].error)) return `<div class="note warn">${esc(r.id)}: ${esc(arms.map((a) => r.arms[a]?.error).filter(Boolean).join("; "))}</div>`;
+    return `<details class="sec" style="margin-top:8px"><summary><b>${esc(r.pupil)}</b> (${esc(r.class)}): “${esc(r.message)}” — ${arms.map((a) => `<span style="color:${ARM_COL[a]}">${ARM_SHORT[a]} ${r.arms[a].total}</span>`).join(" · ")}</summary>
+      <div class="sub" style="margin:8px 0"><b>Actual need (hand-written):</b> ${esc(r.need)}</div>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">${arms.map((a) => `<div><div class="sub"><b style="color:${ARM_COL[a]}">${esc(d.arms[a])}</b> · ${r.arms[a].total}/15 · ${Object.entries(r.arms[a].scores).map(([k, v]) => `${CRIT[k].split(" ")[0]} ${v}`).join(", ")}</div><div class="reply" style="margin-top:6px;font-size:12.5px">${esc(r.arms[a].reply)}</div><div class="sub" style="margin-top:6px"><i>Judge: ${esc(r.arms[a].why[0])}</i></div></div>`).join("")}</div></details>`;
+  }).join("");
+  $("#ev-tutor").innerHTML = `<div class="sub" style="margin-bottom:8px">Last run ${esc(d.finished)} · ${esc(d.model)} · ${d.seconds}s · ${sm.scored_scenarios} scenarios</div>
+    <div class="kpis" style="margin-bottom:12px">${tiles}<div class="kpi"><div class="v">${h.win}–${h.tie}–${h.loss}</div><div class="l">H2 vs raw: wins–ties–losses</div></div></div>
+    <div class="grid g2"><div>${crit}</div><div>${cats}</div></div>
+    <h4 style="margin:16px 0 4px;font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Every scenario, with all three replies</h4>${rows}`;
+}
+async function runTutorSuite(btn) {
+  btn.disabled = true;
+  const prog = $("#ev-tutor-progress");
+  try {
+    let j = await api("/api/eval/tutor", { method: "POST" });
+    while (j.status === "running") {
+      prog.innerHTML = `<div class="note accent" style="margin-bottom:10px"><span class="spin" style="display:inline-block;width:10px;height:10px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-1px"></span> Running… ${j.done}/${j.total || 12} scenarios (3 replies and 6 judgements each)</div>`;
+      await new Promise((r) => setTimeout(r, 4000));
+      j = await api(`/api/eval/tutor/${j.id}`);
+    }
+    prog.innerHTML = "";
+    if (j.status === "error") throw new Error(j.error);
+    renderTutorEval(j.result); S.evalDone = true; renderSteps();
+  } catch (e) { prog.innerHTML = `<div class="note warn">${esc(e.message)}</div>`; }
+  finally { btn.disabled = false; }
 }
 
 /* ------------------------------------------------------------------ connect */
@@ -527,8 +566,8 @@ function bindStatic() {
     const r = await api("/api/tutor", { method: "POST", body: { learner: S.pupil, message: $("#c-msg").value, concept: $("#c-concept").value || null, mode: S.mode } });
     renderCompare(r); S.ctxDone = true; renderSteps();
   });
-  $("#btn-ev-align").onclick = (e) => busy(e.currentTarget, async () => { const d = await api(`/api/eval/alignment?mode=${S.evMode}`, { method: "POST" }); renderAlignEval(d); S.evalDone = true; renderSteps(); });
-  $("#btn-ev-tutor").onclick = (e) => busy(e.currentTarget, async () => { const d = await api("/api/eval/tutor", { method: "POST" }); renderTutorEval(d); S.evalDone = true; await refreshStatus(); });
+  $("#btn-ev-align").onclick = (e) => busy(e.currentTarget, async () => { const d = await api(`/api/eval/alignment?mode=${S.evMode}&set=${S.evSet}`, { method: "POST" }); renderAlignEval(d); S.evalDone = true; renderSteps(); });
+  $("#btn-ev-tutor").onclick = (e) => runTutorSuite(e.currentTarget);
 }
 
 boot().catch((e) => { document.body.insertAdjacentHTML("beforeend", `<div class="toast show">Failed to load: ${esc(e.message)}</div>`); });

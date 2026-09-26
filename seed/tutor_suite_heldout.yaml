@@ -1,0 +1,90 @@
+# FRESH HELD-OUT tutor scenarios. Written and committed BEFORE the briefing fix, and never used to develop it.
+# Includes two pupils (Gabriel, Hana) that did not exist while the fix was developed.
+# Class facts are the same as the development suite.
+classes:
+  "10X":
+    teacher: "Ms Okafor"
+    method: "Balance method (do the same to both sides), with bar models; function machines for inverse operations"
+    avoid: "'Change side, change sign' / 'moving' terms across the equals sign"
+    taught: "Wk1 inverse operations and one-step equations (function machines); Wk2 two-step equations (balance, bar model); Wk3 collecting like terms (algebra tiles); Wk4 unknowns on both sides (balance, bar model; worksheet 'Common mistake: why the sign changes'; homework 'Mixed practice: both sides')"
+    not_yet_taught: "Wk5 expanding brackets (grid method) and equations with brackets; Wk6 inequalities"
+  "10Y":
+    teacher: "Mr Hale"
+    method: "'Change side, change sign'"
+    avoid: "Switching to a different method (e.g. the balance method) as the main explanation without linking it to 'change side, change sign'"
+    taught: "Wk2 two-step equations (change side, change sign); Wk3 collecting like terms; Wk4 unknowns on both sides (change side, change sign; homework 'x on both sides')"
+    not_yet_taught: "Wk5 equations with brackets"
+
+scenarios:
+  - id: ho-gabriel-check
+    category: control
+    pupil: pupil:gabriel
+    message: "Can you check my working for 3x − 4 = 17? I divided by 3 first."
+    need: "Undoes operations in the wrong order (divides before adding/subtracting) — a repeated pattern on two-step equations"
+    good_next: "Show why the +/− is undone first (function machine or balance), redo 3x − 4 = 17, then another two-step equation"
+  - id: ho-gabriel-workon
+    category: non_revealing
+    pupil: pupil:gabriel
+    message: "What should I work on?"
+    need: "Two-step equations: he undoes operations in the wrong order. Secure on one-step equations"
+    good_next: "Two-step equations with the order of inverse operations made explicit, before moving on to both sides"
+  - id: ho-gabriel-skip
+    category: jump_ahead
+    pupil: pupil:gabriel
+    message: "Can we skip to the harder ones with x on both sides? That's what everyone else is doing."
+    need: "Not ready: his two-step equations (the prerequisite) are insecure because of the wrong-order error"
+    good_next: "Secure two-step equations first (briefly, with encouragement), then a gentle both-sides example"
+  - id: ho-hana-why
+    category: method_conflict
+    pupil: pupil:hana
+    message: "I don't get why there are x's on both sides."
+    need: "Reads '=' as 'the answer is' rather than 'both sides are equal'; this blocks both-sides equations"
+    good_next: "Establish that both sides have equal value, then solve a both-sides equation with change side, change sign"
+  - id: ho-hana-quiz
+    category: method_conflict
+    pupil: pupil:hana
+    message: "Give me a quick quiz."
+    need: "Equals-as-answer misconception on the current topic (unknowns on both sides)"
+    good_next: "A few both-sides questions, including one that checks both sides are equal, using change side, change sign"
+  - id: ho-dev-teacherway
+    category: method_conflict
+    pupil: pupil:dev
+    message: "Can you explain it the way my teacher does?"
+    need: "Forgets to change the sign when a term changes side, on both-sides equations"
+    good_next: "Model 'change side, change sign' on a both-sides equation, stressing the sign change"
+  - id: ho-dev-check
+    category: control
+    pupil: pupil:dev
+    message: "Is x = 4 right for 4x + 5 = x − 7?"
+    need: "No, x = −4. For Dev this is his persistent error (forgetting to change the sign), not a one-off slip"
+    good_next: "Show where the sign was not changed, correct it, then a similar question"
+  - id: ho-amara-brackets
+    category: jump_ahead
+    pupil: pupil:amara
+    message: "Can you teach me brackets?"
+    need: "Brackets are not yet taught (Wk5). She still makes the sign error on both-sides equations, which brackets questions build on"
+    good_next: "Flag that brackets come next week; consolidate both-sides first, or give a clearly flagged short preview"
+  - id: ho-ben-monday
+    category: non_revealing
+    pupil: pupil:ben
+    message: "Help me get ready for Monday's test."
+    need: "Secure on the equations taught so far; weak on negative numbers (negative × negative). His bracket errors are in untaught material"
+    good_next: "Revise taught equations work and negative numbers; not brackets"
+  - id: ho-chloe-homework
+    category: non_revealing
+    pupil: pupil:chloe
+    message: "Can you help with my homework?"
+    need: "Early in the strand: only evidence is inverse operations / one-step equations. The class homework is on both sides, which is likely beyond her current evidence"
+    good_next: "Ask what the question is, and check one-step/two-step foundations before a both-sides homework question"
+  - id: ho-farah-new
+    category: jump_ahead
+    pupil: pupil:farah
+    message: "Show me something new."
+    need: "Secure on everything taught; brackets not yet taught to 10Y"
+    good_next: "An explicitly flagged preview of brackets starting from expanding, or a stretch within taught content"
+  - id: ho-amara-why7x
+    category: control
+    pupil: pupil:amara
+    message: "Why isn't 5x + 3 = 2x + 12 the same as 7x = 15?"
+    need: "Sign error when moving a term across the equals sign; she has made it repeatedly"
+    good_next: "Show with the balance method that 2x is subtracted from both sides, giving 3x + 3 = 12"

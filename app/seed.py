@@ -60,7 +60,7 @@ def gold():
     return _y("gold_alignments.yaml")["gold"]
 
 
-SEED_VERSION = "2"  # bump when fixtures change; the database is reseeded on next start
+SEED_VERSION = "3"  # bump when fixtures change; the database is reseeded on next start
 
 
 def reset():

@@ -106,6 +106,8 @@ pupils:
   - {id: pupil:chloe, name: "Chloe (synthetic)", class: "10X"}
   - {id: pupil:dev, name: "Dev (synthetic)", class: "10Y"}
   - {id: pupil:farah, name: "Farah (synthetic)", class: "10Y"}
+  - {id: pupil:gabriel, name: "Gabriel (synthetic)", class: "10X"}
+  - {id: pupil:hana, name: "Hana (synthetic)", class: "10Y"}
 
 # Preset evidence scenarios. 'item' evidence carries concept IDs (aligned source);
 # 'activity' evidence is an untagged markbook entry the aligner must interpret.
@@ -167,3 +169,24 @@ scenarios:
       - {source: "Vendor X tutor", item: item:bs-2, response: "x = 3"}
       - {source: "Vendor X tutor", item: item:bs-3, response: "x = −4"}
       - {source: "Vendor X tutor", item: item:dir-1, response: "6"}
+  - id: wrong-order
+    title: "Class 10X: undoes operations in the wrong order"
+    pupil: pupil:gabriel
+    story: "Secure on one-step equations, but on two-step equations he divides before dealing with the added or subtracted number."
+    events:
+      - {source: "Homework platform", item: item:one-1, response: "x = 5"}
+      - {source: "Homework platform", item: item:inv-2, response: "add 7"}
+      - {source: "Homework platform", item: item:clt-1, response: "3x + 7"}
+      - {source: "Vendor X tutor", item: item:inv-1, response: "6.5"}
+      - {source: "Vendor X tutor", item: item:two-1, response: "x = 2.5"}
+      - {source: "Vendor X tutor", item: item:two-1, response: "x = 2.5"}
+  - id: equals-as-answer
+    title: "Class 10Y: reads = as 'the answer is'"
+    pupil: pupil:hana
+    story: "Can solve simple equations, but reads the equals sign as 'the answer is', which trips her up when x appears on both sides."
+    events:
+      - {source: "Homework platform", item: item:one-1, response: "x = 5"}
+      - {source: "Homework platform", item: item:two-1, response: "x = 4"}
+      - {source: "Vendor X tutor", item: item:bs-4, response: "No — the answer should be 7"}
+      - {source: "Vendor X tutor", item: item:bs-1, response: "x = 3"}
+      - {source: "Vendor X tutor", item: item:bs-4, response: "No — the answer should be 7"}

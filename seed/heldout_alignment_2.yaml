@@ -1,0 +1,51 @@
+# SECOND held-out tagging set. Written BEFORE the tagger's candidate-list fix (which was diagnosed from set 1),
+# so set 1 is no longer clean; this set is the honest measure after the fix.
+units:
+  - id: h2-01
+    title: "Balance puzzle"
+    text: "3 boxes and 5 counters balance 1 box and 13 counters. Each box holds the same number of counters. Draw the balance after you remove one box from each side, and keep going until you know what is in a box."
+    gold: {concepts: [cc:maths/alg/lin-eq-both-sides], acceptable_concepts: [cc:maths/alg/form-equations], method: md:maths/alg/balance, representation: rp:balance-scales, misconceptions: []}
+  - id: h2-02
+    title: "Substitution practice"
+    text: "Find the value of 4a − b when a = 3 and b = −2."
+    gold: {concepts: [cc:maths/alg/substitution], acceptable_concepts: [cc:maths/num/directed-numbers], method: null, representation: null, misconceptions: []}
+  - id: h2-03
+    title: "Factorising"
+    text: "Factorise 6x + 9 completely."
+    gold: {concepts: [cc:maths/alg/factorise-single], acceptable_concepts: [], method: null, representation: null, misconceptions: []}
+  - id: h2-04
+    title: "Double brackets"
+    text: "Expand (x + 5)(x − 2) using a grid."
+    gold: {concepts: [cc:maths/alg/expand-double], acceptable_concepts: [], method: md:maths/alg/grid-method, representation: null, misconceptions: []}
+  - id: h2-05
+    title: "Quadratics"
+    text: "Solve x² + 5x + 6 = 0 by factorising."
+    gold: {concepts: [cc:maths/alg/quadratic-factorise], acceptable_concepts: [], method: null, representation: null, misconceptions: []}
+  - id: h2-06
+    title: "Common error"
+    text: "A pupil writes: −2x < 8, so x < −4. Explain the mistake."
+    gold: {concepts: [cc:maths/alg/lin-inequalities], acceptable_concepts: [], method: null, representation: null, misconceptions: [mc:maths/alg/inequality-flip]}
+  - id: h2-07
+    title: "Straight lines"
+    text: "Write down the gradient and the y-intercept of y = −3x + 7."
+    gold: {concepts: [cc:maths/alg/gradient-intercept], acceptable_concepts: [], method: null, representation: null, misconceptions: []}
+  - id: h2-08
+    title: "Number line"
+    text: "Show x ≥ −1 on a number line, using a filled-in circle."
+    gold: {concepts: [cc:maths/alg/inequality-number-line], acceptable_concepts: [], method: null, representation: rp:number-line, misconceptions: []}
+  - id: h2-09
+    title: "History starter"
+    text: "Put these Tudor monarchs in the order they reigned: Mary I, Henry VII, Elizabeth I, Edward VI, Henry VIII."
+    gold: {concepts: [], acceptable_concepts: [], method: null, representation: null, misconceptions: []}
+  - id: h2-10
+    title: "Rectangle problem"
+    text: "The perimeter of a rectangle is 30 cm. Its length is x + 4 and its width is x. Form an equation and solve it to find x."
+    gold: {concepts: [cc:maths/alg/form-equations], acceptable_concepts: [cc:maths/alg/lin-eq-two-step, cc:maths/alg/collect-like-terms], method: null, representation: null, misconceptions: []}
+  - id: h2-11
+    title: "Brackets and both sides"
+    text: "Solve 2(3x − 1) = 4x + 6."
+    gold: {concepts: [cc:maths/alg/lin-eq-brackets], acceptable_concepts: [cc:maths/alg/expand-single, cc:maths/alg/lin-eq-both-sides], method: null, representation: null, misconceptions: []}
+  - id: h2-12
+    title: "Machine warm-up"
+    text: "Fill in the function machine: input 7, × 2, − 3, output ?. Then work backwards from an output of 21."
+    gold: {concepts: [cc:maths/alg/inverse-ops], acceptable_concepts: [], method: md:maths/alg/function-machine, representation: rp:function-machine-diagram, misconceptions: []}

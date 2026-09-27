@@ -1,8 +1,9 @@
 """Evaluation harness.
 
 1. Tagging accuracy on two sets:
-   • tuning  — the 14 units the tagger was adjusted against (optimistic)
-   • heldout — units written afterwards and never used to adjust anything (the honest number)
+   • tuning  — the "practice" set: the 14 units the tagger was adjusted against (optimistic)
+   • heldout — the "unseen" sets: written and locked before a change, never used to adjust anything (the honest number)
+   (internal keys are kept for stored results and URLs; the UI says practice / unseen)
 2. Hard tutor suite: 3 arms × 12 scenarios, each reply scored blind on five 0–3 criteria against
    HAND-WRITTEN ground truth (seed/tutor_suite.yaml), two independent judge passes averaged.
    Runs as a background job because it takes a few minutes.
@@ -156,10 +157,10 @@ _lock = threading.Lock()
 
 SUITES = {"dev": "tutor_suite.yaml", "heldout": "tutor_suite_heldout.yaml", "behaviour": "tutor_suite_behaviour.yaml",
           "english": "tutor_suite_english.yaml", "english_heldout": "tutor_suite_english_heldout.yaml"}
-SUITE_LABELS = {"dev": "Development scenarios (used to build the fix)", "heldout": "Fresh held-out scenarios (never used to build the fix)",
+SUITE_LABELS = {"dev": "Development scenarios (used to build the fix)", "heldout": "Unseen scenarios (written and locked before the fix)",
                 "behaviour": "Learning behaviour: same answers, different behaviour",
                 "english": "English (Macbeth): first scenarios (used to diagnose the scope fix)",
-                "english_heldout": "English (Macbeth): fresh held-out scenarios (never used to build the fix)"}
+                "english_heldout": "English (Macbeth): unseen scenarios (written and locked before the scope fix)"}
 
 
 def suite(name: str = "dev"):

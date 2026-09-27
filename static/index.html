@@ -237,7 +237,7 @@
       <div class="page-head">
         <div class="eyebrow">Evidence for the hypotheses</div>
         <h2>Evaluate</h2>
-        <p>Two measures. First, tagging accuracy on three sets: the units the tagger was tuned against (optimistic), and two <b>held-out</b> sets. Held-out 2 is the honest figure, because it was written before the latest tagger change. Second, a hard tutor test: 12 pupil turns, three versions of the tutor's context, each reply scored blind on five 0–3 criteria against ground truth written by hand. The judge is an AI model, so treat its scores as indicative and confirm them with teacher review.</p>
+        <p>Two measures. First, tagging accuracy on three sets: a <b>practice</b> set the tagger was tuned against (optimistic), and two <b>unseen</b> sets, written and locked before the tagger was changed, like an exam paper the candidate hasn't seen. Unseen 2 is the honest figure. Second, a hard tutor test: 12 pupil turns, three versions of the tutor's context, each reply scored blind on five 0–3 criteria against ground truth written by hand. The judge is an AI model, so treat its scores as indicative and confirm them with teacher review.</p>
       </div>
       <div class="stack">
         <div class="card">
@@ -249,7 +249,7 @@
         </div>
         <div class="card">
           <div class="card-head">
-            <div><h3>Hard tutor test: no context vs raw classroom data vs organised by the map</h3><p class="sub">Fresh held-out scenarios were locked before the briefing fix; development scenarios were used to build it · 12 scenarios in 4 groups · 5 criteria scored 0–3 (max 15) · each reply judged blind, twice · takes about 4 minutes</p></div>
+            <div><h3>Hard tutor test: no context vs raw classroom data vs organised by the map</h3><p class="sub">Unseen scenarios were written and locked before the briefing fix; development scenarios were used to build it · 12 scenarios in 4 groups · 5 criteria scored 0–3 (max 15) · each reply judged blind, twice · takes about 4 minutes</p></div>
             <div class="actions"><div class="seg" id="ev-suite"></div><select class="input" id="ev-tutor-pick" style="width:auto" title="Which tutor answers the scenarios"></select><button class="btn primary" id="btn-ev-tutor">Run</button></div>
           </div>
           <div id="ev-tutor-progress"></div>
@@ -372,7 +372,7 @@
               <li><b>Pupil evidence is marked written work</b>, not right-or-wrong answers: the task, the topics it covered, the mark, and the mistake the teacher noticed, if any.</li>
             </ul>
             <h4>The classes and pupils</h4>
-            <p>Both Year 11 classes are in week 5 of Macbeth. There are five pupils; Leah and Owen were added later, for a fresh test. Ms Adeyemi (11E) teaches pupils to start with a one-sentence argument, then zoom in on single words. Mr Doyle (11F) teaches PETAL paragraphs: Point, Evidence, Technique, Analysis, Link.</p>
+            <p>Both Year 11 classes are in week 5 of Macbeth. There are five pupils; Leah and Owen were added later, for the unseen test. Ms Adeyemi (11E) teaches pupils to start with a one-sentence argument, then zoom in on single words. Mr Doyle (11F) teaches PETAL paragraphs: Point, Evidence, Technique, Analysis, Link.</p>
             <table class="t help-table">
               <tr><th>Pupil</th><th>Class</th><th>What's going on</th></tr>
               <tr><td><b>Priya</b></td><td>11E</td><td>Knows the play and her quotations very well, but tells the story instead of explaining how Shakespeare's words work.</td></tr>
@@ -464,12 +464,12 @@
               <b>Three things to keep in mind:</b>
               <ul>
                 <li><b>Small differences don't mean much.</b> If you run the same test twice, scores move by about 1 mark. Only pay attention to differences bigger than that.</li>
-                <li><b>“Fresh” questions matter most.</b> We improved the prototype using one set of test questions. Doing well on those is a bit like marking your own homework. So we also wrote a <b>fresh</b> set before making any changes, and only checked it afterwards. Trust the fresh results most.</li>
+                <li><b>“Unseen” questions matter most.</b> We improved the prototype using one set of test questions. Doing well on those is a bit like marking a pupil on the questions they revised from. So we also wrote an <b>unseen</b> set before making any changes, locked it away, and only checked it afterwards, like an exam paper the candidate hasn't seen. Trust the unseen results most.</li>
                 <li><b>The marker is an AI, not a teacher.</b> It sometimes gets things wrong. Treat its marks as a useful first look, not a final verdict.</li>
               </ul>
             </div>
             <h4>The labelling test</h4>
-            <p>We labelled some worksheets by hand, then checked how often the computer agreed. <b>“Concept tags correct: 93%”</b> means that out of every 100 topic labels the computer added, about 93 were right. <b>“Expected concepts found: 100%”</b> means it didn't miss any of the topics we expected. Again, the <b>Held-out</b> set is the fairest test, because those worksheets were never used to improve the computer's labelling.</p>
+            <p>We labelled some worksheets by hand, then checked how often the computer agreed. <b>“Concept tags correct: 93%”</b> means that out of every 100 topic labels the computer added, about 93 were right. <b>“Expected concepts found: 100%”</b> means it didn't miss any of the topics we expected. Again, the <b>Unseen</b> sets are the fairest test, because those worksheets were written and locked away before the labelling was improved, so nothing could have been tuned to pass them.</p>
             <h4>What the results say so far</h4>
             <p>Any classroom information makes the tutor's help much better: scores roughly double. Organising that information with the map helps a bit more, most clearly in getting the tutor to teach the way the class teacher does. A map that picks the wrong focus makes the help <em>worse</em>, so getting the map right matters.</p>
           </article>
@@ -516,7 +516,8 @@
               <dt>Session only</dt><dd>Information that is used while the pupil is working and then thrown away, such as signs of frustration. It is never saved.</dd>
               <dt>Teacher confirmed</dt><dd>A pattern a teacher has checked and agrees with. Only these would ever be shared beyond the tutor.</dd>
               <dt>Scenario</dt><dd>A made-up pupil question used for testing, such as “I got it wrong again”.</dd>
-              <dt>Development / Fresh (held-out) questions</dt><dd>Development questions were used while improving the prototype. Fresh questions were written first and kept aside, so they give a fairer test.</dd>
+              <dt>Practice / Development questions</dt><dd>Questions that were used while improving the prototype. Scores on these flatter it, like marking a pupil on the questions they revised from.</dd>
+              <dt>Unseen questions</dt><dd>Questions written and locked away before the prototype was changed, like an exam paper the candidate hasn't seen. Nothing could have been tuned to pass them, so these are the fair scores. (Researchers call this a “held-out” set.)</dd>
               <dt>AI marker</dt><dd>A second AI that marks the tutor's replies against notes written in advance, without knowing which version of the tutor wrote them.</dd>
               <dt>Map version</dt><dd>The map gets updated from time to time, like a new edition of a textbook. Old answers still count after an update.</dd>
               <dt>Links to other curricula</dt><dd>How a topic on the map matches up with, for example, the GCSE subject content.</dd>
@@ -599,7 +600,7 @@
               <li><b>Graph-constrained model tagger.</b> Claude is shown the candidate node list (all concepts when the subject has ≤ 60, otherwise the keyword-ranked top 30), the full misconception, method and representation lists with descriptions, and rules that distinguish "mainly about" from "uses along the way". It returns JSON. <b>Every returned ID is validated against the graph and the subject</b>; anything not on the map is rejected and reported. The model chooses among a closed set; it cannot invent a topic.</li>
               <li><b>Deterministic text references (English).</b> Act numbers, named events and key quotations are matched by string rules, not by the model, because they are facts about the text rather than judgements about it.</li>
             </ul>
-            <p>The tagger prompt was tuned once, against a 14-unit tuning set, after which two further maths sets and one English set were written and locked before being run. The three sets are reported separately on the Evaluate page because their numbers mean different things (§9).</p>
+            <p>The tagger prompt was tuned once, against a 14-unit practice set, after which two further maths sets and one English set were written and locked before being run (unseen, or held-out, sets). The three sets are reported separately on the Evaluate page because their numbers mean different things (§9).</p>
           </article>
 
           <article class="card" id="t-learner">
@@ -659,7 +660,7 @@
             <h3>9. Evaluation design</h3>
             <p>Two things are measured: the alignment service, and the effect of the briefing on the tutor's reply.</p>
             <h4>Alignment accuracy</h4>
-            <p>Each test unit has hand-written gold: expected concepts, additionally acceptable concepts, method, representation and misconceptions. Concept precision counts a tag correct if expected <i>or</i> acceptable; recall counts expected only. Off-topic units (a poem, a language-paper task) must receive no concept tags. The sets are: a 14-unit tuning set used to adjust the prompt; two maths held-out sets and one English set, written after the last prompt change and never used to alter anything.</p>
+            <p>Each test unit has hand-written gold: expected concepts, additionally acceptable concepts, method, representation and misconceptions. Concept precision counts a tag correct if expected <i>or</i> acceptable; recall counts expected only. Off-topic units (a poem, a language-paper task) must receive no concept tags. The sets are: a 14-unit practice set used to adjust the prompt; two maths unseen sets and one English set, written after the last prompt change and never used to alter anything.</p>
             <h4>Tutor A/B/C</h4>
             <p>Each scenario is a pupil, a message, and hand-written ground truth: the pupil's actual need and a good next step, plus per-class ground truth on method, taught content and content not yet taught. The tutor answers three times with the same system prompt and different context objects:</p>
             <div class="tbl-wrap"><table class="t help-table">
@@ -671,10 +672,10 @@
             <p>Each reply is scored on five criteria from 0 to 3 by a model acting as judge, with the ground truth and rubric in the prompt and the reply quoted verbatim: <b>diagnosis</b> (addresses this pupil's actual need), <b>method</b> (consistent with this teacher), <b>scope</b> (respects what has and has not been taught), <b>next step</b> (right for this pupil now), <b>grounding</b> (claims about pupil and class are true; a fabricated fact scores 0). The behaviour suite adds a sixth, <b>support</b>. Two independent judge passes are averaged. Model-as-judge with a rubric and reference is the protocol studied by Zheng et al. <a href="#theory" data-scroll="t-refs">[R11]</a>, who report high agreement with human raters for pairwise and graded judgements but also position bias and verbosity bias; the design here mitigates the first by scoring each reply alone, and does nothing about the second.</p>
             <h4>Tutor as a variable</h4>
             <p>The tutor is an adapter with one method, <code>respond(context, message, subject) → reply</code>. Three implementations exist: the built-in stub; a webhook that receives each turn as JSON and returns a reply; and an offline exchange in which every turn (scenario × arm, with its context) is exported, answered elsewhere, and the replies uploaded. All three are scored by the same judge against the same ground truth, and results are stored per (suite, tutor) so tutors can be compared on one set. This turns the evaluation from "does the map help this stub?" into "does the map help tutor T?", which is the question a vendor or school actually has. The caveat in §11 about the judge encoding one pedagogy applies with more force when tutors differ from each other than when one tutor is compared with and without the map.</p>
-            <h4>Held-out discipline</h4>
-            <p>Every fix was made on one set and then scored on a fresh set written and committed before the fix existed. The Evaluate page shows the before-fix score alongside each result. Two runs of the same suite differ by around ±1 point in 15, so differences inside that band are reported as noise.</p>
+            <h4>Unseen-set discipline</h4>
+            <p>Every fix was made on one set and then scored on an unseen set (a held-out set, in machine-learning terms) written and committed before the fix existed. The Evaluate page shows the before-fix score alongside each result. Two runs of the same suite differ by around ±1 point in 15, so differences inside that band are reported as noise.</p>
             <h4>What was found</h4>
-            <p>Across four suites (maths dev and held-out; English first and held-out) the map arm beat the raw arm by 1.5 to 3.7 points in 15, and beat the no-context arm by 5 to 8. The gains concentrate in scope (not teaching ahead of the class), method (using the teacher's approach) and grounding (fewer invented facts); diagnosis is where the raw arm is closest, because a teacher's comment on each piece of work is itself a diagnosis. One failure mode recurred in both subjects: when a pupil names what they want, the focus logic can override it with the pupil's weakest skill.</p>
+            <p>Across four suites (maths development and unseen; English first and unseen) the map arm beat the raw arm by 1.5 to 3.7 points in 15, and beat the no-context arm by 5 to 8. The gains concentrate in scope (not teaching ahead of the class), method (using the teacher's approach) and grounding (fewer invented facts); diagnosis is where the raw arm is closest, because a teacher's comment on each piece of work is itself a diagnosis. One failure mode recurred in both subjects: when a pupil names what they want, the focus logic can override it with the pupil's weakest skill.</p>
           </article>
 
           <article class="card" id="t-alternatives">
@@ -697,7 +698,7 @@
           <article class="card" id="t-threats">
             <h3>11. Threats to validity</h3>
             <ul class="help-list">
-              <li><b>Author bias.</b> One person wrote the map, the scenarios, the ground truth and the briefing logic. Held-out sets were written before each fix, but by the same author with the same mental model.</li>
+              <li><b>Author bias.</b> One person wrote the map, the scenarios, the ground truth and the briefing logic. Unseen sets were written before each fix, but by the same author with the same mental model.</li>
               <li><b>Generous raw arm.</b> The raw records are cleaner than real markbooks: every piece of work carries a teacher's comment naming the error. This favours the raw arm on diagnosis and makes the map's margin conservative on that criterion, but the raw arm also never has to deal with noise.</li>
               <li><b>Model as judge.</b> The judge and the tutor are the same model family. The rubric and ground truth constrain it, and two passes are averaged, but self-preference and verbosity biases are documented <a href="#theory" data-scroll="t-refs">[R11]</a> and unmeasured here.</li>
               <li><b>Small n.</b> Ten to fourteen scenarios per suite, five to nine pupils. The ±1 run-to-run band is an observation from repeated runs, not a confidence interval.</li>

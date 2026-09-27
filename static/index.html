@@ -31,6 +31,7 @@
     <div class="sep"></div>
     <button data-page="connect"><span class="num">⌁</span>Connect a tutor</button>
     <button data-page="help"><span class="num">?</span>Help and glossary</button>
+    <button data-page="theory"><span class="num">§</span>Theory</button>
     <div class="foot">No real pupil data. Pupils, classes and teachers are fictional.</div>
   </nav>
 
@@ -423,6 +424,11 @@
             </ul>
           </article>
 
+          <article class="card" id="h-theory">
+            <h3>Want the technical version?</h3>
+            <p>The <a href="#theory" data-page-link="theory">Theory</a> page describes how the prototype is built, how the made-up data was constructed, how the tests are scored, what else could have been built instead, and the research it draws on. It is written for people who work with ontologies, learner models and evaluation.</p>
+          </article>
+
           <article class="card" id="h-glossary">
             <h3>Glossary</h3>
             <dl class="glossary">
@@ -463,6 +469,206 @@
     </section>
 
     <!-- CONNECT -->
+    <section class="page" id="page-theory">
+      <div class="page-head">
+        <div class="eyebrow">Theory</div>
+        <h2>Design basis: architecture, data, evaluation, alternatives and references</h2>
+        <p>The technical companion to the Help page. It describes what the prototype actually implements, on what basis, and what else could have been built. Where a design choice rests on published work, the reference is given; where it rests on a judgement made for this prototype, that is said. Everything described is in the repository and can be checked against the code.</p>
+      </div>
+
+      <div class="help">
+        <nav class="help-toc card" aria-label="Theory contents">
+          <b>On this page</b>
+          <a href="#theory" data-scroll="t-claim">1. The claim under test</a>
+          <a href="#theory" data-scroll="t-arch">2. Component architecture</a>
+          <a href="#theory" data-scroll="t-ontology">3. The map as an ontology</a>
+          <a href="#theory" data-scroll="t-tagging">4. Alignment (tagging)</a>
+          <a href="#theory" data-scroll="t-learner">5. Learner model</a>
+          <a href="#theory" data-scroll="t-behaviour">6. Learning-behaviour layer</a>
+          <a href="#theory" data-scroll="t-assembly">7. Context assembly</a>
+          <a href="#theory" data-scroll="t-synthetic">8. Synthetic data</a>
+          <a href="#theory" data-scroll="t-eval">9. Evaluation design</a>
+          <a href="#theory" data-scroll="t-alternatives">10. Alternatives not taken</a>
+          <a href="#theory" data-scroll="t-threats">11. Threats to validity</a>
+          <a href="#theory" data-scroll="t-refs">12. References</a>
+        </nav>
+
+        <div class="help-body">
+          <article class="card" id="t-claim">
+            <h3>1. The claim under test</h3>
+            <p>An AI tutor that is given classroom context organised around a shared curriculum map produces better tutoring turns than the same tutor given the same context as raw records, or no context. "Better" is operationalised as five judged criteria (§9). The map is the independent variable; the tutor model, its system prompt, the pupil's evidence and the teacher's materials are held constant across arms.</p>
+            <p>The prototype does not test whether pupils learn more. It tests whether the tutor's first reply is more appropriate to a known pupil and class. That is a necessary condition for the stronger claim, not the claim itself.</p>
+          </article>
+
+          <article class="card" id="t-arch">
+            <h3>2. Component architecture</h3>
+            <p>Four data layers are kept in separate tables and never merged. The separation is the central architectural decision: each layer has a different owner, a different rate of change and a different truth condition.</p>
+            <div class="tbl-wrap"><table class="t help-table">
+              <tr><th>Layer</th><th>Tables</th><th>Nature</th><th>Changes when</th></tr>
+              <tr><td>Reference graph</td><td><code>node</code>, <code>edge</code>, <code>crosswalk</code></td><td>Governed, versioned. Nodes are never deleted: a retired node is marked deprecated with a <code>replaced_by</code> pointer</td><td>A curriculum release</td></tr>
+              <tr><td>Alignments</td><td><code>alignment</code></td><td>Derived, probabilistic. Every row carries a confidence, a provenance (which tagger) and the graph version it was made against</td><td>Content is ingested or re-tagged; a release migrates them</td></tr>
+              <tr><td>Evidence</td><td><code>evidence</code>, <code>behaviour_event</code></td><td>Append-only. Records what a pupil did, its source, and how its topic IDs were obtained</td><td>A pupil does something</td></tr>
+              <tr><td>Learner state</td><td><code>learner_state</code>, <code>learner_misconception</code>, <code>learner_indicator</code>, <code>learner_construct</code></td><td>A projection: rebuilt in full from the evidence log by replaying it through the current graph</td><td>Every time evidence is added, and at a release</td></tr>
+            </table></div>
+            <p>Two services sit over these layers. The <b>alignment service</b> (§4) turns free text into graph IDs. The <b>context assembler</b> (§7) joins the four layers into one briefing per tutoring turn. The tutor itself is a thin client: a fixed system prompt plus whatever context object it is handed. It is exposed through MCP and REST so that any tutor can consume the briefing without a bespoke integration.</p>
+            <p>The release demo (maths map 2026.2 → 2026.3) exists to show the layering doing work: two concept nodes are merged, alignments are migrated to the new ID and re-stamped, evidence is left untouched, and learner state is rebuilt. Evidence recorded against the old IDs still resolves because the projector follows <code>replaced_by</code> chains.</p>
+            <p><b>Federation.</b> The store is single-tenant, but its identifiers are designed for federation. Every topic has a deterministic UUID (uuid5 of its readable alias) and a resolvable URI, exported read-only in CASE v1.1 form <a href="#theory" data-scroll="t-refs">[R2]</a>. Cross-scheme links are held as typed mappings using the SKOS mapping vocabulary (exactMatch, closeMatch, broadMatch) <a href="#theory" data-scroll="t-refs">[R1]</a>, so two organisations can keep their own IDs and publish how they correspond. CASE itself only distinguishes <code>exactMatchOf</code> from <code>isRelatedTo</code>; the finer SKOS match types are preserved in the map and noted in the export.</p>
+          </article>
+
+          <article class="card" id="t-ontology">
+            <h3>3. The map as an ontology</h3>
+            <p>The map is a lightweight domain ontology rather than a formal one: a fixed set of node types and typed, directed relations, with no axioms or reasoning beyond graph traversal. In Noy and McGuinness's terms <a href="#theory" data-scroll="t-refs">[R3]</a> it is a taxonomy of concepts plus a small set of relations chosen for the competency questions the tutor needs answered: <i>what must be secure before this?</i>, <i>what error pattern explains this answer?</i>, <i>how does this teacher teach this?</i>, <i>what has this class reached?</i></p>
+            <div class="tbl-wrap"><table class="t help-table">
+              <tr><th>Node type</th><th>Relations</th><th>Used to answer</th></tr>
+              <tr><td>Concept</td><td><code>prerequisiteOf</code> (weighted), <code>relatesTo</code> (undirected)</td><td>Readiness, learning edge, next step</td></tr>
+              <tr><td>Misconception</td><td><code>affects</code> → concept</td><td>Credit assignment for wrong answers; diagnosis</td></tr>
+              <tr><td>Method, Representation</td><td><code>teaches</code> → concept</td><td>Consistency with the teacher's practice</td></tr>
+              <tr><td>Quotation (English)</td><td><code>evidences</code> → concept; <code>inSection</code> → act</td><td>Which parts of the text a topic can be discussed from</td></tr>
+              <tr><td>Section / act (English)</td><td>ordered</td><td>Scope: how far the class has read</td></tr>
+            </table></div>
+            <p><b>Two shapes.</b> The maths map is a partial order: 23 concepts with weighted prerequisites, and a learning edge defined as the earliest taught concept (by prerequisite depth, then week) that the pupil has not secured. The English map is a web: 35 topics in five strands, where only the writing-skills strand carries prerequisites and the rest are joined by <code>relatesTo</code>. The knowledge-space view of a curriculum as a prerequisite structure over which learning states are defined <a href="#theory" data-scroll="t-refs">[R4]</a> fits the maths map directly; it does not fit the English map, and the prototype's handling of that difference (§7) is where most of the design effort went after the maths results.</p>
+            <p><b>What the map deliberately excludes.</b> Learning objectives, mark schemes, difficulty levels and lesson sequences are not nodes. Difficulty is a property of an item and a pupil, not of a concept; sequence belongs to a class's scheme of work, which is school data, not curriculum. Keeping these out is what lets two classes teach the same map in different orders and with different methods.</p>
+            <p><b>Granularity.</b> Concept grain was set by hand at "one thing a teacher would set a lesson on" for maths and "one thing an essay paragraph would be about" for English. This is a judgement, not a derivation. Data-driven refinement of the grain, such as Learning Factors Analysis <a href="#theory" data-scroll="t-refs">[R5]</a>, would need far more evidence than the prototype holds.</p>
+          </article>
+
+          <article class="card" id="t-tagging">
+            <h3>4. Alignment: mapping text to the graph</h3>
+            <p>Everything that enters the system as text (a worksheet unit, a markbook activity title, a pupil message) is aligned to graph IDs by one service with two interchangeable implementations and a single output contract: up to three concepts, at most one method, at most one representation, up to three misconceptions, each with a confidence in [0, 1].</p>
+            <ul class="help-list">
+              <li><b>Keyword tagger.</b> Each node carries a vocabulary of keywords. Matches are scored with phrase bonuses and inverse document frequency across the node set; the score is squashed to a confidence by 1 − e<sup>−s/1.5</sup>. Deterministic, no model, and used as the fallback.</li>
+              <li><b>Graph-constrained model tagger.</b> Claude is shown the candidate node list (all concepts when the subject has ≤ 60, otherwise the keyword-ranked top 30), the full misconception, method and representation lists with descriptions, and rules that distinguish "mainly about" from "uses along the way". It returns JSON. <b>Every returned ID is validated against the graph and the subject</b>; anything not on the map is rejected and reported. The model chooses among a closed set; it cannot invent a topic.</li>
+              <li><b>Deterministic text references (English).</b> Act numbers, named events and key quotations are matched by string rules, not by the model, because they are facts about the text rather than judgements about it.</li>
+            </ul>
+            <p>The tagger prompt was tuned once, against a 14-unit tuning set, after which two further maths sets and one English set were written and locked before being run. The three sets are reported separately on the Evaluate page because their numbers mean different things (§9).</p>
+          </article>
+
+          <article class="card" id="t-learner">
+            <h3>5. Learner model</h3>
+            <p>The learner model is a per-concept mastery estimate with graph propagation, deliberately simpler than the standard alternatives so that its behaviour can be read off the code.</p>
+            <ul class="help-list">
+              <li><b>Update rule.</b> Each concept holds a mastery <i>m</i> ∈ [0, 1], initialised at 0.5. An observation with outcome <i>o</i> moves it by <i>k</i>(<i>o</i> − <i>m</i>), where <i>k</i> = <i>b</i>·<i>w</i> / (1 + 0.12·<i>n</i>): <i>b</i> is 0.4 for an item answer and 0.6 for a teacher's mark; <i>w</i> is 1.0 for evidence tagged at source or by a teacher and 0.6 × confidence for evidence tagged by the alignment service; <i>n</i> is the number of direct observations so far. This is an Elo-style estimator with a decaying step size, in the family Pelánek describes for adaptive systems <a href="#theory" data-scroll="t-refs">[R6]</a>, chosen over Bayesian Knowledge Tracing <a href="#theory" data-scroll="t-refs">[R7]</a> because it needs no per-concept parameter fitting and handles graded marks as well as binary outcomes. Its known weakness is that a single strong teacher mark only reaches "developing" (thresholds: secure ≥ 0.7, developing ≥ 0.4).</li>
+              <li><b>Prerequisite propagation.</b> A success adds weak evidence to each prerequisite: <i>m<sub>p</sub></i> += 0.15 · strength · <i>w</i> · (1 − <i>m<sub>p</sub></i>), counted as inferred rather than direct. A failure propagates nothing, because a failure on a composite skill does not identify which component failed.</li>
+              <li><b>Graph-based credit assignment.</b> When a wrong answer matches a known distractor, or a teacher records a misconception, only the concepts that misconception <code>affects</code> are marked down. A pupil who bolts context onto a good analysis is marked down on the context skill, not on the character they wrote about.</li>
+              <li><b>Misconception strength.</b> Incremented by 0.3·<i>w</i> per diagnosis (capped at 1), multiplied by 0.7 on each later success on an affected concept, and treated as active at ≥ 0.5. Misconceptions therefore fade with counter-evidence rather than persisting as labels.</li>
+              <li><b>Rebuild, never patch.</b> The whole state is recomputed from the evidence log on each change. This costs little at prototype scale and guarantees that a graph release changes the projection without touching the evidence.</li>
+            </ul>
+            <p>The parameters (0.4, 0.6, 0.12, 0.15, 0.3, 0.7, and the thresholds) were set by hand so that the synthetic scenarios produce the states they were written to produce. They have not been fitted to data and should not be read as estimates.</p>
+          </article>
+
+          <article class="card" id="t-behaviour">
+            <h3>6. Learning-behaviour layer</h3>
+            <p>A second, smaller framework records how a pupil works rather than what they know. It is kept separate from the curriculum map because its constructs are cross-curricular, but every observation is still recorded against a topic on the map, because a behaviour only means something relative to what the pupil already knows. The pipeline is three-level and rule-based: observed events per answer → indicators per episode → construct patterns per pupil.</p>
+            <ul class="help-list">
+              <li><b>Constructs</b> (six): planning, monitoring and checking, self-assessment accuracy, persistence after difficulty, help-seeking, adapting strategy. They are drawn from the self-regulated-learning literature, in particular the Winne and Hadwin model of studying as a monitored, adaptive process <a href="#theory" data-scroll="t-refs">[R8]</a>. The help-seeking indicators follow Aleven et al.'s distinction between help sought after an attempt and help used in place of one <a href="#theory" data-scroll="t-refs">[R9]</a>.</li>
+              <li><b>Knowledge-aware rules.</b> A hint requested before any attempt counts against help-seeking only if the topic is one the pupil is already secure on or the class was taught before the current week. On a new topic, early help is reasonable and is not counted.</li>
+              <li><b>Patterns are recent, not traits.</b> A construct's score is (Σw₊ − Σw₋)/(Σw₊ + Σw₋) with episode weight 0.85<sup>k</sup> for the <i>k</i>-th most recent episode. "Pattern to support" needs at least two negative indicators carrying ≥ 50 % of the weight; "strength" needs at least two positive indicators and ≤ 20 % negative weight. Fewer than two indicators is "too little evidence".</li>
+              <li><b>Governance.</b> Affect signals (e.g. frustration) are discarded at ingestion and never stored. Only teacher-confirmed patterns are exposed beyond the tutoring tool. The tutor is instructed to adapt how it helps and never to describe the pupil with a label.</li>
+            </ul>
+            <p>The indicator rules are hand-written and unvalidated. Detecting behaviours such as gaming or disengagement from interaction logs is an established research area with trained detectors; this layer is an interface design for such signals, not a detector.</p>
+          </article>
+
+          <article class="card" id="t-assembly">
+            <h3>7. Context assembly</h3>
+            <p>One call produces the briefing for one turn. Its logic is deterministic given the graph, the learner state and the class coverage; the only model call is an optional reading of the pupil's message (intent and named topic), which has a rule-based fallback.</p>
+            <ol class="help-steps">
+              <li><b>Read the message.</b> Classify intent (specific, check_answer, practice, revision, next, harder, start, stuck, explain_method, other) and the topic it names, if any. The topic must be a valid, active concept of the pupil's subject.</li>
+              <li><b>Compute scope.</b> Maths: a concept is taught once a dated, taught lesson is aligned to it at confidence ≥ 0.5. English: the writing-skills strand is always in scope; any other topic is in scope if a taught lesson names it, or unless every quotation evidencing it sits in an act the class has not reached. Acts are ordered, so reaching act <i>n</i> implies acts 1…<i>n</i>.</li>
+              <li><b>Find the learning edge.</b> Maths: earliest taught concept, by prerequisite depth then week, that is not secure or is affected by an active misconception. English: topics affected by an active misconception first, then gaps, then developing topics.</li>
+              <li><b>Choose the focus.</b> A topic named in a specific question wins; a named topic beyond the taught scope becomes a flagged preview; otherwise the learning edge; otherwise a weak prerequisite of taught work; otherwise the latest taught topic.</li>
+              <li><b>Choose the next step.</b> Readiness-aware: consolidate if the focus is not secure; else the next dependent in the class's scheme; else, in a web subject, use this topic to practise the learning edge, or connect to a related topic the class has studied. A request for a part of the text not yet reached becomes "answer briefly, say it is coming up, link back".</li>
+              <li><b>Retrieve materials.</b> Hybrid: filter the teacher's units to those aligned to the focus, then rank by a hashed bag-of-words cosine with additive boosts for method match (+0.5) and misconception coverage (+1.0). The raw arm uses cosine only. The embedding is a 512-dimensional feature hash of unigrams and bigrams, chosen to avoid a model dependency; it is not a semantic embedding.</li>
+              <li><b>Assemble.</b> Focus, pupil state on it, relevant misconceptions (including, in English, misconceptions about cross-cutting skills whatever the focus), prerequisites, class scope, key quotations from studied acts, materials, the "how to support" briefing, and guidance: diagnosis, teach with, avoid, check first, next step, scope rule.</li>
+            </ol>
+            <p>This is retrieval-augmented generation in the sense of Lewis et al. <a href="#theory" data-scroll="t-refs">[R10]</a>, but with the retrieval driven by graph structure rather than by similarity alone. The comparison between the "raw" and "map" arms is precisely a comparison between similarity-only and graph-structured retrieval over the same corpus.</p>
+          </article>
+
+          <article class="card" id="t-synthetic">
+            <h3>8. Construction of the synthetic data</h3>
+            <p>No real pupil, teacher or school data is used anywhere. Every fixture was written by hand against the map, and each was designed to make one thing visible.</p>
+            <ul class="help-list">
+              <li><b>Item bank (maths).</b> 16 items, each tagged at source to one or two concepts, with a correct answer and distractors. Each distractor that corresponds to a known error is tagged to the misconception it reveals. This is the mechanism by which a wrong answer becomes a diagnosis rather than a mark.</li>
+              <li><b>Pupils.</b> Nine maths, five English. Each has a scripted scenario of five to eight events chosen to produce a specific state: one active misconception, or a prerequisite gap, or secure on everything, or a behaviour pattern. Two maths pupils (Isla, Jay) give identical answers and differ only in process events, to test whether the behaviour layer changes the tutor's reply.</li>
+              <li><b>Classes.</b> Two per subject, in the same week of the same scheme, taught with different methods: balance versus "change side, change sign" in maths; thesis-first with zoom-in versus PETAL in English. The pairing isolates method sensitivity.</li>
+              <li><b>Materials.</b> Dated, week-numbered teaching units written in each teacher's voice, some marked planned (a future week). Coverage, "taught so far", and the teacher's preferred method are all derived from these by alignment, never declared. That is the point: the map has to recover the scheme from the materials.</li>
+              <li><b>English evidence.</b> Teacher-marked written work: a task, the topics the teacher says it covered, a mark, and optionally a misconception. There is no item bank, because literature has no distractors.</li>
+            </ul>
+            <p>Synthetic data is a limitation as well as a control. The scenarios were written by the same person who wrote the briefing logic, and the raw-data arm receives unusually clean records (a teacher's comment per piece of work, exact quiz titles). Both effects are discussed in §11.</p>
+          </article>
+
+          <article class="card" id="t-eval">
+            <h3>9. Evaluation design</h3>
+            <p>Two things are measured: the alignment service, and the effect of the briefing on the tutor's reply.</p>
+            <h4>Alignment accuracy</h4>
+            <p>Each test unit has hand-written gold: expected concepts, additionally acceptable concepts, method, representation and misconceptions. Concept precision counts a tag correct if expected <i>or</i> acceptable; recall counts expected only. Off-topic units (a poem, a language-paper task) must receive no concept tags. The sets are: a 14-unit tuning set used to adjust the prompt; two maths held-out sets and one English set, written after the last prompt change and never used to alter anything.</p>
+            <h4>Tutor A/B/C</h4>
+            <p>Each scenario is a pupil, a message, and hand-written ground truth: the pupil's actual need and a good next step, plus per-class ground truth on method, taught content and content not yet taught. The tutor answers three times with the same system prompt and different context objects:</p>
+            <div class="tbl-wrap"><table class="t help-table">
+              <tr><th>Arm</th><th>Context</th></tr>
+              <tr><td>None</td><td>Pupil's name and year only</td></tr>
+              <tr><td>Raw classroom data</td><td>Last eight evidence rows as text (source, activity, mark, teacher's comment), plus the three most similar units by text cosine</td></tr>
+              <tr><td>Organised by the map</td><td>The assembled briefing (§7)</td></tr>
+            </table></div>
+            <p>Each reply is scored on five criteria from 0 to 3 by a model acting as judge, with the ground truth and rubric in the prompt and the reply quoted verbatim: <b>diagnosis</b> (addresses this pupil's actual need), <b>method</b> (consistent with this teacher), <b>scope</b> (respects what has and has not been taught), <b>next step</b> (right for this pupil now), <b>grounding</b> (claims about pupil and class are true; a fabricated fact scores 0). The behaviour suite adds a sixth, <b>support</b>. Two independent judge passes are averaged. Model-as-judge with a rubric and reference is the protocol studied by Zheng et al. <a href="#theory" data-scroll="t-refs">[R11]</a>, who report high agreement with human raters for pairwise and graded judgements but also position bias and verbosity bias; the design here mitigates the first by scoring each reply alone, and does nothing about the second.</p>
+            <h4>Held-out discipline</h4>
+            <p>Every fix was made on one set and then scored on a fresh set written and committed before the fix existed. The Evaluate page shows the before-fix score alongside each result. Two runs of the same suite differ by around ±1 point in 15, so differences inside that band are reported as noise.</p>
+            <h4>What was found</h4>
+            <p>Across four suites (maths dev and held-out; English first and held-out) the map arm beat the raw arm by 1.5 to 3.7 points in 15, and beat the no-context arm by 5 to 8. The gains concentrate in scope (not teaching ahead of the class), method (using the teacher's approach) and grounding (fewer invented facts); diagnosis is where the raw arm is closest, because a teacher's comment on each piece of work is itself a diagnosis. One failure mode recurred in both subjects: when a pupil names what they want, the focus logic can override it with the pupil's weakest skill.</p>
+          </article>
+
+          <article class="card" id="t-alternatives">
+            <h3>10. Alternatives not taken</h3>
+            <div class="tbl-wrap"><table class="t help-table">
+              <tr><th>Alternative</th><th>Why it was not chosen here</th><th>When it would be right</th></tr>
+              <tr><td><b>Formal ontology (OWL, DL reasoning)</b></td><td>The competency questions are answered by traversal, not entailment. Formal axioms would add authoring cost and a reasoner without changing any briefing.</td><td>When consistency checking across many contributed frameworks is needed, or when federation partners already publish OWL.</td></tr>
+              <tr><td><b>Bayesian Knowledge Tracing</b> <a href="#theory" data-scroll="t-refs">[R7]</a></td><td>Needs fitted per-concept parameters (guess, slip, learn) and binary outcomes; the prototype has graded marks and no data to fit.</td><td>With a real item bank and thousands of attempts per concept.</td></tr>
+              <tr><td><b>Deep knowledge tracing</b> (sequence models over attempt histories)</td><td>Opaque to teachers, and needs volume the prototype does not have. The overview by Pelánek <a href="#theory" data-scroll="t-refs">[R12]</a> sets out the trade-offs between BKT, logistic and deep models.</td><td>At platform scale, as a component whose outputs are still projected onto map concepts.</td></tr>
+              <tr><td><b>Knowledge-space / ALEKS-style assessment</b> <a href="#theory" data-scroll="t-refs">[R4]</a></td><td>Requires an adaptive assessment to locate the learner's state; the prototype consumes evidence from wherever it arises.</td><td>For a placement or diagnostic product built around the map.</td></tr>
+              <tr><td><b>Vector retrieval alone (plain RAG)</b> <a href="#theory" data-scroll="t-refs">[R10]</a></td><td>This <i>is</i> the raw arm. It cannot express prerequisites, scope or method, and it lost on every suite.</td><td>As the first stage of retrieval inside the graph-filtered set, with a real embedding model.</td></tr>
+              <tr><td><b>Learning-objective or mark-scheme graph</b></td><td>Objectives are assessment artefacts; they describe what is measured, not how understanding is structured, and they change with each specification.</td><td>As a crosswalk target, which is how the assessment objectives are handled for English.</td></tr>
+              <tr><td><b>Single shared ontology all parties adopt</b></td><td>Unrealistic across publishers, awarding bodies and schools; governance would stall it.</td><td>Never as a replacement for federation; possibly as the hub layer everyone maps to (§2).</td></tr>
+              <tr><td><b>Letting the model tag freely</b> (no graph constraint)</td><td>Produces labels that are not on the map, which cannot be joined to anything. The constrained tagger rejects such labels and reports the rejection count.</td><td>Only as a discovery tool for candidate new concepts, reviewed by a person.</td></tr>
+              <tr><td><b>Human raters for the tutor evaluation</b></td><td>Cost and speed at prototype stage.</td><td>Before any production claim. Model-as-judge should be calibrated against teacher ratings on a sample.</td></tr>
+            </table></div>
+            <p>The KLI framework <a href="#theory" data-scroll="t-refs">[R13]</a> is the natural theoretical home for the next design question: which kinds of knowledge component (fact, procedure, principle) each map node represents, and therefore which instructional move (retrieval practice, worked example, contrasting cases) the briefing should recommend. The prototype's "method" nodes are a coarse stand-in for that.</p>
+          </article>
+
+          <article class="card" id="t-threats">
+            <h3>11. Threats to validity</h3>
+            <ul class="help-list">
+              <li><b>Author bias.</b> One person wrote the map, the scenarios, the ground truth and the briefing logic. Held-out sets were written before each fix, but by the same author with the same mental model.</li>
+              <li><b>Generous raw arm.</b> The raw records are cleaner than real markbooks: every piece of work carries a teacher's comment naming the error. This favours the raw arm on diagnosis and makes the map's margin conservative on that criterion, but the raw arm also never has to deal with noise.</li>
+              <li><b>Model as judge.</b> The judge and the tutor are the same model family. The rubric and ground truth constrain it, and two passes are averaged, but self-preference and verbosity biases are documented <a href="#theory" data-scroll="t-refs">[R11]</a> and unmeasured here.</li>
+              <li><b>Small n.</b> Ten to fourteen scenarios per suite, five to nine pupils. The ±1 run-to-run band is an observation from repeated runs, not a confidence interval.</li>
+              <li><b>Hand-set parameters.</b> Every constant in §5 and §6 was chosen to make the scenarios come out as designed. None has been fitted or validated.</li>
+              <li><b>Two subjects, one text.</b> Transfer from a ladder to a web has been shown for one play. A subject with neither structure (design and technology, say) is untested.</li>
+              <li><b>Scope inference from materials.</b> Coverage is inferred from tagged worksheets. A class whose materials do not mention an act is assumed not to have read it. A real deployment would take the reading schedule as an input.</li>
+            </ul>
+          </article>
+
+          <article class="card" id="t-refs">
+            <h3>12. References</h3>
+            <p class="sub">Each reference below was checked against its publisher's record before inclusion. Where the prototype departs from a cited method, the departure is stated in the section that cites it.</p>
+            <ol class="refs">
+              <li id="r1"><b>[R1]</b> Miles, A. and Bechhofer, S. (eds.) (2009). <i>SKOS Simple Knowledge Organization System Reference</i>. W3C Recommendation, 18 August 2009. <a href="https://www.w3.org/TR/skos-reference/" target="_blank" rel="noopener">w3.org/TR/skos-reference</a>. — Mapping vocabulary (exactMatch, closeMatch, broadMatch, narrowMatch, relatedMatch) used for the crosswalk.</li>
+              <li id="r2"><b>[R2]</b> 1EdTech Consortium (2025). <i>Competencies and Academic Standards Exchange (CASE) v1.1: Best Practice and Implementation Guide</i>. Final Release, 13 March 2025. <a href="https://www.imsglobal.org/spec/CASE/v1p1/impl" target="_blank" rel="noopener">imsglobal.org/spec/CASE/v1p1/impl</a>. — Identifier model and association vocabulary used for the export.</li>
+              <li id="r3"><b>[R3]</b> Noy, N. F. and McGuinness, D. L. (2001). <i>Ontology Development 101: A Guide to Creating Your First Ontology</i>. Stanford Knowledge Systems Laboratory Technical Report KSL-01-05 / Stanford Medical Informatics Technical Report SMI-2001-0880. <a href="https://protege.stanford.edu/publications/ontology_development/ontology101.pdf" target="_blank" rel="noopener">protege.stanford.edu</a>. — Competency-question method used to fix the node and relation types.</li>
+              <li id="r4"><b>[R4]</b> Doignon, J.-P. and Falmagne, J.-C. (1999). <i>Knowledge Spaces</i>. Springer. <a href="https://doi.org/10.1007/978-3-642-58625-5" target="_blank" rel="noopener">doi:10.1007/978-3-642-58625-5</a>. — Prerequisite structures and learning states; the maths map is a knowledge structure in this sense, the English map is not.</li>
+              <li id="r5"><b>[R5]</b> Cen, H., Koedinger, K. and Junker, B. (2006). Learning Factors Analysis: A General Method for Cognitive Model Evaluation and Improvement. In <i>Intelligent Tutoring Systems (ITS 2006)</i>, LNCS 4053, Springer. <a href="https://doi.org/10.1007/11774303_17" target="_blank" rel="noopener">doi:10.1007/11774303_17</a>. — Data-driven refinement of concept granularity, cited as the method the prototype does not yet have the data to apply.</li>
+              <li id="r6"><b>[R6]</b> Pelánek, R. (2016). Applications of the Elo rating system in adaptive educational systems. <i>Computers &amp; Education</i>, 98, 169–179. <a href="https://doi.org/10.1016/j.compedu.2016.03.017" target="_blank" rel="noopener">doi:10.1016/j.compedu.2016.03.017</a>. — Basis for the decaying-step mastery estimator.</li>
+              <li id="r7"><b>[R7]</b> Corbett, A. T. and Anderson, J. R. (1995). Knowledge tracing: Modeling the acquisition of procedural knowledge. <i>User Modeling and User-Adapted Interaction</i>, 4(4), 253–278. <a href="https://doi.org/10.1007/BF01099821" target="_blank" rel="noopener">doi:10.1007/BF01099821</a>. — Bayesian Knowledge Tracing, the standard alternative learner model.</li>
+              <li id="r8"><b>[R8]</b> Winne, P. H. and Hadwin, A. F. (1998). Studying as self-regulated learning. In Hacker, D. J., Dunlosky, J. and Graesser, A. C. (eds.), <i>Metacognition in Educational Theory and Practice</i>, pp. 277–304. Lawrence Erlbaum. <a href="https://doi.org/10.4324/9781410602350-12" target="_blank" rel="noopener">doi:10.4324/9781410602350-12</a>. — Source of the planning, monitoring and adaptation constructs.</li>
+              <li id="r9"><b>[R9]</b> Aleven, V., Stahl, E., Schworm, S., Fischer, F. and Wallace, R. (2003). Help Seeking and Help Design in Interactive Learning Environments. <i>Review of Educational Research</i>, 73(3), 277–320. <a href="https://doi.org/10.3102/00346543073003277" target="_blank" rel="noopener">doi:10.3102/00346543073003277</a>. — Basis for the help-seeking indicators.</li>
+              <li id="r10"><b>[R10]</b> Lewis, P., Perez, E., Piktus, A., Petroni, F., Karpukhin, V., Goyal, N., Küttler, H., Lewis, M., Yih, W., Rocktäschel, T., Riedel, S. and Kiela, D. (2020). Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. <i>Advances in Neural Information Processing Systems 33 (NeurIPS 2020)</i>. <a href="https://proceedings.neurips.cc/paper/2020/hash/6b493230205f780e1bc26945df7481e5-Abstract.html" target="_blank" rel="noopener">proceedings.neurips.cc</a>. — The similarity-only retrieval the raw arm implements.</li>
+              <li id="r11"><b>[R11]</b> Zheng, L., Chiang, W.-L., Sheng, Y., Zhuang, S., Wu, Z., Zhuang, Y., Lin, Z., Li, Z., Li, D., Xing, E., Zhang, H., Gonzalez, J. E. and Stoica, I. (2023). Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena. <i>Advances in Neural Information Processing Systems 36 (NeurIPS 2023)</i>. <a href="https://arxiv.org/abs/2306.05685" target="_blank" rel="noopener">arxiv.org/abs/2306.05685</a>. — Model-as-judge protocol and its documented biases.</li>
+              <li id="r12"><b>[R12]</b> Pelánek, R. (2017). Bayesian knowledge tracing, logistic models, and beyond: an overview of learner modeling techniques. <i>User Modeling and User-Adapted Interaction</i>, 27, 313–350. <a href="https://doi.org/10.1007/s11257-017-9193-2" target="_blank" rel="noopener">doi:10.1007/s11257-017-9193-2</a>. — Survey of the learner-model design space.</li>
+              <li id="r13"><b>[R13]</b> Koedinger, K. R., Corbett, A. T. and Perfetti, C. (2012). The Knowledge-Learning-Instruction Framework: Bridging the Science-Practice Chasm to Enhance Robust Student Learning. <i>Cognitive Science</i>, 36(5), 757–798. <a href="https://doi.org/10.1111/j.1551-6709.2012.01245.x" target="_blank" rel="noopener">doi:10.1111/j.1551-6709.2012.01245.x</a>. — Knowledge-component types and their matching instructional moves; the next design question for the "method" nodes.</li>
+            </ol>
+            <p class="sub" style="margin-top:12px">Not cited, deliberately: no claim is made here about the effect of any of this on pupil learning outcomes, because the prototype does not measure them and no study of this design exists.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <section class="page" id="page-connect">
       <div class="page-head">
         <div class="eyebrow">Integration surface</div>

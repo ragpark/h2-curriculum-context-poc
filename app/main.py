@@ -19,6 +19,7 @@ from . import learner as L
 from . import llm
 from . import seed as S
 from . import tutor as T
+from . import tutors as TU
 from . import versioning as V
 from .mcp_server import mcp
 
@@ -308,14 +309,69 @@ def eval_alignment_latest(set: str = "english", mode: str = "claude"):
     return E.last_alignment(set, mode) or {}
 
 
+# ---------------------------------------------------------------- independent tutors (level 2 integration)
+class TutorIn(BaseModel):
+    label: str
+    kind: str = "webhook"
+    url: str | None = None
+    secret: str | None = None
+    notes: str | None = None
+
+
+@app.get("/api/tutors")
+def tutors_list():
+    return TU.list_tutors()
+
+
+@app.post("/api/tutors")
+def tutors_register(t: TutorIn):
+    return TU.register(t.label, t.kind, t.url, t.secret, t.notes)
+
+
+@app.delete("/api/tutors/{tid}")
+def tutors_remove(tid: str):
+    if tid == "builtin":
+        raise HTTPException(400, "the built-in tutor cannot be removed")
+    TU.remove(tid)
+    return {"removed": tid}
+
+
+@app.post("/api/tutors/{tid}/ping")
+def tutors_ping(tid: str):
+    return TU.ping(TU.get(tid))
+
+
+@app.get("/api/eval/tutor/export")
+def eval_tutor_export(suite: str = "heldout"):
+    return E.export_suite(suite)
+
+
+class RepliesIn(BaseModel):
+    suite: str | None = None
+    replies: list[dict]
+
+
+@app.post("/api/eval/tutor/import")
+def eval_tutor_import(body: RepliesIn, suite: str = "heldout", tutor: str = "builtin"):
+    if TU.get(tutor)["kind"] != "offline":
+        raise HTTPException(400, "replies can only be uploaded for an offline tutor")
+    replies = E.parse_replies(suite, body.model_dump())
+    return E.start_tutor_suite(suite, tutor, replies)
+
+
+@app.get("/api/eval/tutor/compare")
+def eval_tutor_compare(suite: str = "heldout"):
+    return E.compare_tutors(suite)
+
+
 @app.post("/api/eval/tutor")
-def eval_tutor_start(suite: str = "heldout"):
-    return E.start_tutor_suite(suite)
+def eval_tutor_start(suite: str = "heldout", tutor: str = "builtin"):
+    return E.start_tutor_suite(suite, tutor)
 
 
 @app.get("/api/eval/tutor/latest")
-def eval_tutor_latest(suite: str = "heldout"):
-    return E.last_tutor_suite(suite) or {}
+def eval_tutor_latest(suite: str = "heldout", tutor: str = "builtin"):
+    return E.last_tutor_suite(suite, tutor) or {}
 
 
 @app.get("/api/eval/tutor/{jid}")

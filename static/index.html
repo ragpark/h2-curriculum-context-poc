@@ -250,10 +250,35 @@
         <div class="card">
           <div class="card-head">
             <div><h3>Hard tutor test: no context vs raw classroom data vs organised by the map</h3><p class="sub">Fresh held-out scenarios were locked before the briefing fix; development scenarios were used to build it · 12 scenarios in 4 groups · 5 criteria scored 0–3 (max 15) · each reply judged blind, twice · takes about 4 minutes</p></div>
-            <div class="actions"><div class="seg" id="ev-suite"></div><button class="btn primary" id="btn-ev-tutor">Run</button></div>
+            <div class="actions"><div class="seg" id="ev-suite"></div><select class="input" id="ev-tutor-pick" style="width:auto" title="Which tutor answers the scenarios"></select><button class="btn primary" id="btn-ev-tutor">Run</button></div>
           </div>
           <div id="ev-tutor-progress"></div>
+          <div id="ev-tutor-offline"></div>
           <div id="ev-tutor"></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div><h3>Independent tutors on the same test</h3><p class="sub">Any tutor can be scored on the same pupils, classes, scenarios and judge. Register it here, then pick it above and press Run. The map is held fixed; only the tutor and how it uses the briefing vary.</p></div>
+          </div>
+          <div id="ev-compare"></div>
+          <div class="grid g2" style="margin-top:14px">
+            <div>
+              <h4 style="margin:0 0 6px;font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Registered tutors</h4>
+              <div id="tutor-list"></div>
+            </div>
+            <div>
+              <h4 style="margin:0 0 6px;font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Register a tutor</h4>
+              <div class="field"><label>Name</label><input class="input" id="tr-label" placeholder="e.g. Vendor X tutor, Copilot Studio agent"></div>
+              <div class="row" style="margin-top:8px">
+                <div class="field"><label>How it is called</label><select class="input" id="tr-kind"><option value="webhook">Webhook: we POST each turn to your URL</option><option value="offline">Offline: you download the turns and upload replies</option></select></div>
+              </div>
+              <div class="field" style="margin-top:8px" id="tr-url-f"><label>Webhook URL</label><input class="input mono" id="tr-url" placeholder="https://your-tutor.example.org/turn"></div>
+              <div class="field" style="margin-top:8px" id="tr-secret-f"><label>Shared secret (optional, sent as X-Tutor-Secret)</label><input class="input mono" id="tr-secret" placeholder=""></div>
+              <div class="field" style="margin-top:8px"><label>Notes</label><input class="input" id="tr-notes" placeholder="model, prompt version, anything to remember about this run"></div>
+              <button class="btn primary" style="margin-top:10px" id="btn-tr-add">Register</button>
+              <div class="note" style="margin-top:10px"><b>Webhook contract.</b> We POST JSON <code>{turn_id, subject, arm, pupil, message, context}</code> and expect <code>{"reply": "…"}</code> back within 60 s. <code>context</code> is exactly what the built-in tutor receives for that arm: the briefing, the raw pack, or just the pupil's name. Use as much of it as you like. See <a href="#help" data-page-link="help" data-then-scroll="h-independent">Help</a> for the offline route and worked examples.</div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -274,6 +299,7 @@
           <a href="#help" data-scroll="h-pages">What each page does</a>
           <a href="#help" data-scroll="h-pupils">Meet the pupils</a>
           <a href="#help" data-scroll="h-english">English: Macbeth</a>
+          <a href="#help" data-scroll="h-independent">Testing a different tutor</a>
           <a href="#help" data-scroll="h-read">How to read the colours and labels</a>
           <a href="#help" data-scroll="h-results">How to read the test results</a>
           <a href="#help" data-scroll="h-limits">What this can't tell you</a>
@@ -356,6 +382,40 @@
               <tr><td><b>Zainab</b></td><td>11F</td><td>Neat PETAL paragraphs, but sees Lady Macbeth only as evil, and doesn't move beyond the extract to the rest of the play.</td></tr>
             </table>
             <p class="sub" style="margin-top:8px">A mistake about a writing skill, such as retelling the story, matters whatever the question is about. So the tutor briefing mentions it even when the pupil asks about a character or a quotation.</p>
+          </article>
+
+          <article class="card" id="h-independent">
+            <h3>Testing a different tutor against the map</h3>
+            <p>The tutor built into this prototype is a stand-in. It exists so the tests can run; it is not a product. The real question for a school or a vendor is: <b>would <em>our</em> tutor give better help if it had the map's notes?</b> You can answer that here without changing the map, the pupils or the tests.</p>
+            <h4>What stays the same, and what changes</h4>
+            <table class="t help-table">
+              <tr><th>Held fixed by the prototype</th><th>Supplied by the tutor being tested</th></tr>
+              <tr><td>The made-up pupils, classes, worksheets and marked work</td><td>Its own instructions, personality and safety rules</td></tr>
+              <tr><td>The notes it is given for each turn (the “briefing”)</td><td>How much of the notes it uses, and how</td></tr>
+              <tr><td>The test questions, the answers a good tutor should give, and the marking</td><td>Which AI model it runs on, and how it handles a conversation</td></tr>
+            </table>
+            <p class="sub" style="margin-top:8px">Because the marking is the same, every tutor gets three scores out of 15: with no notes, with a pile of raw records, and with the map's briefing. The gap between the last two is what the map is worth to that tutor.</p>
+            <h4>Two ways to plug a tutor in</h4>
+            <ol class="help-steps">
+              <li><b>Live (webhook).</b> Give the prototype a web address. For each test question it sends the tutor a small package: the pupil's message, which of the three kinds of notes this turn uses, and the notes themselves. The tutor sends back its reply. The prototype marks it. Use “Test connection” on the Evaluate page to check the wiring before a full run.</li>
+              <li><b>Offline (file exchange).</b> If the tutor can't be reached over the web, download the full set of test turns as a file (every question, three times over, each with its notes), run the tutor on them wherever it lives, and upload a file of its replies. The prototype marks those exactly as it would live replies.</li>
+            </ol>
+            <h4>How to do it</h4>
+            <ol class="help-steps">
+              <li>Open <b>Evaluate</b> and scroll to “Independent tutors on the same test”.</li>
+              <li>Register the tutor: give it a name, choose live or offline, and for live paste the web address (and a shared secret if you want the tutor to check that requests really come from here).</li>
+              <li>Pick the tutor in the drop-down next to <b>Run</b>, choose a test set, and run it (or, for offline, download the turns, then upload the replies).</li>
+              <li>Read the result the same way as for the built-in tutor (see “How to read the test results”). The comparison table above the registration form lines up every tutor that has been run on the same set.</li>
+            </ol>
+            <h4>What the tutor receives</h4>
+            <p>For a “map” turn, the notes are the same briefing you can see on the <b>Tutor briefing</b> page: the topic to focus on, what the pupil can and can't do yet, the mistake pattern to address, what the class has covered, the teacher's method, and a suggested next step. For a “raw records” turn, it gets the pupil's last few results and some worksheets found by keyword. For a “no notes” turn, it gets only the pupil's name. The tutor may ignore any of it; the marking will show whether that was wise.</p>
+            <h4>Three cautions</h4>
+            <ul class="help-list">
+              <li><b>Compare a tutor with itself first.</b> “With map” versus “with raw records” for the same tutor is the fair test. Comparing two different tutors is shakier, because the model answers were written with one teaching style in mind, and a tutor with a different style can lose marks for reasons that have nothing to do with the map.</li>
+              <li><b>The briefing's wording was tuned on the built-in tutor.</b> Another tutor may read it differently. If a tutor scores badly on the map arm, look at what it did with the notes before concluding the map didn't help.</li>
+              <li><b>Only synthetic data leaves the prototype.</b> Everything sent to a tutor is about fictional pupils. If you ever connect this to real classroom data, that changes, and the tutor's data handling becomes part of the assessment.</li>
+            </ul>
+            <p class="sub">Technical detail, the exact message formats and the reasoning behind the design are on the <a href="#theory" data-page-link="theory">Theory</a> and <a href="#connect" data-page-link="connect">Connect a tutor</a> pages.</p>
           </article>
 
           <article class="card" id="h-read">
@@ -609,6 +669,8 @@
               <tr><td>Organised by the map</td><td>The assembled briefing (§7)</td></tr>
             </table></div>
             <p>Each reply is scored on five criteria from 0 to 3 by a model acting as judge, with the ground truth and rubric in the prompt and the reply quoted verbatim: <b>diagnosis</b> (addresses this pupil's actual need), <b>method</b> (consistent with this teacher), <b>scope</b> (respects what has and has not been taught), <b>next step</b> (right for this pupil now), <b>grounding</b> (claims about pupil and class are true; a fabricated fact scores 0). The behaviour suite adds a sixth, <b>support</b>. Two independent judge passes are averaged. Model-as-judge with a rubric and reference is the protocol studied by Zheng et al. <a href="#theory" data-scroll="t-refs">[R11]</a>, who report high agreement with human raters for pairwise and graded judgements but also position bias and verbosity bias; the design here mitigates the first by scoring each reply alone, and does nothing about the second.</p>
+            <h4>Tutor as a variable</h4>
+            <p>The tutor is an adapter with one method, <code>respond(context, message, subject) → reply</code>. Three implementations exist: the built-in stub; a webhook that receives each turn as JSON and returns a reply; and an offline exchange in which every turn (scenario × arm, with its context) is exported, answered elsewhere, and the replies uploaded. All three are scored by the same judge against the same ground truth, and results are stored per (suite, tutor) so tutors can be compared on one set. This turns the evaluation from "does the map help this stub?" into "does the map help tutor T?", which is the question a vendor or school actually has. The caveat in §11 about the judge encoding one pedagogy applies with more force when tutors differ from each other than when one tutor is compared with and without the map.</p>
             <h4>Held-out discipline</h4>
             <p>Every fix was made on one set and then scored on a fresh set written and committed before the fix existed. The Evaluate page shows the before-fix score alongside each result. Two runs of the same suite differ by around ±1 point in 15, so differences inside that band are reported as noise.</p>
             <h4>What was found</h4>
@@ -701,6 +763,40 @@
             <tr><td><code>ALIGNER_MODE</code></td><td><code>auto</code> (default), <code>heuristic</code> or <code>claude</code></td></tr>
             <tr><td><code>CASE_BASE_URI</code></td><td>Optional. The web address CASE identifiers resolve under. Defaults to this service</td></tr>
           </table>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>Evaluate an independent tutor (level 2 integration)</h3>
+        <p class="sub">The harness can drive any tutor over the same scenarios, ground truth and judge. Register it on the Evaluate page; the contract is below.</p>
+        <div class="grid g2">
+          <div>
+            <h4 style="margin:0 0 6px;font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Webhook: request we send</h4>
+            <pre class="json">POST {your url}
+content-type: application/json
+X-Tutor-Secret: {secret, if set}
+
+{
+  "turn_id": "en-priya-check:h2",
+  "subject": "english",
+  "arm": "h2",              // none | raw | h2
+  "pupil": "pupil:priya",
+  "message": "Can you check my paragraph? …",
+  "context": { …the briefing / raw pack / {pupil} … }
+}</pre>
+            <h4 style="margin:12px 0 6px;font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Response we expect (within 60 s)</h4>
+            <pre class="json">200 OK
+{ "reply": "…the tutor's reply to the pupil…" }</pre>
+          </div>
+          <div>
+            <h4 style="margin:0 0 6px;font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Offline: export and import</h4>
+            <table class="t">
+              <tr><td><code>GET /api/eval/tutor/export?suite=…</code></td><td>Every scenario × arm with its context and a <code>turn_id</code></td></tr>
+              <tr><td><code>POST /api/eval/tutor/import?suite=…&amp;tutor=…</code></td><td>Body <code>{"suite": …, "replies": [{"turn_id", "reply"}]}</code>; all turns required</td></tr>
+              <tr><td><code>GET /api/eval/tutor/compare?suite=…</code></td><td>Latest result per tutor, side by side</td></tr>
+              <tr><td><code>/api/tutors</code></td><td>GET list · POST register · DELETE /{id} · POST /{id}/ping</td></tr>
+            </table>
+            <p class="sub" style="margin-top:10px"><b>Scoring is identical for every tutor:</b> five criteria 0–3, two judge passes, hand-written ground truth. The judge never sees the context, only the reply. Secrets are stored server-side and never returned by the API. Suites: <code>heldout</code>, <code>dev</code>, <code>behaviour</code>, <code>english</code>, <code>english_heldout</code>.</p>
+          </div>
         </div>
       </div>
       <div class="card" style="margin-top:16px">

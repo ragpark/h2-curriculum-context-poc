@@ -573,7 +573,7 @@ function renderCompare(r) {
 }
 
 /* ------------------------------------------------------------------ evaluate */
-S.evMode = "claude"; S.evSet = "heldout2"; S.suite = "heldout";
+S.evMode = "claude"; S.evSet = "heldout2"; S.suite = "heldout"; S.evTutor = "builtin"; S.tutors = [];
 function renderEvaluate() {
   const llm = S.status.llm_available;
   if (!llm && S.evMode === "claude") S.evMode = "heuristic";
@@ -592,10 +592,42 @@ function renderEvaluate() {
     S.alignLoaded = ak;
     api(`/api/eval/alignment/latest?set=${S.evSet}&mode=${S.evMode}`).then((d) => { if (d && d.summary) renderAlignEval(d); else $("#ev-align").innerHTML = `<div class="empty">No run yet for this set. Click Run.</div>`; });
   }
+  renderTutorPicker();
   if (!S.suiteLoaded) {
     S.suiteLoaded = true;
-    api(`/api/eval/tutor/latest?suite=${S.suite}`).then((d) => { if (d && d.summary) renderTutorEval(d); else if (!llm) $("#ev-tutor").innerHTML = `<div class="note">Needs <code>ANTHROPIC_API_KEY</code>.</div>`; else $("#ev-tutor").innerHTML = `<div class="empty">No run yet for this set. Click Run.</div>`; });
+    api(`/api/eval/tutor/latest?suite=${S.suite}&tutor=${encodeURIComponent(S.evTutor)}`).then((d) => { if (d && d.summary) renderTutorEval(d); else if (!llm) $("#ev-tutor").innerHTML = `<div class="note">Needs <code>ANTHROPIC_API_KEY</code>.</div>`; else $("#ev-tutor").innerHTML = `<div class="empty">No run yet for this set and tutor. Click Run${S.tutors.find((t) => t.id === S.evTutor)?.kind === "offline" ? ", or upload a replies file" : ""}.</div>`; });
+    renderTutorCompare(); renderTutorList();
   }
+}
+async function renderTutorPicker() {
+  if (!S.tutors.length) S.tutors = await api("/api/tutors");
+  const sel = $("#ev-tutor-pick");
+  sel.innerHTML = S.tutors.map((t) => `<option value="${esc(t.id)}">${esc(t.label)}</option>`).join("");
+  sel.value = S.evTutor;
+  sel.onchange = () => { S.evTutor = sel.value; S.suiteLoaded = false; renderEvaluate(); };
+  const t = S.tutors.find((x) => x.id === S.evTutor) || S.tutors[0];
+  const off = $("#ev-tutor-offline");
+  if (t && t.kind === "offline") {
+    off.innerHTML = `<div class="note" style="margin-bottom:10px"><b>Offline tutor.</b> 1. <a href="/api/eval/tutor/export?suite=${esc(S.suite)}" target="_blank">Download the turns for this set</a> (every scenario × 3 arms, with the context each arm gets). 2. Run your tutor on them. 3. Upload the replies: <input type="file" id="ev-replies" accept="application/json" style="font-size:12px"> <button class="btn sm" id="btn-ev-upload">Upload and score</button></div>`;
+    $("#btn-ev-tutor").disabled = true; $("#btn-ev-tutor").title = "Offline tutors are scored from an uploaded replies file";
+    $("#btn-ev-upload").onclick = async (e) => {
+      const f = $("#ev-replies").files[0]; if (!f) { toast("Choose the replies file first"); return; }
+      let body; try { body = JSON.parse(await f.text()); } catch { toast("That file is not valid JSON"); return; }
+      await runTutorSuite(e.currentTarget, body);
+    };
+  } else { off.innerHTML = ""; $("#btn-ev-tutor").disabled = !S.status.llm_available; $("#btn-ev-tutor").title = ""; }
+}
+async function renderTutorCompare() {
+  const d = await api(`/api/eval/tutor/compare?suite=${S.suite}`);
+  const arms = ["none", "raw", "h2"];
+  $("#ev-compare").innerHTML = d.tutors.length ? `<div class="tbl-wrap"><table class="t"><tr><th>Tutor</th><th>Last run</th>${arms.map((a) => `<th>${ARM_SHORT[a]}</th>`).join("")}<th>Map − raw</th><th>Map vs raw (W–T–L)</th></tr>${d.tutors.map((t) => { const dlt = +(t.by_arm.h2 - t.by_arm.raw).toFixed(2); const h = t.head_to_head; return `<tr><td><b>${esc(t.label)}</b><div class="sub">${esc(t.kind)}</div></td><td class="sub">${esc(t.finished || "")}</td>${arms.map((a) => `<td style="color:${ARM_COL[a]}"><b>${t.by_arm[a]}</b><span class="sub"> / ${t.max_total}</span></td>`).join("")}<td class="${dlt > 0.25 ? "ok" : dlt < -0.25 ? "bad" : ""}"><b>${dlt > 0 ? "+" : ""}${dlt}</b></td><td>${h.win}–${h.tie}–${h.loss}</td></tr>`; }).join("")}</table></div><div class="sub" style="margin-top:6px">Same scenarios, ground truth and judge for every row (${esc(d.suite_label || d.suite)}). Compare each tutor with and without the map before comparing tutors with each other: the ground truth encodes one pedagogy, and a tutor with a different one can score lower for reasons unrelated to the map.</div>` : `<div class="empty">No results yet on this set. Run the built-in tutor, or register and run another.</div>`;
+}
+async function renderTutorList() {
+  S.tutors = await api("/api/tutors");
+  $("#tutor-list").innerHTML = S.tutors.map((t) => `<div class="sec" style="margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${esc(t.label)}</b><span class="badge">${esc(t.kind)}</span>${t.has_secret ? '<span class="badge secure">secret set</span>' : ""}</div>${t.url ? `<div class="mono sub" style="margin-top:3px;word-break:break-all">${esc(t.url)}</div>` : ""}${t.notes ? `<div class="sub" style="margin-top:3px">${esc(t.notes)}</div>` : ""}${t.builtin ? "" : `<div style="margin-top:6px;display:flex;gap:6px">${t.kind === "webhook" ? `<button class="btn sm" data-ping="${esc(t.id)}">Test connection</button>` : ""}<button class="btn sm" data-rm="${esc(t.id)}">Remove</button></div>`}</div>`).join("");
+  $("#tutor-list").querySelectorAll("[data-ping]").forEach((b) => (b.onclick = () => busy(b, async () => { const r = await api(`/api/tutors/${b.dataset.ping}/ping`, { method: "POST" }); toast(r.ok ? "Connected. Reply: " + (r.reply || "").slice(0, 80) : "Failed: " + r.error); })));
+  $("#tutor-list").querySelectorAll("[data-rm]").forEach((b) => (b.onclick = () => busy(b, async () => { await api(`/api/tutors/${b.dataset.rm}`, { method: "DELETE" }); if (S.evTutor === b.dataset.rm) S.evTutor = "builtin"; S.tutors = []; S.suiteLoaded = false; renderEvaluate(); })));
+  const kind = $("#tr-kind"); const sync = () => { const w = kind.value === "webhook"; $("#tr-url-f").hidden = !w; $("#tr-secret-f").hidden = !w; }; kind.onchange = sync; sync();
 }
 function renderAlignEval(d) {
   const s = d.summary;
@@ -630,17 +662,18 @@ function renderTutorEval(d) {
       <div class="sub" style="margin:8px 0"><b>Actual need (hand-written):</b> ${esc(r.need)}</div>
       <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">${arms.map((a) => `<div><div class="sub"><b style="color:${ARM_COL[a]}">${esc(d.arms[a])}</b> · ${r.arms[a].total}/15 · ${Object.entries(r.arms[a].scores).map(([k, v]) => `${CRIT[k].split(" ")[0]} ${v}`).join(", ")}</div><div class="reply" style="margin-top:6px;font-size:12.5px">${esc(r.arms[a].reply)}</div><div class="sub" style="margin-top:6px"><i>Judge: ${esc(r.arms[a].why[0])}</i></div></div>`).join("")}</div></details>`;
   }).join("");
-  $("#ev-tutor").innerHTML = `<div class="sub" style="margin-bottom:8px"><b>${esc(d.suite_label || "Development scenarios")}</b> · last run ${esc(d.finished)} · ${esc(d.model)} · ${d.seconds}s · ${sm.scored_scenarios} scenarios${bf ? ` · the map on the same scenarios before the fix: <b>${bf.by_arm.h2.total}</b> / ${max}` : ""}</div>
+  $("#ev-tutor").innerHTML = `<div class="sub" style="margin-bottom:8px"><b>${esc(d.suite_label || "Development scenarios")}</b>${d.tutor && !d.tutor.builtin ? ` · tutor: <b>${esc(d.tutor.label)}</b> (${esc(d.tutor.kind)})` : ""} · last run ${esc(d.finished)} · ${esc(d.model)} · ${d.seconds}s · ${sm.scored_scenarios} scenarios${bf ? ` · the map on the same scenarios before the fix: <b>${bf.by_arm.h2.total}</b> / ${max}` : ""}</div>
     <div class="note" style="margin-bottom:10px">Scores vary by about ±1 point between identical runs, so differences smaller than that are noise.</div>
     <div class="kpis" style="margin-bottom:12px">${tiles}<div class="kpi"><div class="v">${h.win}–${h.tie}–${h.loss}</div><div class="l">Map vs raw data: wins–ties–losses</div></div></div>
     <div class="grid g2"><div>${crit}</div><div>${cats}</div></div>
     <h4 style="margin:16px 0 4px;font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Every scenario, with all three replies</h4>${rows}`;
 }
-async function runTutorSuite(btn) {
+async function runTutorSuite(btn, replies) {
   btn.disabled = true;
   const prog = $("#ev-tutor-progress");
   try {
-    let j = await api(`/api/eval/tutor?suite=${S.suite}`, { method: "POST" });
+    let j = replies ? await api(`/api/eval/tutor/import?suite=${S.suite}&tutor=${encodeURIComponent(S.evTutor)}`, { method: "POST", body: replies })
+                    : await api(`/api/eval/tutor?suite=${S.suite}&tutor=${encodeURIComponent(S.evTutor)}`, { method: "POST" });
     while (j.status === "running") {
       prog.innerHTML = `<div class="note accent" style="margin-bottom:10px"><span class="spin" style="display:inline-block;width:10px;height:10px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-1px"></span> Running… ${j.done}/${j.total || 12} scenarios (3 replies and 6 judgements each)</div>`;
       await new Promise((r) => setTimeout(r, 4000));
@@ -726,6 +759,13 @@ function bindStatic() {
     const r = await api("/api/tutor", { method: "POST", body: { learner: S.pupil, message: $("#c-msg").value, concept: $("#c-concept").value || null, mode: S.mode } });
     renderCompare(r); S.ctxDone = true; renderSteps();
   });
+  $("#btn-tr-add").onclick = (e) => busy(e.currentTarget, async () => {
+    const kind = $("#tr-kind").value;
+    const t = await api("/api/tutors", { method: "POST", body: { label: $("#tr-label").value, kind, url: kind === "webhook" ? $("#tr-url").value : null, secret: $("#tr-secret").value || null, notes: $("#tr-notes").value || null } });
+    $("#tr-label").value = ""; $("#tr-url").value = ""; $("#tr-secret").value = ""; $("#tr-notes").value = "";
+    S.tutors = []; S.evTutor = t.id; S.suiteLoaded = false; toast("Registered " + t.label); renderEvaluate();
+  });
+  document.querySelectorAll("[data-then-scroll]").forEach((a) => (a.onclick = (e) => { e.preventDefault(); show(a.dataset.pageLink); setTimeout(() => { const t = document.getElementById(a.dataset.thenScroll); if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 72, behavior: "smooth" }); }, 50); }));
   $("#btn-ev-align").onclick = (e) => busy(e.currentTarget, async () => { const d = await api(`/api/eval/alignment?mode=${S.evMode}&set=${S.evSet}`, { method: "POST" }); renderAlignEval(d); S.evalDone = true; renderSteps(); });
   $("#btn-ev-tutor").onclick = (e) => runTutorSuite(e.currentTarget);
 }

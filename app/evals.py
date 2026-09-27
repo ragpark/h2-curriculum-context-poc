@@ -23,6 +23,7 @@ from . import db
 from . import llm
 from . import seed as S
 from . import tutor as T
+from . import tutors as TU
 
 SEED = Path(__file__).resolve().parent.parent / "seed"
 
@@ -183,7 +184,8 @@ def _judge(sc, cls, pupil, reply, crit, pinfo=None) -> dict:
     return {c: max(0, min(3, int(out.get(c, 0)))) for c in crit} | {"why": out.get("why", "")}
 
 
-def _run_one(sc, classes, pupils, crit=CRITERIA, pinfo=None):
+def _run_one(sc, classes, pupils, crit=CRITERIA, pinfo=None, tutor=TU.BUILTIN, replies=None):
+    """One scenario, three arms. `replies` (offline tutors): {arm: reply} already produced elsewhere."""
     pupil = pupils[sc["pupil"]]
     cls = classes[pupil["class"]]
     res = {"id": sc["id"], "category": sc["category"], "pupil": pupil["name"], "class": pupil["class"],
@@ -191,7 +193,13 @@ def _run_one(sc, classes, pupils, crit=CRITERIA, pinfo=None):
     for arm in ARMS:
         try:
             ctx = _context(arm, pupil, sc["message"])
-            reply = T.respond(ctx, sc["message"], S.subject_of_pupil(pupil["id"]))
+            if replies is not None:
+                reply = (replies.get(arm) or "").strip()
+                if not reply:
+                    raise ValueError("no reply supplied for this arm")
+            else:
+                reply = TU.respond(tutor, ctx, sc["message"], S.subject_of_pupil(pupil["id"]), arm=arm, pupil_id=pupil["id"],
+                                   turn_id=f"{sc['id']}:{arm}")
             judgements = [_judge(sc, cls, pupil, reply, crit, (pinfo or {}).get(sc["pupil"])) for _ in range(2)]  # two independent passes
             scores = {c: round(sum(j[c] for j in judgements) / 2, 2) for c in crit}
             res["arms"][arm] = {"reply": reply, "scores": scores, "total": round(sum(scores.values()), 2),
@@ -217,7 +225,16 @@ def _aggregate(results, crit=CRITERIA):
     return {"by_arm": agg, "by_category": by_cat, "head_to_head": wins, "scored_scenarios": len(ok), "max_total": 3 * len(crit)}
 
 
-def start_tutor_suite(name: str = "dev") -> dict:
+def _result_key(name: str, tutor_id: str) -> str:
+    return f"last_tutor_suite_{name}" if tutor_id == "builtin" else f"last_tutor_suite_{name}:{tutor_id}"
+
+
+def start_tutor_suite(name: str = "dev", tutor_id: str = "builtin", replies: dict | None = None) -> dict:
+    """Run a suite against a tutor. For an offline tutor, `replies` is {scenario_id: {arm: reply}} from an upload;
+    the judge still needs the model, so the key is required in every case."""
+    tutor = TU.get(tutor_id)
+    if tutor["kind"] == "offline" and replies is None:
+        raise ValueError("This tutor is offline: export the suite, run it, then upload the replies file.")
     if not llm.available():
         raise ValueError("Set ANTHROPIC_API_KEY on the service to run the tutor suite.")
     with _lock:
@@ -227,7 +244,8 @@ def start_tutor_suite(name: str = "dev") -> dict:
         jid = uuid.uuid4().hex[:8]
         if name not in SUITES:
             raise ValueError("unknown suite")
-        job = {"id": jid, "status": "running", "done": 0, "total": 0, "started": time.time(), "model": llm.model(), "suite": name}
+        job = {"id": jid, "status": "running", "done": 0, "total": 0, "started": time.time(), "model": llm.model(),
+               "suite": name, "tutor": tutor_id}
         _jobs[jid] = job
 
     def work():
@@ -241,22 +259,76 @@ def start_tutor_suite(name: str = "dev") -> dict:
             crit = CRITERIA + tuple(s.get("extra_criteria", []))
 
             def one(sc):
-                r = _run_one(sc, s["classes"], pupils, crit, s.get("pupils"))
+                r = _run_one(sc, s["classes"], pupils, crit, s.get("pupils"), tutor,
+                             None if replies is None else replies.get(sc["id"], {}))
                 job["done"] += 1
                 return r
 
             with ThreadPoolExecutor(4) as ex:
                 results = list(ex.map(one, s["scenarios"]))
-            out = {"suite": name, "suite_label": SUITE_LABELS[name], "model": llm.model(), "arms": ARM_LABELS, "criteria": crit, "summary": _aggregate(results, crit),
+            out = {"suite": name, "suite_label": SUITE_LABELS[name], "model": llm.model(), "arms": ARM_LABELS, "criteria": crit,
+                   "tutor": TU.public(tutor) if tutor["kind"] != "builtin" else tutor, "summary": _aggregate(results, crit),
                    "results": results, "finished": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()),
                    "seconds": round(time.time() - job["started"])}
-            db.meta_set(f"last_tutor_suite_{name}", json.dumps(out))
+            db.meta_set(_result_key(name, tutor_id), json.dumps(out))
             job.update(status="done", result=out)
         except Exception as e:
             job.update(status="error", error=f"{type(e).__name__}: {str(e)[:300]}")
 
     threading.Thread(target=work, daemon=True).start()
     return job
+
+
+# ------------------------------------------------------------------ offline tutors: export turns, import replies
+def export_suite(name: str) -> dict:
+    """Every scenario × arm with the exact context the built-in tutor would receive. A tutor run elsewhere answers
+    each turn and returns {"suite": name, "replies": [{"turn_id": "...", "reply": "..."}]}."""
+    if name not in SUITES:
+        raise ValueError("unknown suite")
+    T.ensure_demo_state()
+    s = suite(name)
+    pupils = {p["id"]: p for p in db.q("select * from pupil")}
+    turns = []
+    for sc in s["scenarios"]:
+        pupil = pupils[sc["pupil"]]
+        subject = S.subject_of_pupil(pupil["id"])
+        for arm in ARMS:
+            turns.append({"turn_id": f"{sc['id']}:{arm}", "scenario_id": sc["id"], "arm": arm, "arm_label": ARM_LABELS[arm],
+                          "subject": subject, "pupil": pupil["id"], "message": sc["message"],
+                          "context": _context(arm, pupil, sc["message"])})
+    return {"suite": name, "suite_label": SUITE_LABELS[name], "arms": ARM_LABELS, "graph_versions": {k: G_version(k) for k in S.SUBJECTS},
+            "instructions": ("Answer every turn as your tutor would, using as much or as little of `context` as you like. "
+                             "Return {\"suite\": ..., \"replies\": [{\"turn_id\": ..., \"reply\": ...}]} and upload it. "
+                             "The three arms for one scenario are the same pupil message with different context; treat them independently."),
+            "turns": turns}
+
+
+def G_version(subject):
+    from . import graph as G
+    return G.get().version_for(subject)
+
+
+def parse_replies(name: str, body: dict) -> dict:
+    """Validate an uploaded replies file -> {scenario_id: {arm: reply}}. Missing turns are reported, not silently skipped."""
+    if not isinstance(body, dict) or not isinstance(body.get("replies"), list):
+        raise ValueError('upload must be JSON with a "replies" list')
+    if body.get("suite") and body["suite"] != name:
+        raise ValueError(f"file is for suite '{body['suite']}', not '{name}'")
+    s = suite(name)
+    expected = {f"{sc['id']}:{arm}" for sc in s["scenarios"] for arm in ARMS}
+    out: dict = {}
+    seen = set()
+    for r in body["replies"]:
+        tid = str(r.get("turn_id", ""))
+        if tid not in expected:
+            raise ValueError(f"unknown turn_id '{tid[:60]}'")
+        sid, arm = tid.rsplit(":", 1)
+        out.setdefault(sid, {})[arm] = str(r.get("reply", ""))[:TU.MAX_REPLY]
+        seen.add(tid)
+    missing = sorted(expected - seen)
+    if missing:
+        raise ValueError(f"{len(missing)} of {len(expected)} turns have no reply, e.g. {missing[0]}")
+    return out
 
 
 def job_status(jid: str) -> dict:
@@ -266,13 +338,28 @@ def job_status(jid: str) -> dict:
     return {k: v for k, v in j.items() if k != "result"} | ({"result": j["result"]} if j.get("status") == "done" else {})
 
 
-def last_tutor_suite(name: str = "dev") -> dict | None:
-    raw = db.meta_get(f"last_tutor_suite_{name}")
+def last_tutor_suite(name: str = "dev", tutor_id: str = "builtin") -> dict | None:
+    raw = db.meta_get(_result_key(name, tutor_id))
     if raw:
         return with_before_fix(json.loads(raw), name)
+    if tutor_id != "builtin":
+        return None
     shipped = SEED / "results" / f"tutor_{name}_latest.json"  # results of the run made when this version was built
     out = json.loads(shipped.read_text()) if shipped.exists() else None
     return with_before_fix(out, name)
+
+
+def compare_tutors(name: str) -> dict:
+    """Latest result per tutor on one suite, side by side (by-arm totals and head-to-head)."""
+    rows = []
+    for t in TU.list_tutors():
+        r = last_tutor_suite(name, t["id"])
+        if r and r.get("summary"):
+            sm = r["summary"]
+            rows.append({"tutor": t["id"], "label": t["label"], "kind": t["kind"], "finished": r.get("finished"),
+                         "by_arm": {a: sm["by_arm"][a]["total"] for a in ARMS}, "head_to_head": sm["head_to_head"]["h2_vs_raw"],
+                         "max_total": sm["max_total"], "scored": sm["scored_scenarios"]})
+    return {"suite": name, "suite_label": SUITE_LABELS.get(name), "tutors": rows}
 
 
 def with_before_fix(result: dict | None, name: str) -> dict | None:

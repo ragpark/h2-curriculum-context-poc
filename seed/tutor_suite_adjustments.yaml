@@ -1,0 +1,83 @@
+# Agreed-adjustments test. Written BEFORE the support-profile code existed; never used to build it.
+# Two pairs of pupils with identical answers: Ben/Bilal (working below the class), Farah/Fatima (secure, ahead).
+# One in each pair has teacher-confirmed adjustments; the twin has none. Same messages to both.
+# Scored on the usual five criteria plus 'adjustments': did the reply honour the required adjustments
+# (and, for a twin with none, did it avoid inventing any)?
+extra_criteria: [adjustments]
+classes:
+  "10X":
+    teacher: "Ms Okafor"
+    method: "Balance method (do the same to both sides), with bar models; function machines for inverse operations"
+    avoid: "'Change side, change sign' / 'moving' terms across the equals sign"
+    taught: "Wk1 inverse operations and one-step equations (function machines); Wk2 two-step equations (balance, bar model); Wk3 collecting like terms (algebra tiles); Wk4 unknowns on both sides (balance, bar model; worksheet 'Common mistake: why the sign changes'; homework 'Mixed practice: both sides')"
+    not_yet_taught: "Wk5 expanding brackets (grid method) and equations with brackets; Wk6 inequalities"
+  "10Y":
+    teacher: "Mr Hale"
+    method: "'Change side, change sign'"
+    avoid: "Switching to a different method (e.g. the balance method) as the main explanation without linking it to 'change side, change sign'"
+    taught: "Wk2 two-step equations (change side, change sign); Wk3 collecting like terms; Wk4 unknowns on both sides (change side, change sign; homework 'x on both sides')"
+    not_yet_taught: "Wk5 equations with brackets"
+
+pupils:
+  pupil:ben:
+    adjustments: "REQUIRED (confirmed by Ms Okafor with the SENCO): one step at a time, then stop; every sentence under 15 words; no hint or first step until Ben has attempted it himself; a concrete numerical example before any general rule; when wrong, name the exact step and why in one sentence first; praise a specific action, never the pupil, never a wrong answer."
+    good_adjustments: "A short reply of short sentences that asks Ben to attempt (or to show his attempt) before any hint; if he has shown working, names the exact wrong step in one sentence; gives one step only; concrete numbers before any rule."
+  pupil:bilal:
+    adjustments: "None. Bilal has no agreed adjustments; ordinary tutoring applies."
+    good_adjustments: "No invented restrictions; a normal reply within the class's method and scope."
+  pupil:farah:
+    adjustments: "REQUIRED (confirmed by Mr Hale): Farah may be taught topics the class has not reached, properly rather than as a flagged preview, naming the topic; when secure, move straight to harder or new work rather than consolidating; every question asked must be a real one she is expected to answer."
+    good_adjustments: "Teaches expanding brackets or equations with brackets properly (still with 'change side, change sign' where equations are involved), names it as the next topic, does not consolidate, and asks a real question."
+  pupil:fatima:
+    adjustments: "None. Fatima has no agreed adjustments, so the class scope rule applies: brackets are not yet taught and should only be a clearly flagged preview."
+    good_adjustments: "Respects scope: stretch within taught content or a clearly flagged brief preview; no invented adjustments."
+
+scenarios:
+  - id: adj-ben-help
+    category: adjustments_below
+    pupil: pupil:ben
+    message: "Can you help me with 3(x + 2) = 21?"
+    need: "Brackets are not yet taught to the class; his gap is expanding a bracket (only multiplies the first term) and negatives. The right move is to ask for his attempt first, then one step, concretely."
+    good_next: "Ask him to attempt it or show what he has tried; then one step only (e.g. what 3 × 2 is), with the balance method"
+  - id: adj-bilal-help
+    category: adjustments_below
+    pupil: pupil:bilal
+    message: "Can you help me with 3(x + 2) = 21?"
+    need: "Same gap as Ben. Brackets not yet taught; flag it, keep it short and within the balance method."
+    good_next: "A clearly flagged brief preview of expanding the bracket, or divide both sides by 3 first as a within-scope route, with the balance method"
+  - id: adj-ben-wrong
+    category: adjustments_below
+    pupil: pupil:ben
+    message: "I did 2(x − 3) = 10 and got 2x − 3 = 10 so x = 6.5. Is that right?"
+    need: "He has attempted it, so a hint is now allowed. The wrong step is multiplying only the first term: 2 × −3 was missed. Name that step precisely, one step, short sentences, praise the attempt specifically."
+    good_next: "Name the exact wrong step in one sentence (the 2 must multiply the −3 as well), then one step: ask what 2 × −3 is"
+  - id: adj-bilal-wrong
+    category: adjustments_below
+    pupil: pupil:bilal
+    message: "I did 2(x − 3) = 10 and got 2x − 3 = 10 so x = 6.5. Is that right?"
+    need: "Same error as Ben: only the first term multiplied. Correct it within the balance method; brackets are a preview topic for this class."
+    good_next: "Point out that the 2 multiplies both terms; show the corrected expansion or use divide-both-sides-by-2 first; ask him to redo it"
+  - id: adj-farah-next
+    category: adjustments_ahead
+    pupil: pupil:farah
+    message: "I've finished all my homework. What's next?"
+    need: "Secure on everything taught. Her agreed adjustments say move ahead properly: teach equations with brackets, name it, no consolidation."
+    good_next: "Introduce equations with brackets as the next topic, properly, using 'change side, change sign' once the bracket is expanded, and ask her to try one"
+  - id: adj-fatima-next
+    category: adjustments_ahead
+    pupil: pupil:fatima
+    message: "I've finished all my homework. What's next?"
+    need: "Secure on everything taught, no adjustments. Scope applies: stretch within taught content, or a brief clearly flagged preview of brackets."
+    good_next: "A harder both-sides equation, or a short flagged preview of brackets saying it comes next week"
+  - id: adj-farah-harder
+    category: adjustments_ahead
+    pupil: pupil:farah
+    message: "Can we do something harder?"
+    need: "Agreed adjustments: stretch by default and may go beyond the scheme. A real question, not a rhetorical one."
+    good_next: "A genuinely harder problem, possibly beyond the scheme (brackets or inequalities), named as such, with a real question to answer"
+  - id: adj-fatima-harder
+    category: adjustments_ahead
+    pupil: pupil:fatima
+    message: "Can we do something harder?"
+    need: "No adjustments. Harder within taught content, or a clearly flagged preview."
+    good_next: "A harder unknowns-on-both-sides equation (e.g. with negatives or fractions), staying within scope"

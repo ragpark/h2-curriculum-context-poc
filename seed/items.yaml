@@ -106,6 +106,9 @@ pupils:
   - {id: pupil:chloe, name: "Chloe (synthetic)", class: "10X"}
   - {id: pupil:dev, name: "Dev (synthetic)", class: "10Y"}
   - {id: pupil:farah, name: "Farah (synthetic)", class: "10Y"}
+  # twins for the agreed-adjustments test: identical answers to Ben and Farah, no adjustments profile
+  - {id: pupil:bilal, name: "Bilal (synthetic)", class: "10X"}
+  - {id: pupil:fatima, name: "Fatima (synthetic)", class: "10Y"}
   - {id: pupil:gabriel, name: "Gabriel (synthetic)", class: "10X"}
   - {id: pupil:hana, name: "Hana (synthetic)", class: "10Y"}
   - {id: pupil:isla, name: "Isla (synthetic)", class: "10X"}
@@ -163,6 +166,30 @@ scenarios:
     title: "Class 10Y: secure and wants more"
     pupil: pupil:farah
     story: "Secure on everything the class has covered so far. Brackets are next in the scheme but have not been taught yet."
+    events:
+      - {source: "Homework platform", item: item:two-1, response: "x = 4"}
+      - {source: "Homework platform", item: item:two-2, response: "x = 7"}
+      - {source: "Homework platform", item: item:clt-1, response: "3x + 7"}
+      - {source: "Vendor X tutor", item: item:bs-1, response: "x = 3"}
+      - {source: "Vendor X tutor", item: item:bs-2, response: "x = 3"}
+      - {source: "Vendor X tutor", item: item:bs-3, response: "x = −4"}
+      - {source: "Vendor X tutor", item: item:dir-1, response: "6"}
+  - id: brackets-gap-twin
+    title: "Same answers as Ben, no agreed adjustments"
+    pupil: pupil:bilal
+    story: "Identical evidence to Ben. He has no adjustments profile. He exists so the effect of Ben's adjustments can be measured on its own."
+    events:
+      - {source: "Homework platform", item: item:two-1, response: "x = 4"}
+      - {source: "Homework platform", item: item:bs-1, response: "x = 3"}
+      - {source: "Homework platform", item: item:bs-2, response: "x = 3"}
+      - {source: "Vendor X tutor", item: item:exp-1, response: "3x + 2"}
+      - {source: "Vendor X tutor", item: item:exp-2, response: "−2x − 6"}
+      - {source: "Vendor X tutor", item: item:dir-1, response: "−6"}
+      - {source: "Vendor X tutor", item: item:br-1, response: "x = 19/3"}
+  - id: secure-and-ahead-twin
+    title: "Same answers as Farah, no agreed adjustments"
+    pupil: pupil:fatima
+    story: "Identical evidence to Farah. She has no adjustments profile, so the class scope rule applies to her in full."
     events:
       - {source: "Homework platform", item: item:two-1, response: "x = 4"}
       - {source: "Homework platform", item: item:two-2, response: "x = 7"}

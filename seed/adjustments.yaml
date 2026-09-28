@@ -1,0 +1,60 @@
+# Agreed adjustments: a fixed vocabulary of things a teacher or SENCO can require of the tutor for one pupil.
+#
+# Design rules
+#   • Each is an instruction the tutor can follow and a marker can check. Never a category, label or diagnosis.
+#   • Authored by a person and confirmed with a name and a review date. Nothing here is ever inferred from behaviour.
+#   • In the briefing these are REQUIRED. The derived 'how to support' block stays advisory; the two never merge.
+#   • The source document (a one-page profile, a pupil passport) is not stored; only the confirmed adjustments are.
+version: "0.1"
+
+groups:
+  - {id: pace, label: "Pace and chunking"}
+  - {id: language, label: "Language and reading"}
+  - {id: help, label: "Help and feedback"}
+  - {id: method, label: "Method and representation"}
+  - {id: scope, label: "Scope"}
+  - {id: tone, label: "Tone and confidence"}
+
+adjustments:
+  # ---- pace and chunking
+  - {id: adj:one-step, group: pace, label: "One step at a time", instruction: "Give exactly one step, then stop and wait for the pupil. Never list several steps in one reply."}
+  - {id: adj:one-question, group: pace, label: "One question per reply", instruction: "Ask at most one question in a reply."}
+  - {id: adj:processing-time, group: pace, label: "Allow processing time", instruction: "Do not prompt again or add extra hints if the pupil is slow to answer; wait for their reply."}
+  - {id: adj:repeat-back, group: pace, label: "Check understanding before moving on", instruction: "Before any new step, ask the pupil to say back what they have just done, in their own words."}
+  # ---- language and reading
+  - {id: adj:short-sentences, group: language, label: "Short sentences", instruction: "Keep every sentence under 15 words. Prefer common words."}
+  - {id: adj:plain-words, group: language, label: "Plain words for technical terms", instruction: "When you use a technical term, immediately give it in everyday words as well."}
+  - {id: adj:minimal-text, group: language, label: "Minimal text", instruction: "Keep the whole reply under 60 words."}
+  - {id: adj:worked-example-first, group: language, label: "Worked example before any question", instruction: "Show a complete worked example first; only then ask the pupil to try one."}
+  # ---- help and feedback
+  - {id: adj:no-hint-before-attempt, group: help, label: "No hint before an attempt", instruction: "Do not give a hint or the first step until the pupil has attempted the question themselves."}
+  - {id: adj:smallest-hint, group: help, label: "Smallest hint that unblocks", instruction: "When a hint is due, give the smallest one that lets the pupil continue; never the full method."}
+  - {id: adj:name-the-error, group: help, label: "Name the error precisely", instruction: "When the pupil is wrong, say exactly which step was wrong and why, in one sentence, before anything else."}
+  - {id: adj:concrete-first, group: help, label: "Concrete before abstract", instruction: "Use a concrete example with numbers before any general rule or symbol."}
+  # ---- method and representation
+  - {id: adj:visual-support, group: method, label: "Always include a visual", instruction: "Every explanation must include a visual representation (a diagram, number line or bar), described in words."}
+  - {id: adj:class-method-only, group: method, label: "Class method only", instruction: "Use only the method the class teacher uses. Never introduce an alternative method, even as a comparison."}
+  # ---- scope
+  - {id: adj:may-go-beyond, group: scope, label: "May work beyond the class scheme", instruction: "This pupil may be taught topics the class has not reached yet. Teach them properly rather than as a flagged preview, but say which topic it is."}
+  - {id: adj:stretch-first, group: scope, label: "Stretch by default", instruction: "When the pupil is secure on the topic, move to a harder or new problem straight away; do not consolidate."}
+  - {id: adj:stay-within, group: scope, label: "Stay strictly within taught content", instruction: "Never mention a topic the class has not been taught, even as a preview."}
+  # ---- tone and confidence
+  - {id: adj:effort-praise, group: tone, label: "Praise effort, specifically", instruction: "Praise a specific thing the pupil did (an attempt, a check, a correction), not the pupil. Never praise a wrong answer."}
+  - {id: adj:no-rhetorical, group: tone, label: "No rhetorical questions", instruction: "Every question you ask must be a real question the pupil is expected to answer."}
+  - {id: adj:normalise-errors, group: tone, label: "Treat errors as normal", instruction: "When the pupil is wrong, say plainly that this is a common error and move straight to the fix. No commiseration."}
+
+# Profiles for the two pupils in scope. 'confirmed_by' and 'review_by' are part of the record: an adjustment past its
+# review date drops out of the briefing until re-confirmed.
+profiles:
+  - pupil: pupil:ben
+    confirmed_by: "Ms Okafor (class teacher) with the SENCO"
+    confirmed_on: "2026-09-08"
+    review_by: "2026-12-18"
+    note: "Ben works below the class on brackets and negatives. He rushes when given several steps and gives up after a wrong answer. These adjustments came from his one-page profile."
+    adjustments: [adj:one-step, adj:short-sentences, adj:no-hint-before-attempt, adj:concrete-first, adj:name-the-error, adj:effort-praise]
+  - pupil: pupil:farah
+    confirmed_by: "Mr Hale (class teacher)"
+    confirmed_on: "2026-09-08"
+    review_by: "2026-12-18"
+    note: "Farah is secure on everything taught and is bored by consolidation. Agreed with her and her parents that she may move ahead of the scheme."
+    adjustments: [adj:may-go-beyond, adj:stretch-first, adj:no-rhetorical]

@@ -413,7 +413,7 @@
             <h4>Three cautions</h4>
             <ul class="help-list">
               <li><b>Compare a tutor with itself first.</b> “With map” versus “with raw records” for the same tutor is the fair test. Comparing two different tutors is shakier, because the model answers were written with one teaching style in mind, and a tutor with a different style can lose marks for reasons that have nothing to do with the map.</li>
-              <li><b>The briefing's wording was tuned on the built-in tutor.</b> Another tutor may read it differently. If a tutor scores badly on the map arm, look at what it did with the notes before concluding the map didn't help.</li>
+              <li><b>The briefing's wording was tuned on the built-in tutor.</b> Another tutor may read it differently. If a tutor scores badly in the “organised by the map” version, look at what it did with the notes before concluding the map didn't help.</li>
               <li><b>Only synthetic data leaves the prototype.</b> Everything sent to a tutor is about fictional pupils. If you ever connect this to real classroom data, that changes, and the tutor's data handling becomes part of the assessment.</li>
             </ul>
             <p class="sub">Technical detail, the exact message formats and the reasoning behind the design are on the <a href="#theory" data-page-link="theory">Theory</a> and <a href="#connect" data-page-link="connect">Connect a tutor</a> pages.</p>
@@ -523,6 +523,7 @@
               <dt>Teacher confirmed</dt><dd>A pattern a teacher has checked and agrees with. Only these would ever be shared beyond the tutor.</dd>
               <dt>Scenario</dt><dd>A made-up pupil question used for testing, such as “I got it wrong again”.</dd>
               <dt>Practice / Development questions</dt><dd>Questions that were used while improving the prototype. Scores on these flatter it, like marking a pupil on the questions they revised from.</dd>
+              <dt>Version of the notes (an “arm”)</dt><dd>In the tutor test the same pupil asks the same question three times, and each time the tutor is given a different set of notes: none, a pile of raw records, or the map's briefing. Each of those is one version, or “condition”. Researchers borrow the word “arm” from medical trials, where a study has a treatment arm and a control arm. The gap between the “map” version and the “raw records” version is the number the whole prototype exists to measure.</dd>
               <dt>Unseen questions</dt><dd>Questions written and locked away before the prototype was changed, like an exam paper the candidate hasn't seen. Nothing could have been tuned to pass them, so these are the fair scores. (Researchers call this a “held-out” set.)</dd>
               <dt>AI marker</dt><dd>A second AI that marks the tutor's replies against notes written in advance, without knowing which version of the tutor wrote them.</dd>
               <dt>Map version</dt><dd>The map gets updated from time to time, like a new edition of a textbook. Old answers still count after an update.</dd>
@@ -644,10 +645,10 @@
               <li><b>Find the learning edge.</b> Maths: earliest taught concept, by prerequisite depth then week, that is not secure or is affected by an active misconception. English: topics affected by an active misconception first, then gaps, then developing topics.</li>
               <li><b>Choose the focus.</b> A topic named in a specific question wins; a named topic beyond the taught scope becomes a flagged preview; otherwise the learning edge; otherwise a weak prerequisite of taught work; otherwise the latest taught topic.</li>
               <li><b>Choose the next step.</b> Readiness-aware: consolidate if the focus is not secure; else the next dependent in the class's scheme; else, in a web subject, use this topic to practise the learning edge, or connect to a related topic the class has studied. A request for a part of the text not yet reached becomes "answer briefly, say it is coming up, link back".</li>
-              <li><b>Retrieve materials.</b> Hybrid: filter the teacher's units to those aligned to the focus, then rank by a hashed bag-of-words cosine with additive boosts for method match (+0.5) and misconception coverage (+1.0). The raw arm uses cosine only. The embedding is a 512-dimensional feature hash of unigrams and bigrams, chosen to avoid a model dependency; it is not a semantic embedding.</li>
+              <li><b>Retrieve materials.</b> Hybrid: filter the teacher's units to those aligned to the focus, then rank by a hashed bag-of-words cosine with additive boosts for method match (+0.5) and misconception coverage (+1.0). The raw-records condition uses cosine only. The embedding is a 512-dimensional feature hash of unigrams and bigrams, chosen to avoid a model dependency; it is not a semantic embedding.</li>
               <li><b>Assemble.</b> Focus, pupil state on it, relevant misconceptions (including, in English, misconceptions about cross-cutting skills whatever the focus), prerequisites, class scope, key quotations from studied acts, materials, the "how to support" briefing, and guidance: diagnosis, teach with, avoid, check first, next step, scope rule.</li>
             </ol>
-            <p>This is retrieval-augmented generation in the sense of Lewis et al. <a href="#theory" data-scroll="t-refs">[R10]</a>, but with the retrieval driven by graph structure rather than by similarity alone. The comparison between the "raw" and "map" arms is precisely a comparison between similarity-only and graph-structured retrieval over the same corpus.</p>
+            <p>This is retrieval-augmented generation in the sense of Lewis et al. <a href="#theory" data-scroll="t-refs">[R10]</a>, but with the retrieval driven by graph structure rather than by similarity alone. The comparison between the "raw records" and "map" conditions is precisely a comparison between similarity-only and graph-structured retrieval over the same corpus.</p>
           </article>
 
           <article class="card" id="t-synthetic">
@@ -660,7 +661,7 @@
               <li><b>Materials.</b> Dated, week-numbered teaching units written in each teacher's voice, some marked planned (a future week). Coverage, "taught so far", and the teacher's preferred method are all derived from these by alignment, never declared. That is the point: the map has to recover the scheme from the materials.</li>
               <li><b>English evidence.</b> Teacher-marked written work: a task, the topics the teacher says it covered, a mark, and optionally a misconception. There is no item bank, because literature has no distractors.</li>
             </ul>
-            <p>Synthetic data is a limitation as well as a control. The scenarios were written by the same person who wrote the briefing logic, and the raw-data arm receives unusually clean records (a teacher's comment per piece of work, exact quiz titles). Both effects are discussed in §11.</p>
+            <p>Synthetic data is a limitation as well as a control. The scenarios were written by the same person who wrote the briefing logic, and the raw-records condition receives unusually clean records (a teacher's comment per piece of work, exact quiz titles). Both effects are discussed in §11.</p>
           </article>
 
           <article class="card" id="t-eval">
@@ -669,20 +670,20 @@
             <h4>Alignment accuracy</h4>
             <p>Each test unit has hand-written gold: expected concepts, additionally acceptable concepts, method, representation and misconceptions. Concept precision counts a tag correct if expected <i>or</i> acceptable; recall counts expected only. Off-topic units (a poem, a language-paper task) must receive no concept tags. The sets are: a 14-unit practice set used to adjust the prompt; two maths unseen sets and one English set, written after the last prompt change and never used to alter anything.</p>
             <h4>Tutor A/B/C</h4>
-            <p>Each scenario is a pupil, a message, and hand-written ground truth: the pupil's actual need and a good next step, plus per-class ground truth on method, taught content and content not yet taught. The tutor answers three times with the same system prompt and different context objects:</p>
+            <p>Each scenario is a pupil, a message, and hand-written ground truth: the pupil's actual need and a good next step, plus per-class ground truth on method, taught content and content not yet taught. The tutor answers three times with the same system prompt and different context objects. These three are the <em>conditions</em> of the test (in trial terminology, the arms; the API and export files use <code>arm</code> as the field name):</p>
             <div class="tbl-wrap"><table class="t help-table">
-              <tr><th>Arm</th><th>Context</th></tr>
+              <tr><th>Condition (each reply is generated once per condition)</th><th>Context the tutor receives</th></tr>
               <tr><td>None</td><td>Pupil's name and year only</td></tr>
               <tr><td>Raw classroom data</td><td>Last eight evidence rows as text (source, activity, mark, teacher's comment), plus the three most similar units by text cosine</td></tr>
               <tr><td>Organised by the map</td><td>The assembled briefing (§7)</td></tr>
             </table></div>
             <p>Each reply is scored on five criteria from 0 to 3 by a model acting as judge, with the ground truth and rubric in the prompt and the reply quoted verbatim: <b>diagnosis</b> (addresses this pupil's actual need), <b>method</b> (consistent with this teacher), <b>scope</b> (respects what has and has not been taught), <b>next step</b> (right for this pupil now), <b>grounding</b> (claims about pupil and class are true; a fabricated fact scores 0). The behaviour suite adds a sixth, <b>support</b>. Two independent judge passes are averaged. Model-as-judge with a rubric and reference is the protocol studied by Zheng et al. <a href="#theory" data-scroll="t-refs">[R11]</a>, who report high agreement with human raters for pairwise and graded judgements but also position bias and verbosity bias; the design here mitigates the first by scoring each reply alone, and does nothing about the second.</p>
             <h4>Tutor as a variable</h4>
-            <p>The tutor is an adapter with one method, <code>respond(context, message, subject) → reply</code>. Three implementations exist: the built-in stub; a webhook that receives each turn as JSON and returns a reply; and an offline exchange in which every turn (scenario × arm, with its context) is exported, answered elsewhere, and the replies uploaded. All three are scored by the same judge against the same ground truth, and results are stored per (suite, tutor) so tutors can be compared on one set. This turns the evaluation from "does the map help this stub?" into "does the map help tutor T?", which is the question a vendor or school actually has. The caveat in §11 about the judge encoding one pedagogy applies with more force when tutors differ from each other than when one tutor is compared with and without the map.</p>
+            <p>The tutor is an adapter with one method, <code>respond(context, message, subject) → reply</code>. Three implementations exist: the built-in stub; a webhook that receives each turn as JSON and returns a reply; and an offline exchange in which every turn (scenario × condition, with its context) is exported, answered elsewhere, and the replies uploaded. All three are scored by the same judge against the same ground truth, and results are stored per (suite, tutor) so tutors can be compared on one set. This turns the evaluation from "does the map help this stub?" into "does the map help tutor T?", which is the question a vendor or school actually has. The caveat in §11 about the judge encoding one pedagogy applies with more force when tutors differ from each other than when one tutor is compared with and without the map.</p>
             <h4>Unseen-set discipline</h4>
             <p>Every fix was made on one set and then scored on an unseen set (a held-out set, in machine-learning terms) written and committed before the fix existed. The Evaluate page shows the before-fix score alongside each result. Two runs of the same suite differ by around ±1 point in 15, so differences inside that band are reported as noise.</p>
             <h4>What was found</h4>
-            <p>Across four suites (maths development and unseen; English first and unseen) the map arm beat the raw arm by 1.5 to 3.7 points in 15, and beat the no-context arm by 5 to 8. The gains concentrate in scope (not teaching ahead of the class), method (using the teacher's approach) and grounding (fewer invented facts); diagnosis is where the raw arm is closest, because a teacher's comment on each piece of work is itself a diagnosis. One failure mode recurred in both subjects: when a pupil names what they want, the focus logic can override it with the pupil's weakest skill.</p>
+            <p>Across four suites (maths development and unseen; English first and unseen) the map condition beat the raw-records condition by 1.5 to 3.7 points in 15, and beat the no-context condition by 5 to 8. The gains concentrate in scope (not teaching ahead of the class), method (using the teacher's approach) and grounding (fewer invented facts); diagnosis is where the raw-records condition is closest, because a teacher's comment on each piece of work is itself a diagnosis. One failure mode recurred in both subjects: when a pupil names what they want, the focus logic can override it with the pupil's weakest skill.</p>
           </article>
 
           <article class="card" id="t-alternatives">
@@ -693,7 +694,7 @@
               <tr><td><b>Bayesian Knowledge Tracing</b> <a href="#theory" data-scroll="t-refs">[R7]</a></td><td>Needs fitted per-concept parameters (guess, slip, learn) and binary outcomes; the prototype has graded marks and no data to fit.</td><td>With a real item bank and thousands of attempts per concept.</td></tr>
               <tr><td><b>Deep knowledge tracing</b> (sequence models over attempt histories)</td><td>Opaque to teachers, and needs volume the prototype does not have. The overview by Pelánek <a href="#theory" data-scroll="t-refs">[R12]</a> sets out the trade-offs between BKT, logistic and deep models.</td><td>At platform scale, as a component whose outputs are still projected onto map concepts.</td></tr>
               <tr><td><b>Knowledge-space / ALEKS-style assessment</b> <a href="#theory" data-scroll="t-refs">[R4]</a></td><td>Requires an adaptive assessment to locate the learner's state; the prototype consumes evidence from wherever it arises.</td><td>For a placement or diagnostic product built around the map.</td></tr>
-              <tr><td><b>Vector retrieval alone (plain RAG)</b> <a href="#theory" data-scroll="t-refs">[R10]</a></td><td>This <i>is</i> the raw arm. It cannot express prerequisites, scope or method, and it lost on every suite.</td><td>As the first stage of retrieval inside the graph-filtered set, with a real embedding model.</td></tr>
+              <tr><td><b>Vector retrieval alone (plain RAG)</b> <a href="#theory" data-scroll="t-refs">[R10]</a></td><td>This <i>is</i> the raw-records condition. It cannot express prerequisites, scope or method, and it lost on every suite.</td><td>As the first stage of retrieval inside the graph-filtered set, with a real embedding model.</td></tr>
               <tr><td><b>Learning-objective or mark-scheme graph</b></td><td>Objectives are assessment artefacts; they describe what is measured, not how understanding is structured, and they change with each specification.</td><td>As a crosswalk target, which is how the assessment objectives are handled for English.</td></tr>
               <tr><td><b>Single shared ontology all parties adopt</b></td><td>Unrealistic across publishers, awarding bodies and schools; governance would stall it.</td><td>Never as a replacement for federation; possibly as the hub layer everyone maps to (§2).</td></tr>
               <tr><td><b>Letting the model tag freely</b> (no graph constraint)</td><td>Produces labels that are not on the map, which cannot be joined to anything. The constrained tagger rejects such labels and reports the rejection count.</td><td>Only as a discovery tool for candidate new concepts, reviewed by a person.</td></tr>
@@ -706,7 +707,7 @@
             <h3>11. Threats to validity</h3>
             <ul class="help-list">
               <li><b>Author bias.</b> One person wrote the map, the scenarios, the ground truth and the briefing logic. Unseen sets were written before each fix, but by the same author with the same mental model.</li>
-              <li><b>Generous raw arm.</b> The raw records are cleaner than real markbooks: every piece of work carries a teacher's comment naming the error. This favours the raw arm on diagnosis and makes the map's margin conservative on that criterion, but the raw arm also never has to deal with noise.</li>
+              <li><b>Generous raw-records condition.</b> The raw records are cleaner than real markbooks: every piece of work carries a teacher's comment naming the error. This favours that condition on diagnosis and makes the map's margin conservative on that criterion, but that condition also never has to deal with noise.</li>
               <li><b>Model as judge.</b> The judge and the tutor are the same model family. The rubric and ground truth constrain it, and two passes are averaged, but self-preference and verbosity biases are documented <a href="#theory" data-scroll="t-refs">[R11]</a> and unmeasured here.</li>
               <li><b>Small n.</b> Ten to fourteen scenarios per suite, five to nine pupils. The ±1 run-to-run band is an observation from repeated runs, not a confidence interval.</li>
               <li><b>Hand-set parameters.</b> Every constant in §5 and §6 was chosen to make the scenarios come out as designed. None has been fitted or validated.</li>
@@ -942,7 +943,7 @@ X-Tutor-Secret: {secret, if set}
 {
   "turn_id": "en-priya-check:h2",
   "subject": "english",
-  "arm": "h2",              // none | raw | h2
+  "arm": "h2",              // which condition: none | raw | h2
   "pupil": "pupil:priya",
   "message": "Can you check my paragraph? …",
   "context": { …the briefing / raw pack / {pupil} … }
@@ -954,7 +955,7 @@ X-Tutor-Secret: {secret, if set}
           <div>
             <h4 style="margin:0 0 6px;font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em">Offline: export and import</h4>
             <table class="t">
-              <tr><td><code>GET /api/eval/tutor/export?suite=…</code></td><td>Every scenario × arm with its context and a <code>turn_id</code></td></tr>
+              <tr><td><code>GET /api/eval/tutor/export?suite=…</code></td><td>Every scenario × condition (field name <code>arm</code>) with its context and a <code>turn_id</code></td></tr>
               <tr><td><code>POST /api/eval/tutor/import?suite=…&amp;tutor=…</code></td><td>Body <code>{"suite": …, "replies": [{"turn_id", "reply"}]}</code>; all turns required</td></tr>
               <tr><td><code>GET /api/eval/tutor/compare?suite=…</code></td><td>Latest result per tutor, side by side</td></tr>
               <tr><td><code>/api/tutors</code></td><td>GET list · POST register · DELETE /{id} · POST /{id}/ping</td></tr>

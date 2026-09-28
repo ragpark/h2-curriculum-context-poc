@@ -608,7 +608,7 @@ async function renderTutorPicker() {
   const t = S.tutors.find((x) => x.id === S.evTutor) || S.tutors[0];
   const off = $("#ev-tutor-offline");
   if (t && t.kind === "offline") {
-    off.innerHTML = `<div class="note" style="margin-bottom:10px"><b>Offline tutor.</b> 1. <a href="/api/eval/tutor/export?suite=${esc(S.suite)}" target="_blank">Download the turns for this set</a> (every scenario × 3 arms, with the context each arm gets). 2. Run your tutor on them. 3. Upload the replies: <input type="file" id="ev-replies" accept="application/json" style="font-size:12px"> <button class="btn sm" id="btn-ev-upload">Upload and score</button></div>`;
+    off.innerHTML = `<div class="note" style="margin-bottom:10px"><b>Offline tutor.</b> 1. <a href="/api/eval/tutor/export?suite=${esc(S.suite)}" target="_blank">Download the turns for this set</a> (every scenario × 3 versions of the notes, with the context each version gets). 2. Run your tutor on them. 3. Upload the replies: <input type="file" id="ev-replies" accept="application/json" style="font-size:12px"> <button class="btn sm" id="btn-ev-upload">Upload and score</button></div>`;
     $("#btn-ev-tutor").disabled = true; $("#btn-ev-tutor").title = "Offline tutors are scored from an uploaded replies file";
     $("#btn-ev-upload").onclick = async (e) => {
       const f = $("#ev-replies").files[0]; if (!f) { toast("Choose the replies file first"); return; }

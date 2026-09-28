@@ -1,0 +1,127 @@
+# ============================================================================
+# CURRICULUM MAP — AUTHORING TEMPLATE
+# ============================================================================
+# Copy this file, fill it in, and check it with the validator on the Authoring page (or POST it to /api/validate).
+# Lines starting with # are comments and can be deleted. Every "REQUIRED" field must be present.
+#
+# Before you start, decide the SHAPE of the subject:
+#   layers  — a ladder: topics build on each other (most of maths, grammar, early reading).
+#             Structure = 'prerequisites'.
+#   strands — a web: topics connect sideways and can be met in any order (literature, history, RE).
+#             Structure = 'related' links between strands, with 'prerequisites' only where one skill truly
+#             needs another. Optionally 'sections' (parts of a set text) and 'quotations'.
+# ----------------------------------------------------------------------------
+
+subject: science                # REQUIRED. One lower-case word. Used to keep this map separate from others.
+graph_version: "2026.1"         # REQUIRED. Quoted. Bump on every release; never reuse a version.
+title: "Science — Forces (KS3)" # Shown on the map page.
+layout: layers                  # REQUIRED. 'layers' or 'strands' (see above).
+id_prefix: cc:science/forces/   # Optional. Lets you write short concept ids below (e.g. 'balanced') and have them
+                                # expanded to cc:science/forces/balanced. Misconception/method ids are always full.
+
+# strands: only for layout 'strands'. Every concept then needs a 'strand'.
+# strands:
+#   - {id: context, label: Context}
+#   - {id: skills,  label: "Writing skills"}
+
+# ----------------------------------------------------------------------------
+# CONCEPTS  (REQUIRED, at least one)
+# One concept = one thing a teacher would set a lesson (or, in English, a paragraph) on.
+#   id          REQUIRED  short id if id_prefix is set, else full 'cc:...'. Lower-case, hyphens, no spaces.
+#   label       REQUIRED  what a teacher would call it, as a verb phrase where possible (≤ 80 chars).
+#   description optional  one sentence: what a pupil who is secure on this can do.
+#   keywords    REQUIRED  ≥ 3. Words and phrases that appear in worksheets and pupil messages about this topic.
+#                         Include the ways teachers actually write it, not just the official term.
+#                         Avoid words shared with other concepts (the validator warns).
+#   key_stage   optional  e.g. [KS3]
+#   strand      REQUIRED in 'strands' layout only.
+# ----------------------------------------------------------------------------
+concepts:
+  - id: force-arrows
+    label: Represent forces with arrows
+    description: Draws a force diagram with arrows whose length and direction show size and direction.
+    keywords: [force arrow, force diagram, "free body", direction of force]
+    key_stage: [KS3]
+  - id: balanced
+    label: Identify balanced and unbalanced forces
+    keywords: [balanced, unbalanced, "resultant force", "net force"]
+    key_stage: [KS3]
+  - id: resultant
+    label: Calculate a resultant force along a line
+    keywords: [resultant, "add the forces", "subtract the forces", newtons]
+    key_stage: [KS3]
+
+# ----------------------------------------------------------------------------
+# PREREQUISITES  ('layers' layout; optional but expected)
+# [before, after, weight]. "Before must be secure before after can be learned." weight 0–1: how strongly.
+# Only real dependencies, not the usual teaching order. The validator rejects cycles.
+# ----------------------------------------------------------------------------
+prerequisites:
+  - [force-arrows, balanced, 0.8]
+  - [balanced, resultant, 0.7]
+
+# related: ('strands' layout) undirected links between topics that are taught together or illuminate each other.
+# related:
+#   - [some-character, some-theme]
+
+# ----------------------------------------------------------------------------
+# MISCONCEPTIONS  (strongly recommended)
+# A recurring, explainable error pattern — not a slip. Each must 'affect' at least one concept.
+#   id           REQUIRED  full 'mc:<subject>/<name>'
+#   label        REQUIRED  the error, as a teacher would name it
+#   description  REQUIRED  what the pupil does and the thinking behind it
+#   affects      REQUIRED  concepts this error shows up in (short ids allowed)
+#   keywords     ≥ 3       how a worksheet or examiner report would describe it
+# Sources: examiner reports, marking experience, item-bank distractors, subject-education research.
+# ----------------------------------------------------------------------------
+misconceptions:
+  - id: mc:science/motion-needs-force
+    label: Believes a moving object must have a force pushing it
+    description: "Assumes constant motion needs a continuing force; concludes that a moving object has an unbalanced force on it."
+    affects: [balanced]
+    keywords: ["keeps it moving", "force to keep moving", "no force no motion", "Aristotelian"]
+
+# ----------------------------------------------------------------------------
+# METHODS  (recommended)  — named ways of teaching, deliberately plural. Each must 'teach' ≥ 1 concept.
+# REPRESENTATIONS (optional) — visual/concrete tools pupils draw or use.
+# ----------------------------------------------------------------------------
+methods:
+  - id: md:science/force-diagram-first
+    label: Draw the force diagram before any calculation
+    teaches: [force-arrows, balanced, resultant]
+    keywords: ["draw the diagram first", "diagram before", "label the arrows"]
+
+representations:
+  - id: rp:science/force-diagram
+    label: Force diagram
+    keywords: ["force diagram", "free-body diagram", "arrow diagram"]
+
+# ----------------------------------------------------------------------------
+# SECTIONS and QUOTATIONS  (set texts only; 'strands' layout)
+# sections: ordered parts of the text. quotations: key lines, each 'evidencing' concepts, with act "n.m".
+# ----------------------------------------------------------------------------
+# sections:
+#   - {id: sec:text/act-1, label: "Act 1", order: 1, keywords: ["opening"]}
+# quotations:
+#   - {id: q:text/first-line, text: "…", speaker: X, act: "1.1", evidences: [some-theme]}
+
+# ----------------------------------------------------------------------------
+# CROSSWALK  (recommended) — links to other schemes.
+# [concept, scheme, external_id, match]. match is a SKOS type: exactMatch | closeMatch | broadMatch | narrowMatch | relatedMatch
+# ----------------------------------------------------------------------------
+crosswalk:
+  - [balanced, dfe-ks3-science, "Forces: balanced and unbalanced", closeMatch]
+
+# ----------------------------------------------------------------------------
+# AUTHORING RECORD  (not loaded into the map; kept with the file for review and audit)
+# ----------------------------------------------------------------------------
+authoring:
+  authors: ["A. Specialist (subject lead)", "B. Specialist (examiner)"]
+  reviewer: "C. Reviewer (head of department, did not author)"
+  sources:
+    - "National curriculum KS3 science, Physics: Forces"
+    - "Examiner reports 2023–2025 (Paper 1, forces questions)"
+  decisions:
+    - "Grain: one concept per lesson in the department scheme; 'resultant' kept separate from 'balanced' because pupils secure on one often fail the other."
+  review_log:
+    - {date: 2026-09-01, by: "C. Reviewer", finding: "Missing: friction as a force. Added in 2026.2.", status: open}

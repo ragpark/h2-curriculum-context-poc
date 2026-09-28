@@ -54,6 +54,12 @@ def load_graph(version_override=None):
 
 
 def _load_subject_graph(subject, g, version_override=None):
+    from . import validate as VAL
+    from pathlib import Path as _P
+    rep = VAL.validate((SEED / SUBJECTS[subject]["graph"]).read_text())
+    if not rep["ok"]:
+        first = rep["errors"][0]
+        raise RuntimeError(f"map '{subject}' failed structural validation: {first['where']}: {first['message']}")
     v = version_override or g["graph_version"]
     f = lambda sid: _full(subject, sid)
     for c in g["concepts"]:

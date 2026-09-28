@@ -84,7 +84,7 @@ function show(page) {
   S.page = page; S.visited.add(page); history.replaceState(null, "", "#" + page);
   document.querySelectorAll(".page").forEach((p) => p.classList.toggle("active", p.id === "page-" + page));
   document.querySelectorAll("#nav button").forEach((b) => b.classList.toggle("active", b.dataset.page === page));
-  ({ overview: renderOverview, graph: renderGraphPage, materials: renderMaterials, evidence: renderEvidence, context: renderContextPage, evaluate: renderEvaluate, connect: renderConnect, help: renderHelp, theory: renderHelp }[page])();
+  ({ overview: renderOverview, graph: renderGraphPage, materials: renderMaterials, evidence: renderEvidence, context: renderContextPage, evaluate: renderEvaluate, connect: renderConnect, help: renderHelp, theory: renderHelp, authoring: renderAuthoring }[page])();
   window.scrollTo({ top: 0 });
 }
 
@@ -693,6 +693,24 @@ function renderHelp() {
     const t = document.getElementById(a.dataset.scroll);
     if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 72, behavior: "smooth" });
   }));
+}
+
+/* ------------------------------------------------------------------ authoring */
+function renderAuthoring() {
+  renderHelp();
+  const out = $("#val-out"), ta = $("#val-text");
+  const load = (name) => api(`/api/authoring/${name}`).then((t) => { ta.value = typeof t === "string" ? t : JSON.stringify(t); out.innerHTML = ""; });
+  $("#btn-val-example").onclick = () => load("example");
+  $("#btn-val-template").onclick = () => load("template");
+  $("#val-file").onchange = async () => { const f = $("#val-file").files[0]; if (f) { ta.value = await f.text(); out.innerHTML = ""; } };
+  $("#btn-validate").onclick = (e) => busy(e.currentTarget, async () => {
+    if (!ta.value.trim()) { toast("Paste or load a map first"); return; }
+    const r = await api("/api/validate", { method: "POST", body: { yaml_text: ta.value } });
+    const s = r.summary || {};
+    const row = (x, cls) => `<tr><td class="${cls}">${cls === "bad" ? "error" : "warning"}</td><td class="mono" style="font-size:11.5px">${esc(x.code)}</td><td class="mono" style="font-size:11.5px;word-break:break-all">${esc(x.where)}</td><td>${esc(x.message)}</td></tr>`;
+    out.innerHTML = `<div class="note ${r.ok ? "" : "warn"}" style="margin-bottom:8px"><b>${r.ok ? "Well-formed." : "Refused."}</b> ${r.counts.errors} error${r.counts.errors === 1 ? "" : "s"}, ${r.counts.warnings} warning${r.counts.warnings === 1 ? "" : "s"}${s.subject ? ` · ${esc(s.subject)} ${esc(s.graph_version || "")} · ${esc(s.layout)} · ${s.concepts || 0} concepts, ${s.misconceptions || 0} misconceptions, ${s.methods || 0} methods, ${s.prerequisites || 0} prerequisites${s.related ? `, ${s.related} related links` : ""}${s.quotations ? `, ${s.quotations} quotations` : ""}` : ""}. ${r.ok ? "This means the file is structurally sound; whether the map is right is the reviewer's judgement." : "Fix the errors and check again."}</div>
+      ${r.errors.length || r.warnings.length ? `<div class="tbl-wrap"><table class="t"><tr><th></th><th>Check</th><th>Where</th><th>Finding</th></tr>${r.errors.map((x) => row(x, "bad")).join("")}${r.warnings.map((x) => row(x, "")).join("")}</table></div>` : ""}`;
+  });
 }
 
 /* ------------------------------------------------------------------ connect */

@@ -8,6 +8,7 @@ subject: english
 graph_version: "2026.1"
 title: "English Literature — Macbeth (KS4)"
 layout: strands
+id_prefix: cc:english/macbeth/   # short concept ids in this file are expanded with this prefix
 strands:
   - {id: context, label: Context}
   - {id: characters, label: Characters}

@@ -2,7 +2,8 @@
 # Layers: this file is the REFERENCE GRAPH (instances). The SCHEMA (node/edge types)
 # is fixed in app/schema.py. Alignments and learner state are derived at runtime.
 graph_version: "2026.2"
-subject: Mathematics
+subject: maths
+title: "Mathematics — Algebra: linear equations (KS3–KS4)"
 strand: "Algebra — linear equations (KS3–KS4)"
 
 concepts:

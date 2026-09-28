@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -20,6 +20,7 @@ from . import llm
 from . import seed as S
 from . import tutor as T
 from . import tutors as TU
+from . import validate as VAL
 from . import versioning as V
 from .mcp_server import mcp
 
@@ -110,6 +111,40 @@ def node(id: str):
         "evidence": db.q1("select count(*) n from evidence where concepts ? %s", (id,))["n"],
     }
     return d
+
+
+# ---------------------------------------------------------------- map authoring: validator and templates
+AUTHORING = Path(__file__).resolve().parent.parent / "seed" / "authoring"
+
+
+class ValidateIn(BaseModel):
+    yaml_text: str
+
+
+@app.post("/api/validate")
+def validate_map(body: ValidateIn):
+    if len(body.yaml_text) > 400_000:
+        raise HTTPException(413, "map file too large (400 KB limit)")
+    return VAL.validate(body.yaml_text)
+
+
+@app.get("/api/authoring/{name}")
+def authoring_file(name: str):
+    files = {"template": "template.yaml", "example": "example_fractions.yaml"}
+    if name not in files:
+        raise HTTPException(404, "unknown file")
+    return PlainTextResponse((AUTHORING / files[name]).read_text(), media_type="text/yaml; charset=utf-8",
+                             headers={"content-disposition": f'attachment; filename="curriculum-map-{name}.yaml"'})
+
+
+@app.get("/api/validate/shipped")
+def validate_shipped():
+    """The two live maps run through the same validator (they must pass)."""
+    out = {}
+    for sub, meta in S.SUBJECTS.items():
+        r = VAL.validate((Path(__file__).resolve().parent.parent / "seed" / meta["graph"]).read_text())
+        out[sub] = {"ok": r["ok"], "counts": r["counts"], "warnings": r["warnings"]}
+    return out
 
 
 # ---------------------------------------------------------------- CASE v1.1 (read-only export)

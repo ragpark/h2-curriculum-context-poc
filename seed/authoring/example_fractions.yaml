@@ -1,0 +1,144 @@
+# ============================================================================
+# WORKED EXAMPLE — KS3 Mathematics: adding and subtracting fractions
+# ============================================================================
+# A small unit authored end to end so that every stage of the process can be seen on one file.
+# It is deliberately modest (7 concepts): the point is the method, not coverage.
+# The 'authoring' block at the end is the record: who, from what, why, and what the reviewer said.
+# This file passes the structural validator with no errors. Its remaining warnings are discussed in the guide.
+# ----------------------------------------------------------------------------
+
+subject: maths
+graph_version: "2026.1"
+title: "Mathematics — Fractions: adding and subtracting (KS3)"
+layout: layers
+id_prefix: cc:maths/frac/
+
+concepts:
+  # Stage 2 (draft from documents): the KS3 programme of study says pupils should "use the four operations,
+  # including formal written methods, applied to ... proper and improper fractions, and mixed numbers".
+  # Stage 3 (specialist authoring) split that into lesson-sized pieces and added the two prerequisites that
+  # the specification assumes but does not list (equivalence and LCM), because marking shows they are where
+  # the errors come from.
+  - id: equivalent
+    label: Recognise and generate equivalent fractions
+    description: Can say when two fractions are equal and produce an equivalent fraction with a given denominator.
+    keywords: [equivalent, "equivalent fractions", "same value", "simplify", "cancel down"]
+    key_stage: [KS3]
+  - id: lcm
+    label: Find the lowest common multiple of two numbers
+    description: Finds the LCM of two small integers, as needed for a common denominator.
+    keywords: ["lowest common multiple", lcm, "common multiple", "smallest number in both"]
+    key_stage: [KS3]
+  - id: common-denominator
+    label: Rewrite two fractions with a common denominator
+    description: Chooses a common denominator (ideally the LCM) and converts both fractions to it.
+    keywords: ["common denominator", "same denominator", "change the denominator", "bottom the same"]
+    key_stage: [KS3]
+  - id: add-same
+    label: Add and subtract fractions with the same denominator
+    keywords: ["same denominator", "add the numerators", "add the tops", "subtract the numerators"]
+    key_stage: [KS3]
+  - id: add-different
+    label: Add and subtract fractions with different denominators
+    keywords: ["different denominators", "unlike denominators", "add fractions", "subtract fractions"]
+    key_stage: [KS3]
+  - id: mixed
+    label: Add and subtract mixed numbers
+    keywords: ["mixed number", "mixed numbers", "improper fraction", "whole number part"]
+    key_stage: [KS3]
+  - id: word-problems
+    label: Solve worded problems involving adding and subtracting fractions
+    keywords: ["word problem", "worded", "how much is left", "fraction of the", "in context"]
+    key_stage: [KS3]
+
+# Decision (stage 3): only real dependencies. 'lcm' is a prerequisite of 'common-denominator' at 0.6, not 1.0,
+# because a pupil can use any common multiple and still succeed; the LCM is efficient, not necessary.
+prerequisites:
+  - [equivalent, common-denominator, 0.9]
+  - [lcm, common-denominator, 0.6]
+  - [add-same, add-different, 0.8]
+  - [common-denominator, add-different, 0.9]
+  - [add-different, mixed, 0.8]
+  - [add-different, word-problems, 0.8]
+
+# Stage 2 sources for misconceptions: examiner reports and the department's marking. Each is an explainable
+# pattern with a cause, not a slip. Stage 4 (review) added 'whole-number-thinking' as the cause behind 'add-denominators'.
+misconceptions:
+  - id: mc:maths/frac/add-denominators
+    label: Adds numerators and denominators separately
+    description: "Computes 1/2 + 1/3 = 2/5, treating a fraction as two whole numbers rather than one quantity."
+    affects: [add-same, add-different]
+    keywords: ["add the denominators", "adds the bottoms", "2/5", "added both", "top and bottom"]
+  - id: mc:maths/frac/change-one-side
+    label: Changes the denominator without changing the numerator
+    description: "Rewrites 1/2 as 1/6 when the common denominator is 6, scaling only the bottom."
+    affects: [equivalent, common-denominator]
+    keywords: ["only changed the denominator", "forgot the numerator", "numerator unchanged", "scaled the bottom"]
+  - id: mc:maths/frac/lcm-is-product
+    label: Believes the common denominator must be the product of the denominators
+    description: "Always multiplies the denominators (e.g. 4 × 6 = 24 for quarters and sixths), then struggles to simplify. Not wrong, but a source of later errors."
+    affects: [lcm, common-denominator]
+    keywords: ["multiply the denominators", "times the bottoms", "24 instead of 12", "product of denominators"]
+  - id: mc:maths/frac/mixed-parts-separate
+    label: Subtracts whole parts and fraction parts independently, ignoring borrowing
+    description: "Computes 3 1/4 − 1 3/4 as 2 and (1/4 − 3/4), then gives up or writes a negative fraction."
+    affects: [mixed]
+    keywords: ["borrow from the whole", "negative fraction", "subtract the wholes first", "regroup"]
+
+# Stage 3: methods are plural on purpose. Two departments in the trial school teach 'add-different' differently.
+methods:
+  - id: md:maths/frac/bar-model
+    label: Bar model — draw both fractions on equal bars, then subdivide
+    teaches: [equivalent, common-denominator, add-same, add-different]
+    keywords: ["bar model", "draw the bars", "split the bar", "shade"]
+  - id: md:maths/frac/butterfly
+    label: Cross-multiplication ('butterfly') shortcut
+    teaches: [add-different]
+    keywords: [butterfly, "cross multiply", "criss-cross", "multiply across"]
+  - id: md:maths/frac/convert-to-improper
+    label: Convert mixed numbers to improper fractions before adding or subtracting
+    teaches: [mixed]
+    keywords: ["convert to improper", "improper first", "top-heavy fraction", "change to improper"]
+
+representations:
+  - id: rp:maths/frac/bar
+    label: Fraction bar
+    keywords: ["fraction bar", "bar diagram", "fraction strip"]
+  - id: rp:maths/frac/number-line
+    label: Number line marked in fractions
+    keywords: ["number line", "fraction number line", "jumps on the line"]
+
+crosswalk:
+  - [add-different, dfe-ks3-maths, "Number: use the four operations applied to fractions", closeMatch]
+  - [mixed, dfe-ks3-maths, "Number: use the four operations applied to fractions", broadMatch]
+  - [equivalent, dfe-ks3-maths, "Number: work interchangeably with terminating decimals and fractions", relatedMatch]
+
+# ----------------------------------------------------------------------------
+# AUTHORING RECORD
+# ----------------------------------------------------------------------------
+authoring:
+  scope: "KS3 Year 7, one unit (about 6 lessons). Ladder shape."
+  authors: ["Subject lead (maths), 6 h", "Examiner (GCSE maths), 3 h"]
+  reviewer: "Head of maths at trial school, 2 h; did not author"
+  sources:
+    - "National curriculum in England: mathematics programmes of study, KS3 (Number)"
+    - "Department marking of Year 7 fractions assessment, 2025 (n ≈ 90 scripts)"
+    - "Examiner reports, GCSE Foundation Paper 1, 2023–2025 (fraction items)"
+  decisions:
+    - "Grain: one concept per lesson in the scheme. 'add-same' kept separate from 'add-different' because the marking shows pupils secure on one and not the other."
+    - "Added 'equivalent' and 'lcm' although the unit does not teach them: they are where the errors originate, and the tutor needs them as check-first prerequisites."
+    - "'lcm' → 'common-denominator' weighted 0.6, not 1.0: any common multiple works; the LCM is efficient, not necessary."
+    - "'butterfly' listed as a method even though the subject lead disapproves of it: the map records what is taught, not what should be. The briefing will still avoid it for classes that don't use it."
+  review_log:
+    - {date: 2026-09-10, by: reviewer, finding: "'change-one-side' misconception was attached only to 'common-denominator'; it originates in 'equivalent'. Attached to both.", status: resolved}
+    - {date: 2026-09-10, by: reviewer, finding: "Missing concept: comparing and ordering fractions. Out of scope for this unit; noted for the next.", status: deferred}
+    - {date: 2026-09-10, by: reviewer, finding: "Keyword 'same denominator' is shared by two concepts (common-denominator, add-same). Left as is: it genuinely belongs to both; tagger confidence will be split. Watch in the tagging trial.", status: accepted}
+  agreement_test:
+    sample: "12 worksheet units from the trial school"
+    raters: 2
+    concept_agreement: "10 of 12 identical; 2 differed on add-same vs add-different where the worksheet mixed both. Grain judged acceptable."
+  tagging_trial:
+    materials: "18 units from two departments' schemes"
+    unmatched: "2 units (a starter on decimals, a homework cover sheet): correctly untagged"
+    suspicious: "'butterfly' tagged on a bar-model worksheet that mentioned 'cross out': keyword 'cross multiply' too close to 'cross out'. Keyword tightened."
+  release: "2026.1 on 2026-09-12"

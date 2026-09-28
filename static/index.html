@@ -32,6 +32,7 @@
     <button data-page="connect"><span class="num">⌁</span>Connect a tutor</button>
     <button data-page="help"><span class="num">?</span>Help and glossary</button>
     <button data-page="theory"><span class="num">§</span>Theory</button>
+    <button data-page="authoring"><span class="num">✎</span>Authoring a map</button>
     <div class="foot">No real pupil data. Pupils, classes and teachers are fictional.</div>
   </nav>
 
@@ -484,6 +485,11 @@
             </ul>
           </article>
 
+          <article class="card" id="h-authoring">
+            <h3>Want to make a map for another subject?</h3>
+            <p>The <a href="#authoring" data-page-link="authoring">Authoring a map</a> page explains what goes into a map, who should write and review it, how to check it, and walks through one small unit from start to finish. It has a downloadable template and a checker you can paste a map into.</p>
+          </article>
+
           <article class="card" id="h-theory">
             <h3>Want the technical version?</h3>
             <p>The <a href="#theory" data-page-link="theory">Theory</a> page describes how the prototype is built, how the made-up data was constructed, how the tests are scored, what else could have been built instead, and the research it draws on. It is written for people who work with ontologies, learner models and evaluation.</p>
@@ -589,6 +595,7 @@
             </table></div>
             <p><b>Two shapes.</b> The maths map is a partial order: 23 concepts with weighted prerequisites, and a learning edge defined as the earliest taught concept (by prerequisite depth, then week) that the pupil has not secured. The English map is a web: 35 topics in five strands, where only the writing-skills strand carries prerequisites and the rest are joined by <code>relatesTo</code>. The knowledge-space view of a curriculum as a prerequisite structure over which learning states are defined <a href="#theory" data-scroll="t-refs">[R4]</a> fits the maths map directly; it does not fit the English map, and the prototype's handling of that difference (§7) is where most of the design effort went after the maths results.</p>
             <p><b>What the map deliberately excludes.</b> Learning objectives, mark schemes, difficulty levels and lesson sequences are not nodes. Difficulty is a property of an item and a pupil, not of a concept; sequence belongs to a class's scheme of work, which is school data, not curriculum. Keeping these out is what lets two classes teach the same map in different orders and with different methods.</p>
+            <p><b>Authoring process.</b> The two shipped maps were authored by one person without review. The process by which a defensible map would be produced (scope, document draft, specialist authoring, independent review, tagging trial with an inter-rater agreement test, versioned release), the structural validator that every map must pass, and a worked example are on the <a href="#authoring" data-page-link="authoring">Authoring</a> page.</p>
             <p><b>Granularity.</b> Concept grain was set by hand at "one thing a teacher would set a lesson on" for maths and "one thing an essay paragraph would be about" for English. This is a judgement, not a derivation. Data-driven refinement of the grain, such as Learning Factors Analysis <a href="#theory" data-scroll="t-refs">[R5]</a>, would need far more evidence than the prototype holds.</p>
           </article>
 
@@ -727,6 +734,162 @@
               <li id="r13"><b>[R13]</b> Koedinger, K. R., Corbett, A. T. and Perfetti, C. (2012). The Knowledge-Learning-Instruction Framework: Bridging the Science-Practice Chasm to Enhance Robust Student Learning. <i>Cognitive Science</i>, 36(5), 757–798. <a href="https://doi.org/10.1111/j.1551-6709.2012.01245.x" target="_blank" rel="noopener">doi:10.1111/j.1551-6709.2012.01245.x</a>. — Knowledge-component types and their matching instructional moves; the next design question for the "method" nodes.</li>
             </ol>
             <p class="sub" style="margin-top:12px">Not cited, deliberately: no claim is made here about the effect of any of this on pupil learning outcomes, because the prototype does not measure them and no study of this design exists.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-authoring">
+      <div class="page-head">
+        <div class="eyebrow">Authoring</div>
+        <h2>How to make a curriculum map for a new subject</h2>
+        <p>The two maps in this prototype were written by one author from general subject knowledge, with no expert review and no data. That is acceptable for a proof of concept and not for anything a school would rely on. This page sets out a repeatable process that ends in a defensible map, gives you the file template and a structural checker, and walks through one small unit from start to finish.</p>
+      </div>
+
+      <div class="help">
+        <nav class="help-toc card" aria-label="Authoring contents">
+          <b>On this page</b>
+          <a href="#authoring" data-scroll="a-what">What a map contains</a>
+          <a href="#authoring" data-scroll="a-inputs">Required inputs</a>
+          <a href="#authoring" data-scroll="a-process">The process, six stages</a>
+          <a href="#authoring" data-scroll="a-validate">Validating a map</a>
+          <a href="#authoring" data-scroll="a-checker">Check a map file</a>
+          <a href="#authoring" data-scroll="a-example">Worked example: fractions</a>
+          <a href="#authoring" data-scroll="a-checklist">Reviewer's checklist</a>
+          <a href="#authoring" data-scroll="a-effort">Effort and tooling</a>
+          <a href="#authoring" data-scroll="a-downloads">Downloads</a>
+        </nav>
+
+        <div class="help-body">
+          <article class="card" id="a-what">
+            <h3>What a map contains</h3>
+            <p>A map has five kinds of content. They come from different places and are judged by different people, so “make a map” is really five tasks.</p>
+            <div class="tbl-wrap"><table class="t help-table">
+              <tr><th>Content</th><th>What it is</th><th>Best source</th><th>Who can judge it</th></tr>
+              <tr><td><b>Concepts, at the right grain</b></td><td>The topics, sized at one lesson's worth (maths) or one paragraph's worth (English)</td><td>The specification and the national curriculum, broken down by subject specialists</td><td>Subject specialists, examiners</td></tr>
+              <tr><td><b>Structure</b></td><td>Prerequisites (a ladder) or related-topic links (a web); strands; parts of a set text</td><td>Specialists' judgement, later checked against data</td><td>Specialists first; learner data later</td></tr>
+              <tr><td><b>Misconceptions</b></td><td>Named, recurring error patterns, each tied to the topics they show up in</td><td>Examiner reports, marking, item-bank distractors, subject-education research</td><td>Examiners, experienced teachers</td></tr>
+              <tr><td><b>Methods and representations</b></td><td>Named ways of teaching a topic; deliberately plural</td><td>Textbooks, schemes of work, what teachers actually do</td><td>Teachers, subject associations</td></tr>
+              <tr><td><b>Crosswalks</b></td><td>Links to other schemes: DfE content, assessment objectives, a shared layer</td><td>Mechanical from the specification, then reviewed</td><td>Assessment and standards teams</td></tr>
+            </table></div>
+            <p>Two things follow. The specification is the natural spine: it exists, it is governed, and it is what teachers teach to. And misconceptions and methods are the valuable, hard part. They do not come from documents; they come from people who mark and teach.</p>
+          </article>
+
+          <article class="card" id="a-inputs">
+            <h3>Required inputs</h3>
+            <ul class="help-list">
+              <li><b>A scope decision.</b> One qualification, one unit or theme. Both prototype maps cover about one unit; that is the right size for a first version.</li>
+              <li><b>A shape decision.</b> Ladder (<code>layers</code>: topics build on each other) or web (<code>strands</code>: topics connect sideways and can be met in any order). Decide before drafting, because it changes what “structure” means and what the tutor does with it.</li>
+              <li><b>The governing documents.</b> The specification or programme of study; assessment objectives; any scheme of work you want the map to serve.</li>
+              <li><b>Error evidence.</b> Examiner reports for the unit; a sample of marked work; if an item bank exists, its distractors and what each one reveals.</li>
+              <li><b>Teaching evidence.</b> Two or more schemes of work or textbooks that teach the unit differently, so the methods list is plural.</li>
+              <li><b>People.</b> Two or three subject specialists to author; one reviewer who did not author; access to a class's real materials for the trial.</li>
+            </ul>
+          </article>
+
+          <article class="card" id="a-process">
+            <h3>The process, in six stages</h3>
+            <ol class="help-steps">
+              <li><b>Scope.</b> Fix the unit and the shape. Write one sentence on what a pupil who is “secure on this unit” can do; it becomes the test for what belongs.</li>
+              <li><b>Draft from documents.</b> Break the specification into candidate concepts; pull assessment objectives into crosswalks; harvest misconceptions from examiner reports and distractors. A language model can do this first pass quickly and consistently. That produces a draft, not a map.</li>
+              <li><b>Specialist authoring.</b> Two or three specialists decide grain, fix the structure, write the misconception descriptions (what the pupil does <em>and why</em>), name the methods, and add keywords in the words teachers actually use. Record a one-line rationale for every non-obvious decision in the file's <code>authoring</code> block.</li>
+              <li><b>Review.</b> A separate reviewer works through the checklist below. Disagreements are logged with a status (resolved, deferred, accepted), not averaged away.</li>
+              <li><b>Trial against real material.</b> Load the map, tag a body of real teaching materials and, if possible, a sample of marked work, and look at what the tagger does: unmatched materials, suspicious tags, concepts that never fire, concepts that always fire together. Fix keywords and grain accordingly. Then have two people tag the same twelve units independently and compare: that agreement figure is the best single measure of whether the grain is right.</li>
+              <li><b>Release and revise.</b> Give it a version. Every later change is a new version; retired concepts point to their replacements rather than disappearing, so evidence recorded against old versions still counts. Publish the CASE export so others can map to it.</li>
+            </ol>
+          </article>
+
+          <article class="card" id="a-validate">
+            <h3>Validating a map: three kinds of check</h3>
+            <h4>Structural (automatic)</h4>
+            <p>The map is a graph, so some faults are simply testable. The checker below refuses a map with any of these: prerequisites that form a cycle; a reference to a concept that is not defined; a misconception that affects nothing, or a method that teaches nothing; a concept with fewer than three keywords, or without a label; a crosswalk with an unknown match type; an id with capitals or spaces. It warns about things an author should look at: a concept with no links at all; keywords shared between concepts; most concepts having no misconception or method attached. Both prototype maps pass it. <b>Passing the checker means the map is well-formed. It says nothing about whether the map is right.</b></p>
+            <h4>Expert (judgement)</h4>
+            <p>The reviewer's checklist below covers what cannot be automated: whether each concept is a real unit of teaching, whether each prerequisite is a genuine dependency or just the usual order, whether each misconception is a pattern with a cause. The agreement test in stage 5 turns one of these judgements into a number.</p>
+            <h4>Empirical (data)</h4>
+            <p>Once the map has been used against real evidence, its structure can be checked against outcomes. Do pupils who fail a prerequisite fail the dependent topic more often than those who pass it? If not, the link is doubtful. Does a diagnosed misconception predict later errors on the topics it supposedly affects? Are there concepts that are never tagged, or always tagged together (a sign they should merge)? These checks need volumes of data the prototype does not have. They are the difference between a <em>credible</em> map and a <em>validated</em> one, and the methods for them are cited on the Theory page.</p>
+          </article>
+
+          <article class="card" id="a-checker">
+            <h3>Check a map file</h3>
+            <p class="sub">Paste a map (the YAML format used by the template) or choose a file. The checker runs the structural checks and reports errors and warnings with the line they refer to. Nothing is stored.</p>
+            <div class="row" style="margin-bottom:8px;gap:8px;flex-wrap:wrap">
+              <input type="file" id="val-file" accept=".yaml,.yml,text/yaml" style="font-size:12px">
+              <button class="btn sm" id="btn-val-example">Load the worked example</button>
+              <button class="btn sm" id="btn-val-template">Load the template</button>
+              <button class="btn primary" id="btn-validate">Check</button>
+            </div>
+            <textarea class="input mono" id="val-text" rows="12" spellcheck="false" placeholder="subject: science&#10;graph_version: &quot;2026.1&quot;&#10;layout: layers&#10;concepts:&#10;  - id: cc:science/forces/balanced&#10;    label: Identify balanced and unbalanced forces&#10;    keywords: [balanced, unbalanced, resultant]"></textarea>
+            <div id="val-out" style="margin-top:10px"></div>
+          </article>
+
+          <article class="card" id="a-example">
+            <h3>Worked example: KS3 fractions, adding and subtracting</h3>
+            <p>A small unit (seven concepts, six lessons) authored end to end, chosen because it is not in either prototype map and because fraction errors are well documented. The full file is downloadable below and loads into the checker; here is what each stage produced.</p>
+            <h4>Stage 1: scope</h4>
+            <p>Year 7, one unit. Shape: ladder. Secure means: “can add and subtract any two fractions or mixed numbers, and apply it in a worded problem.”</p>
+            <h4>Stage 2: draft from documents</h4>
+            <p>The KS3 programme of study gives one line: use the four operations applied to proper and improper fractions and mixed numbers. Examiner reports for Foundation Paper 1 name three recurring errors. That is the whole documentary input; it yields perhaps three concepts and three misconceptions.</p>
+            <h4>Stage 3: specialist authoring</h4>
+            <p>The specialists split the one line into five lesson-sized concepts and added two the specification assumes but does not list, <em>equivalent fractions</em> and <em>lowest common multiple</em>, because the department's marking (about 90 scripts) shows that is where the errors originate. Three decisions were recorded:</p>
+            <ul class="help-list">
+              <li><em>“Add with the same denominator”</em> kept separate from <em>“add with different denominators”</em>, because pupils secure on one are often not secure on the other. Grain follows the evidence, not the specification's sentence structure.</li>
+              <li><em>LCM → common denominator</em> weighted 0.6 rather than 1.0: any common multiple works; the LCM is efficient, not necessary. Weights encode how hard a dependency is, not how usual.</li>
+              <li>The “butterfly” cross-multiplication shortcut is listed as a method even though the subject lead disapproves of it. The map records what is taught, not what should be; the briefing will steer away from it for classes that don't use it.</li>
+            </ul>
+            <div class="tbl-wrap"><table class="t help-table">
+              <tr><th>Concept</th><th>Builds on</th><th>Misconceptions attached</th><th>Methods</th></tr>
+              <tr><td>Recognise and generate equivalent fractions</td><td>—</td><td>Changes the denominator without the numerator</td><td>Bar model</td></tr>
+              <tr><td>Find the lowest common multiple</td><td>—</td><td>Believes the common denominator must be the product</td><td>—</td></tr>
+              <tr><td>Rewrite two fractions with a common denominator</td><td>equivalent (0.9), LCM (0.6)</td><td>Changes the denominator without the numerator; product-as-LCM</td><td>Bar model</td></tr>
+              <tr><td>Add and subtract with the same denominator</td><td>—</td><td>Adds numerators and denominators separately</td><td>Bar model</td></tr>
+              <tr><td>Add and subtract with different denominators</td><td>same-denominator (0.8), common denominator (0.9)</td><td>Adds numerators and denominators separately</td><td>Bar model; butterfly</td></tr>
+              <tr><td>Add and subtract mixed numbers</td><td>different denominators (0.8)</td><td>Subtracts whole and fraction parts independently</td><td>Convert to improper first</td></tr>
+              <tr><td>Solve worded problems</td><td>different denominators (0.8)</td><td>—</td><td>—</td></tr>
+            </table></div>
+            <h4>Stage 4: review</h4>
+            <p>The reviewer (a head of maths who did not author) logged three findings: one <b>resolved</b> (a misconception was attached to the wrong concept; it originates in equivalence, so it was attached to both), one <b>deferred</b> (comparing and ordering fractions is missing, but out of scope for this unit), and one <b>accepted</b> (the keyword “same denominator” is shared by two concepts; it genuinely belongs to both, so it stays, with a note to watch it in the trial).</p>
+            <h4>Stage 5: trial</h4>
+            <p>Eighteen units from two departments' schemes were tagged. Two were correctly left untagged (a decimals starter, a cover sheet). One suspicious tag: the butterfly method fired on a bar-model worksheet that said “cross out”, because the keyword “cross multiply” was too close. The keyword was tightened. Two people then tagged the same twelve units: ten identical, two differed where the worksheet mixed same- and different-denominator work. Grain judged acceptable.</p>
+            <h4>Stage 6: release</h4>
+            <p>Version 2026.1. The structural checker passes with one warning, the shared keyword the reviewer already accepted. Total specialist time: about nine hours of authoring, two of review.</p>
+            <p class="sub">The example's trial and review figures are illustrative: they describe what the process produces, using plausible numbers, because no real trial has been run on this map. Everything else in the file (concepts, links, misconceptions, methods) is a genuine authoring attempt at the unit.</p>
+          </article>
+
+          <article class="card" id="a-checklist">
+            <h3>Reviewer's checklist</h3>
+            <p class="sub">For the person who did not write the map. Answer each in writing; a “no” is a logged finding, not a veto.</p>
+            <ol class="help-steps">
+              <li>Is every concept something you would recognise as a unit of teaching? Could you set a lesson, or a paragraph, on it and nothing else?</li>
+              <li>Take twelve real worksheets. Would you and the author put each on the same concept? Count the disagreements.</li>
+              <li>For each prerequisite: is this a genuine dependency (a pupil who lacks the first <em>cannot</em> do the second), or just the usual order of teaching?</li>
+              <li>For each misconception: is it a recurring pattern with an explanation, or a mistake? Does its description say what the pupil does <em>and why</em>? Is it attached to every concept it actually shows up in?</li>
+              <li>Are the methods a fair range, including ones you would not choose yourself?</li>
+              <li>Read the keywords aloud. Are they how teachers in your department actually write and speak about this? Which words would you add?</li>
+              <li>Teach one lesson from the map in your head. What did you need that is not here?</li>
+              <li>Is anything here that a pupil at this stage would never meet, or that belongs to a different unit?</li>
+            </ol>
+          </article>
+
+          <article class="card" id="a-effort">
+            <h3>Effort and tooling</h3>
+            <p>For one GCSE or KS3 unit with an existing specification: the document draft takes hours; specialist authoring one to two weeks of two people's part-time effort; review and trial about another week. Almost all of the cost is people. The tooling that helps most, in order:</p>
+            <ol class="help-steps">
+              <li><b>The structural checker</b> (on this page), so nothing malformed reaches a review.</li>
+              <li><b>An authoring format specialists can edit</b> without touching YAML. The template is the first step; a spreadsheet version with import is the obvious next one.</li>
+              <li><b>A tagging-trial report</b>: unmatched materials, low-confidence tags, concepts that never fire. The Teacher's materials page shows the pieces; a single report would save the reviewer assembling them.</li>
+              <li><b>An agreement test</b> that gives two reviewers the same sample and scores their agreement.</li>
+            </ol>
+            <p>What none of this replaces: the empirical checks against real pupil data (see “Validating a map”). Those need a map in use at scale, and they are what would let the process claim a map is validated rather than credible.</p>
+          </article>
+
+          <article class="card" id="a-downloads">
+            <h3>Downloads</h3>
+            <div class="tags">
+              <a class="btn" href="/api/authoring/template" download>Authoring template (YAML, commented)</a>
+              <a class="btn" href="/api/authoring/example" download>Worked example: fractions (YAML)</a>
+              <a class="btn" href="/api/validate/shipped" target="_blank">Checker report on the two live maps</a>
+            </div>
+            <p class="sub" style="margin-top:10px">The template is the same format the prototype loads. A map that passes the checker can be dropped into <code>seed/</code> and registered in <code>app/seed.py</code> to appear as a new subject; a proper upload-and-register flow is the next tooling step. Programmatic check: <code>POST /api/validate</code> with <code>{"yaml_text": "…"}</code>.</p>
           </article>
         </div>
       </div>

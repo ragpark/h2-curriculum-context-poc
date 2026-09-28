@@ -299,3 +299,6 @@ body:not([data-subject="english"]) .only-english{display:none}
 #page-theory sup { font-size: 10px; }
 #page-theory .help-table td { vertical-align: top; }
 #page-theory .help-table td:first-child { white-space: normal; }
+.quote-block { margin: 8px 0 10px; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--surface-2); font-size: 13.5px; line-height: 1.55; color: var(--text-2); }
+#h-howtest .help-table td:first-child { white-space: normal; min-width: 150px; }
+#h-howtest .help-table td { font-size: 13px; }

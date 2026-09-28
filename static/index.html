@@ -303,6 +303,7 @@
           <a href="#help" data-scroll="h-independent">Testing a different tutor</a>
           <a href="#help" data-scroll="h-read">How to read the colours and labels</a>
           <a href="#help" data-scroll="h-results">How to read the test results</a>
+          <a href="#help" data-scroll="h-howtest">How the test is run</a>
           <a href="#help" data-scroll="h-limits">What this can't tell you</a>
           <a href="#help" data-scroll="h-glossary">Glossary</a>
         </nav>
@@ -460,7 +461,7 @@
               <tr><td><b>Next step</b></td><td>Was the suggested next step right for this pupil?</td></tr>
               <tr><td><b>True to pupil &amp; class</b></td><td>Was everything it said about the pupil and class actually true?</td></tr>
             </table>
-            <p>The learning-behaviour test adds a sixth: <b>did it respond to how this pupil learns?</b> For example, did it ask Isla to have a go before giving a hint?</p>
+            <p>The exact instructions given to the tutor and to the marker are in <a href="#help" data-scroll="h-howtest">How the test is run</a>. The learning-behaviour test adds a sixth: <b>did it respond to how this pupil learns?</b> For example, did it ask Isla to have a go before giving a hint?</p>
             <div class="help-callout">
               <b>Three things to keep in mind:</b>
               <ul>
@@ -473,6 +474,47 @@
             <p>We labelled some worksheets by hand, then checked how often the computer agreed. <b>“Concept tags correct: 93%”</b> means that out of every 100 topic labels the computer added, about 93 were right. <b>“Expected concepts found: 100%”</b> means it didn't miss any of the topics we expected. Again, the <b>Unseen</b> sets are the fairest test, because those worksheets were written and locked away before the labelling was improved, so nothing could have been tuned to pass them.</p>
             <h4>What the results say so far</h4>
             <p>Any classroom information makes the tutor's help much better: scores roughly double. Organising that information with the map helps a bit more, most clearly in getting the tutor to teach the way the class teacher does. A map that picks the wrong focus makes the help <em>worse</em>, so getting the map right matters.</p>
+          </article>
+
+          <article class="card" id="h-howtest">
+            <h3>How the test is run, and the exact instructions used</h3>
+            <p>Two AI programs take part in the tutor test, and they never talk to each other. One is the <b>tutor</b>, which writes a reply to the pupil. The other is the <b>marker</b>, which scores that reply against an answer key. This section shows what each one is told, word for word, so you can judge the test for yourself.</p>
+
+            <h4>What happens for one test question</h4>
+            <ol class="help-steps">
+              <li>The prototype builds three versions of the notes for the same pupil and the same message: none, a pile of raw records, and the map's briefing.</li>
+              <li>The tutor is given each version in turn, with exactly the same instructions each time, and writes three replies.</li>
+              <li>Each reply is sent to the marker <b>twice</b>, separately, so a single odd judgement doesn't decide the result. The two sets of marks are averaged.</li>
+              <li>The five marks (0 to 3 each) are added up to give a score out of 15 for each version of the notes.</li>
+            </ol>
+            <p class="sub">A ten-question test therefore involves 30 tutor replies and 60 markings, which is why it takes a few minutes to run.</p>
+
+            <h4>What the tutor is told</h4>
+            <p>The tutor's instructions never change. Only the notes attached to them do. This is what it receives every time (with “maths” swapped for “English Literature … studying Macbeth” for the English pupils):</p>
+            <blockquote class="quote-block">You are an AI maths tutor working one-to-one with a Year 10 pupil in an English secondary school.<br>You are given a CONTEXT object assembled by the school's platform. Use it to personalise your reply.<br>Reply in under 140 words, British English, one small step at a time, and end with a single question for the pupil.<br>Do not mention the context object, IDs or the platform.</blockquote>
+            <p>After that come the notes (as the structured text you can see under “Raw context JSON” on the Tutor briefing page) and then the pupil's message. The tutor is deliberately plain. It has no personality, no memory of earlier turns and no tricks, so that the only thing that can make one reply better than another is the notes.</p>
+
+            <h4>What the marker is told</h4>
+            <p>The marker is told to be “a strict, fair assessor of tutoring”. It is given the reply, the pupil's message, and an <b>answer key</b> that was written by hand for that question: what the pupil actually needs, what a good next step would be, and for the class, the teacher's method, what to avoid, what has been taught and what hasn't. The marker is told the tutor may not have had this answer key. It is <b>not</b> shown the notes the tutor received, so it cannot give credit for matching the briefing unless the reply actually says the right thing. Its marking scheme, word for word:</p>
+            <div class="tbl-wrap"><table class="t help-table">
+              <tr><th>Criterion</th><th>0</th><th>1</th><th>2</th><th>3</th></tr>
+              <tr><td><b>Diagnosis</b><div class="sub">does it address THIS pupil's actual need?</div></td><td>addresses the wrong problem, or invents a problem the pupil does not have</td><td>generic help that would suit any pupil</td><td>relevant to the real need but only implicitly</td><td>explicitly and accurately targets the real need (or correctly treats a one-off slip as a slip)</td></tr>
+              <tr><td><b>Method</b><div class="sub">is it consistent with the class teacher's method?</div></td><td>teaches mainly with a method the teacher avoids, or contradicts the teacher</td><td>no discernible method, or mixes methods confusingly</td><td>compatible with the teacher's method without naming or using it clearly</td><td>clearly uses the teacher's own method (and representation where apt)</td></tr>
+              <tr><td><b>Scope</b><div class="sub">does it respect what the class has and has not been taught?</div></td><td>teaches not-yet-taught content as if it were known, or jumps ahead without comment</td><td>drifts towards untaught content without flagging it</td><td>stays within taught content</td><td>stays within taught content AND handles any request for more explicitly (e.g. “that's coming next week”)</td></tr>
+              <tr><td><b>Next step</b><div class="sub">is the step it proposes right for this pupil now?</div></td><td>inappropriate (too far ahead, or skips a gap)</td><td>generic (“try another one”)</td><td>sensible</td><td>sensible and specifically sequenced to the pupil's position and gaps</td></tr>
+              <tr><td><b>Grounding</b><div class="sub">are its claims about the pupil and class true?</div></td><td>states something false about the pupil, the class or what the teacher did</td><td>no claims about the class or pupil at all</td><td>claims are consistent with the facts but vague</td><td>accurately uses specific facts about the pupil or class (their error pattern, a real class resource or example)</td></tr>
+            </table></div>
+            <p>The marker is told: “Score the tutor reply on five criteria, each 0–3, using ONLY the ground truth below. Be strict: 3 is rare and must be earned.” It must also give one sentence of reasoning that quotes the reply; you can read those sentences under each scenario on the Evaluate page. The learning-behaviour test adds a sixth row, <b>Support</b>: 0 works against how the pupil learns (for example, hands a hint straight away to a pupil who asks before trying); 1 generic encouragement only; 2 somewhat adapted; 3 clearly and appropriately adapted, without labelling the pupil.</p>
+
+            <h4>Where the questions and answer keys come from</h4>
+            <p>Every test question was written by hand: the pupil, their message, what they actually need, and a good next step, plus a description of each class. They are kept in plain text files alongside the prototype, under version control, so the exact wording that produced any result can always be found. The <b>unseen</b> sets were written and locked before the change they test, and the record shows the date. The tutor's and marker's instructions are also fixed text kept with the prototype; they were written once and have not changed since the first results.</p>
+
+            <h4>The labelling test</h4>
+            <p>This one has no AI marker. Each test worksheet has a hand-written answer key (the topics it should be labelled with, the teaching method, any misconception it mentions). The prototype's labels are compared against the key mechanically: how many labels were right, how many expected topics were found, and whether off-topic worksheets were correctly left unlabelled.</p>
+
+            <div class="help-callout">
+              <b>Why this matters for anyone judging the results.</b> The marking scheme above is where the prototype's idea of “good tutoring” is written down. If you would score “method” or “scope” differently, that table is the place to disagree, and the Evaluate page's numbers should be read with your disagreement in mind. Changing the scheme would make earlier results incomparable, which is why it has been kept fixed.
+            </div>
           </article>
 
           <article class="card" id="h-limits">

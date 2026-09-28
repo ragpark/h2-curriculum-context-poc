@@ -418,6 +418,7 @@ async function renderEvidence() {
   $("#e-legend").innerHTML = LEGEND_MASTERY;
   $("#e-states").innerHTML = lv.state.length ? `<table class="t">${lv.state.map((s) => `<tr><td>${esc(s.label)}</td><td>${badge(s.status)}</td><td style="width:90px">${bar(s.mastery, statusColor(s.status))}<div class="sub">${pct(s.mastery)}</div></td><td class="sub" title="direct / inferred evidence">${s.n_direct}d · ${s.n_inferred}i</td></tr>`).join("")}</table>` : `<div class="empty">No estimates yet</div>`;
   renderBehaviour(await api(`/api/learners/${S.pupil}/behaviour`));
+  renderAdjustments(await api(`/api/learners/${S.pupil}/adjustments`));
   $("#e-mcs").innerHTML = lv.misconceptions.length ? lv.misconceptions.map((m) => `<div style="margin-bottom:12px">${tag("misconception", m.id)} ${m.active ? badge("gap").replace(">gap<", ">active<") : badge("faded")}
       <div class="row" style="align-items:center;margin-top:6px"><div style="flex:1">${bar(m.strength, "var(--mc)")}</div><span class="sub">strength ${pct(m.strength)} · seen ${m.count}×</span></div>
       <div class="sub" style="margin-top:4px">Affects: ${m.affects.map((c) => esc(c.label)).join(", ")}</div></div>`).join("") : `<div class="empty">None diagnosed</div>`;
@@ -427,6 +428,35 @@ async function renderEvidence() {
     <td>${e.item ? (e.outcome >= 0.5 ? '<span class="ok">✓</span>' : '<span class="bad">✗</span>') : pct(e.outcome)}</td>
     <td><div class="tags">${e.concepts.map((c) => tag("concept", c.id, null, { label: c.label })).join("")}</div><div class="sub">${e.concept_provenance === "source" ? "tagged at source" : e.concept_provenance === "teacher" ? "topics given by the teacher" : "aligned: " + esc(e.concept_provenance) + " · conf " + e.confidence} · v${esc(e.graph_version)}</div></td>
     <td>${e.misconception ? tag("misconception", e.misconception.id) : ""}</td></tr>`).join("")}</table>` : `<div class="empty">Empty</div>`;
+}
+async function renderAdjustments(p) {
+  if (!S.adjVocab) S.adjVocab = await api("/api/adjustments/vocabulary");
+  const el = $("#e-adj"), v = S.adjVocab;
+  const cur = new Set(p.current.map((a) => a.id));
+  const groups = v.groups.map((g) => ({ ...g, items: v.adjustments.filter((a) => a.group === g.id) }));
+  el.innerHTML = `<div class="card-head"><div><h3>Agreed adjustments</h3><p class="sub">What this pupil's teacher (or SENCO) has decided the tutor must do. Written by a person, never worked out from the pupil's answers. In the briefing these are required; “Learning behaviour” below is only advice.</p></div></div>
+    ${p.current.length ? `<div class="note" style="margin-bottom:10px"><b>${p.current.length} agreed</b> · confirmed by ${esc(p.confirmed_by)} on ${esc(p.confirmed_on)} · review by ${esc(p.review_by)}${p.note ? `<div class="sub" style="margin-top:4px">${esc(p.note)}</div>` : ""}</div>
+      <ul class="help-list" style="margin:0 0 10px">${p.current.map((a) => `<li><b>${esc(a.label)}.</b> <span class="sub">${esc(a.instruction)}</span></li>`).join("")}</ul>` : `<div class="empty" style="margin-bottom:10px">None. Ordinary tutoring applies.${p.expired.length ? ` ${p.expired.length} adjustment${p.expired.length > 1 ? "s are" : " is"} past the review date and no longer sent to the tutor.` : ""}</div>`}
+    <details ${p.current.length ? "" : ""}><summary>${p.current.length ? "Change the agreed adjustments" : "Set agreed adjustments"}</summary>
+      <div style="margin-top:8px">
+        ${groups.map((g) => `<div class="sub" style="margin:8px 0 3px;text-transform:uppercase;letter-spacing:.05em;font-size:11px">${esc(g.label)}</div><div class="topic-picks" style="max-height:none">${g.items.map((a) => `<label title="${esc(a.instruction)}"><input type="checkbox" value="${esc(a.id)}"${cur.has(a.id) ? " checked" : ""}>${esc(a.label)}</label>`).join("")}</div>`).join("")}
+        <div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap">
+          <div class="field" style="flex:2 1 220px"><label>Confirmed by (name and role)</label><input class="input" id="adj-by" value="${esc(p.confirmed_by || "")}" placeholder="e.g. Ms Okafor (class teacher) with the SENCO"></div>
+          <div class="field" style="flex:1 1 140px"><label>Confirmed on</label><input class="input" type="date" id="adj-on" value="${esc(p.confirmed_on || new Date().toISOString().slice(0, 10))}"></div>
+          <div class="field" style="flex:1 1 140px"><label>Review by</label><input class="input" type="date" id="adj-review" value="${esc(p.review_by || "")}"></div>
+        </div>
+        <div class="field" style="margin-top:8px"><label>Note (optional)</label><input class="input" id="adj-note" value="${esc(p.note || "")}" placeholder="Where these came from, e.g. the one-page profile reviewed in September"></div>
+        <div style="margin-top:10px;display:flex;gap:8px"><button class="btn primary" id="btn-adj-save">Save</button>${p.current.length || p.expired.length ? `<button class="btn" id="btn-adj-clear">Remove all</button>` : ""}</div>
+        <div class="sub" style="margin-top:8px">These are instructions, not labels. Nothing about why a pupil needs them is stored here.</div>
+      </div></details>`;
+  $("#btn-adj-save").onclick = (e) => busy(e.currentTarget, async () => {
+    const ids = [...el.querySelectorAll('input[type=checkbox]:checked')].map((x) => x.value);
+    if (!ids.length) throw new Error("Tick at least one adjustment, or use Remove all");
+    if (!$("#adj-review").value) throw new Error("A review date is required");
+    renderAdjustments(await api(`/api/learners/${S.pupil}/adjustments`, { method: "PUT", body: { adjustments: ids, confirmed_by: $("#adj-by").value, confirmed_on: $("#adj-on").value, review_by: $("#adj-review").value, note: $("#adj-note").value || null } }));
+    toast("Agreed adjustments saved");
+  });
+  const c = $("#btn-adj-clear"); if (c) c.onclick = (e) => busy(e.currentTarget, async () => { renderAdjustments(await api(`/api/learners/${S.pupil}/adjustments`, { method: "DELETE" })); });
 }
 const BSTAT = { support: ["gap", "pattern to support"], strength: ["secure", "strength"], mixed: ["developing", "mixed"], "too little evidence": ["", "too little evidence"] };
 function renderBehaviour(b) {
@@ -508,6 +538,8 @@ const SUGGEST = {
   "pupil:leah": ["Can you check my quotation for the blood imagery paragraph?", "How do I get my essay to a grade 7?", "What does 'full of scorpions is my mind' show?"],
   "pupil:owen": ["Why do people in the play care so much about the king?", "Is Macbeth a good tragic hero?", "Can you check my PETAL paragraph on Lady Macbeth?"],
   "pupil:zainab": ["Is Lady Macbeth a villain?", "Can you help me plan an essay on ambition?", "What should I work on?"],
+  "pupil:bilal": ["Can you help me with 3(x + 2) = 21?", "I did 2(x − 3) = 10 and got 2x − 3 = 10 so x = 6.5. Is that right?", "What should I practise next?"],
+  "pupil:fatima": ["I've finished all my homework. What's next?", "Can we do something harder?", "Is x = 4 right for 4x + 5 = x − 7?"],
   "pupil:farah": ["I've finished all my homework. What's next?", "Is x = 4 right for 4x + 5 = x − 7?", "Can we do something harder?"],
 };
 function renderContextPage() {
@@ -536,6 +568,7 @@ function renderCompare(r) {
   const left = `<div class="cmp-col">
     <div class="cmp-title"><span class="pill no">RAW CLASSROOM DATA</span><span class="sub">~${a.approx_tokens} tokens of context</span></div>
     ${reply(r.without_h2)}
+    ${a.teacher_notes && a.teacher_notes.length ? `<div class="sec"><div class="st">Teacher's notes</div><ul>${a.teacher_notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
     <div class="sec"><div class="st">Recent activity (raw log)</div>${a.recent_activity.length ? `<ul>${a.recent_activity.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>` : '<div class="sub">No activity</div>'}</div>
     <div class="sec"><div class="st">Materials by text similarity</div>${a.materials.length ? `<ul>${a.materials.map((m) => `<li><b>${esc(m.heading)}</b> <span class="sub">W${m.week} · ${esc(m.why)}</span></li>`).join("")}</ul>` : '<div class="sub">None (ingest materials first)</div>'}</div>
     <div class="note">${esc(a.note)}</div>
@@ -559,6 +592,7 @@ function renderCompare(r) {
       ${C.text_studied_so_far ? `<div class="sub" style="margin-top:6px"><b>Play studied:</b> ${esc(C.text_studied_so_far.join(", ") || "none")}${C.text_coming_up.length ? ` · <b>coming up:</b> ${esc(C.text_coming_up.join(", "))}` : ""}</div>` : ""}</div>
     ${b.key_quotations && b.key_quotations.length ? `<div class="sec"><div class="st">Key quotations the class has studied</div>${b.key_quotations.map((q) => `<p class="quote">“${esc(q.text)}” <span class="sub" style="font-style:normal">${esc(q.speaker)}, ${esc(q.act)}</span></p>`).join("")}</div>` : ""}
     <div class="sec"><div class="st">Teacher's materials (filtered by concept, ranked by method + misconception)</div>${b.materials.length ? `<ul>${b.materials.map((m) => `<li><b>${esc(m.heading)}</b> <span class="sub">W${m.week}: ${esc(m.why)}</span></li>`).join("")}</ul>` : '<div class="sub">No aligned materials for this concept in taught weeks</div>'}</div>
+    ${b.support_profile ? `<div class="sec" style="border-left:3px solid var(--accent)"><div class="st">Agreed adjustments (required · ${esc(b.support_profile.agreed_by)}, review by ${esc(b.support_profile.review_by)})</div><ul>${b.support_profile.adjustments.map((a) => `<li>${esc(a.do)}</li>`).join("")}</ul></div>` : ""}
     ${b.how_to_support && (b.how_to_support.patterns_to_support.length || b.how_to_support.strengths.length) ? `<div class="sec"><div class="st">How to support (learning behaviour, ${esc(b.how_to_support.based_on)})</div><ul>${b.how_to_support.patterns_to_support.map((p) => `<li><b>${esc(p.area)}:</b> ${esc(p.what_we_saw)}. <i>${esc(p.how_to_help)}</i></li>`).join("")}${b.how_to_support.strengths.map((p) => `<li><b>Strength, ${esc(p.area.toLowerCase())}:</b> ${esc(p.what_we_saw)}</li>`).join("")}</ul><div class="sub" style="margin-top:4px">${esc(b.how_to_support.rule)}</div></div>` : ""}
     <div class="sec guidance"><div class="st">Guidance for the tutor</div><ul>
       <li>${esc(G.diagnosis)}</li>
@@ -582,7 +616,7 @@ function renderEvaluate() {
     el.querySelectorAll("button").forEach((b) => (b.onclick = () => { S[key] = b.dataset.v; renderEvaluate(); }));
   };
   seg($("#ev-set"), S.subject === "english" ? [["english", "English: Macbeth (12)"]] : [["heldout2", "Unseen 2 (12)"], ["heldout", "Unseen 1 (14)"], ["tuning", "Practice (14)"]], "evSet");
-  seg($("#ev-suite"), S.subject === "english" ? [["english_heldout", "Unseen (10)"], ["english", "First set (10)"]] : [["heldout", "Unseen"], ["dev", "Development"], ["behaviour", "Learning behaviour"]], "suite");
+  seg($("#ev-suite"), S.subject === "english" ? [["english_heldout", "Unseen (10)"], ["english", "First set (10)"]] : [["heldout", "Unseen"], ["dev", "Development"], ["behaviour", "Learning behaviour"], ["adjustments", "Agreed adjustments"]], "suite");
   $("#ev-suite").querySelectorAll("button").forEach((btn) => btn.addEventListener("click", () => { S.suiteLoaded = false; renderEvaluate(); }));
   seg($("#ev-mode"), [["heuristic", "Keyword tagger"], ["claude", "Claude tagger", !llm]], "evMode");
   $("#ev-align-sub").textContent = { heldout2: "Unseen set 2: written and locked before the latest tagger change, like an exam paper the candidate hasn't seen. The honest figure.", heldout: "Unseen set 1: its misses were used to diagnose the latest tagger change, so it is no longer truly unseen.", tuning: "Practice set: the 14 units the tagger was adjusted against. Expect flattering numbers.", english: "English (Macbeth), unseen: 12 units written before any English tagging was run, including two that are not about Macbeth and should get no topics. Never used to adjust anything." }[S.evSet];
@@ -646,8 +680,8 @@ function renderAlignEval(d) {
 }
 const ARM_COL = { none: "var(--text-3)", raw: "var(--developing)", h2: "var(--accent)" };
 const ARM_SHORT = { none: "No context", raw: "Raw data", h2: "Map" };
-const CAT = { specific: "Asks about something specific", gives_up: "Isla: asks before trying, stops after errors", repeats_method: "Jay: keeps going, repeats the same method", method_conflict: "Teacher uses a different method (10Y / 11F)", non_revealing: "Request doesn't reveal the problem", jump_ahead: "Temptation to jump ahead", control: "Controls" };
-const CRIT = { support: "Responds to how the pupil learns", diagnosis: "Diagnosis", method: "Teacher's method", scope: "Respects what's been taught", next_step: "Next step", grounding: "True to pupil & class" };
+const CAT = { adjustments_below: "Ben / Bilal: working below the class, with and without adjustments", adjustments_ahead: "Farah / Fatima: secure and ahead, with and without adjustments", specific: "Asks about something specific", gives_up: "Isla: asks before trying, stops after errors", repeats_method: "Jay: keeps going, repeats the same method", method_conflict: "Teacher uses a different method (10Y / 11F)", non_revealing: "Request doesn't reveal the problem", jump_ahead: "Temptation to jump ahead", control: "Controls" };
+const CRIT = { adjustments: "Honours agreed adjustments", support: "Responds to how the pupil learns", diagnosis: "Diagnosis", method: "Teacher's method", scope: "Respects what's been taught", next_step: "Next step", grounding: "True to pupil & class" };
 function renderTutorEval(d) {
   if (d.error) { $("#ev-tutor").innerHTML = `<div class="note warn">${esc(d.error)}</div>`; return; }
   const sm = d.summary, arms = ["none", "raw", "h2"], max = sm.max_total;
@@ -660,7 +694,7 @@ function renderTutorEval(d) {
     if (arms.some((a) => !r.arms[a] || r.arms[a].error)) return `<div class="note warn">${esc(r.id)}: ${esc(arms.map((a) => r.arms[a]?.error).filter(Boolean).join("; "))}</div>`;
     return `<details class="sec" style="margin-top:8px"><summary><b>${esc(r.pupil)}</b> (${esc(r.class)}): “${esc(r.message)}” — ${arms.map((a) => `<span style="color:${ARM_COL[a]}">${ARM_SHORT[a]} ${r.arms[a].total}</span>`).join(" · ")}</summary>
       <div class="sub" style="margin:8px 0"><b>Actual need (hand-written):</b> ${esc(r.need)}</div>
-      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">${arms.map((a) => `<div><div class="sub"><b style="color:${ARM_COL[a]}">${esc(d.arms[a])}</b> · ${r.arms[a].total}/15 · ${Object.entries(r.arms[a].scores).map(([k, v]) => `${CRIT[k].split(" ")[0]} ${v}`).join(", ")}</div><div class="reply" style="margin-top:6px;font-size:12.5px">${esc(r.arms[a].reply)}</div><div class="sub" style="margin-top:6px"><i>Judge: ${esc(r.arms[a].why[0])}</i></div></div>`).join("")}</div></details>`;
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">${arms.map((a) => `<div><div class="sub"><b style="color:${ARM_COL[a]}">${esc(d.arms[a])}</b> · ${r.arms[a].total}/${d.summary.max_total} · ${Object.entries(r.arms[a].scores).map(([k, v]) => `${CRIT[k].split(" ")[0]} ${v}`).join(", ")}</div><div class="reply" style="margin-top:6px;font-size:12.5px">${esc(r.arms[a].reply)}</div><div class="sub" style="margin-top:6px"><i>Judge: ${esc(r.arms[a].why[0])}</i></div></div>`).join("")}</div></details>`;
   }).join("");
   $("#ev-tutor").innerHTML = `<div class="sub" style="margin-bottom:8px"><b>${esc(d.suite_label || "Development scenarios")}</b>${d.tutor && !d.tutor.builtin ? ` · tutor: <b>${esc(d.tutor.label)}</b> (${esc(d.tutor.kind)})` : ""} · last run ${esc(d.finished)} · ${esc(d.model)} · ${d.seconds}s · ${sm.scored_scenarios} scenarios${bf ? ` · the map on the same scenarios before the fix: <b>${bf.by_arm.h2.total}</b> / ${max}` : ""}</div>
     <div class="note" style="margin-bottom:10px">Scores vary by about ±1 point between identical runs, so differences smaller than that are noise.</div>

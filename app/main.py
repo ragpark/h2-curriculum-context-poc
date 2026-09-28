@@ -7,6 +7,7 @@ from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from . import adjustments as ADJ
 from . import align as A
 from . import behaviour as B
 from . import case as K
@@ -311,6 +312,39 @@ def confirm_pattern(lid: str, construct: str, body: ConfirmIn):
 def clear(lid: str):
     L.clear(lid)
     return L.view(lid)
+
+
+# ---------------------------------------------------------------- agreed adjustments (teacher-authored)
+class ProfileIn(BaseModel):
+    adjustments: list[str]
+    confirmed_by: str
+    confirmed_on: str
+    review_by: str
+    note: str | None = None
+
+
+@app.get("/api/adjustments/vocabulary")
+def adjustments_vocab():
+    v = ADJ.vocab()
+    return {"version": v["version"], "groups": v["groups"], "adjustments": [v["adjustments"][i] for i in v["order"]]}
+
+
+@app.get("/api/learners/{lid}/adjustments")
+def learner_adjustments(lid: str):
+    return ADJ.profile(lid)
+
+
+@app.put("/api/learners/{lid}/adjustments")
+def set_learner_adjustments(lid: str, body: ProfileIn):
+    if not db.q1("select 1 from pupil where id=%s", (lid,)):
+        raise KeyError(lid)
+    return ADJ.set_profile(lid, body.adjustments, body.confirmed_by, body.confirmed_on, body.review_by, body.note)
+
+
+@app.delete("/api/learners/{lid}/adjustments")
+def clear_learner_adjustments(lid: str):
+    ADJ.clear_profile(lid)
+    return ADJ.profile(lid)
 
 
 # ---------------------------------------------------------------- context & tutor

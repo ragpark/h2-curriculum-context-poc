@@ -143,6 +143,14 @@ TUTOR REPLY:
 
 Return ONLY JSON: {json_line}"""
 
+ADJUSTMENTS_RUBRIC = """adjustments — does it honour the pupil's AGREED ADJUSTMENTS (required by their teacher), and avoid inventing adjustments for a pupil who has none?
+  0 breaks an agreed adjustment (e.g. gives the method before an attempt when told not to; consolidates when told to stretch), or invents restrictions for a pupil with none
+  1 ignores the adjustments: a generic reply that happens not to break them
+  2 follows most of the adjustments, with a lapse
+  3 follows every agreed adjustment exactly, without mentioning them or describing the pupil (for a pupil with none: a normal reply)
+
+"""
+
 SUPPORT_RUBRIC = """support — does it respond to HOW this pupil learns (their learning behaviour), not just what they know?
   0 works against it (e.g. hands a hint straight away to a pupil who asks before trying; sets more of the same to a pupil stuck repeating a method)
   1 generic encouragement only
@@ -156,11 +164,13 @@ _lock = threading.Lock()
 
 
 SUITES = {"dev": "tutor_suite.yaml", "heldout": "tutor_suite_heldout.yaml", "behaviour": "tutor_suite_behaviour.yaml",
-          "english": "tutor_suite_english.yaml", "english_heldout": "tutor_suite_english_heldout.yaml"}
+          "english": "tutor_suite_english.yaml", "english_heldout": "tutor_suite_english_heldout.yaml",
+          "adjustments": "tutor_suite_adjustments.yaml"}
 SUITE_LABELS = {"dev": "Development scenarios (used to build the fix)", "heldout": "Unseen scenarios (written and locked before the fix)",
                 "behaviour": "Learning behaviour: same answers, different behaviour",
                 "english": "English (Macbeth): first scenarios (used to diagnose the scope fix)",
-                "english_heldout": "English (Macbeth): unseen scenarios (written and locked before the scope fix)"}
+                "english_heldout": "English (Macbeth): unseen scenarios (written and locked before the scope fix)",
+                "adjustments": "Agreed adjustments: same answers, with and without a teacher's required adjustments"}
 
 
 def suite(name: str = "dev"):
@@ -174,8 +184,12 @@ def _context(arm: str, pupil: dict, message: str) -> dict:
 
 
 def _judge(sc, cls, pupil, reply, crit, pinfo=None) -> dict:
-    extra_rubric = SUPPORT_RUBRIC if "support" in crit else ""
-    extra_truth = (f"\n  Learning behaviour: {pinfo['behaviour']}\n  Good support: {pinfo['good_support']}" if pinfo else "")
+    extra_rubric = (SUPPORT_RUBRIC if "support" in crit else "") + (ADJUSTMENTS_RUBRIC if "adjustments" in crit else "")
+    extra_truth = ""
+    if pinfo and "behaviour" in pinfo:
+        extra_truth += f"\n  Learning behaviour: {pinfo['behaviour']}\n  Good support: {pinfo['good_support']}"
+    if pinfo and "adjustments" in pinfo:
+        extra_truth += f"\n  Agreed adjustments: {pinfo['adjustments']}\n  What honouring them looks like here: {pinfo['good_adjustments']}"
     json_line = "{" + ",".join(f'"{c}":n' for c in crit) + ',"why":"one sentence citing the reply"}'
     prompt = RUBRIC.format(cls=pupil["class"], teacher=cls["teacher"], method=cls["method"], avoid=cls["avoid"],
                            taught=cls["taught"], not_yet=cls["not_yet_taught"], pupil=pupil["name"],

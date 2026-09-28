@@ -172,6 +172,7 @@
             <div class="card"><h3>Progress by topic</h3><p class="sub">Estimates from the pupil's own answers, plus weaker evidence inferred from later topics</p><div id="e-states"></div></div>
             <div class="card"><h3>Misconceptions</h3><p class="sub">Strength builds with each diagnosed error and fades with later successes</p><div id="e-mcs"></div></div>
           </div>
+          <div class="card" id="e-adj"></div>
           <div class="card" id="e-beh"></div>
           <div class="card"><h3>Pupil answers log</h3><p class="sub">Only ever added to. Every row records its source, how it was tagged and the map version.</p><div class="tbl-wrap" id="e-log"></div></div>
         </div>
@@ -301,6 +302,7 @@
           <a href="#help" data-scroll="h-pupils">Meet the pupils</a>
           <a href="#help" data-scroll="h-english">English: Macbeth</a>
           <a href="#help" data-scroll="h-independent">Testing a different tutor</a>
+          <a href="#help" data-scroll="h-adjustments">Agreed adjustments</a>
           <a href="#help" data-scroll="h-read">How to read the colours and labels</a>
           <a href="#help" data-scroll="h-results">How to read the test results</a>
           <a href="#help" data-scroll="h-howtest">How the test is run</a>
@@ -346,7 +348,7 @@
 
           <article class="card" id="h-pupils">
             <h3>Meet the pupils</h3>
-            <p>All nine pupils are made up. Each one was designed to show something different. Classes 10X (Ms Okafor) and 10Y (Mr Hale) are both in week 4 of a unit on solving equations. Ms Okafor teaches with <b>the balance method</b>: do the same to both sides. Mr Hale teaches <b>“change side, change sign”</b>.</p>
+            <p>All eleven pupils are made up. Each one was designed to show something different. Classes 10X (Ms Okafor) and 10Y (Mr Hale) are both in week 4 of a unit on solving equations. Ms Okafor teaches with <b>the balance method</b>: do the same to both sides. Mr Hale teaches <b>“change side, change sign”</b>.</p>
             <table class="t help-table">
               <tr><th>Pupil</th><th>Class</th><th>What's going on</th></tr>
               <tr><td><b>Amara</b></td><td>10X</td><td>Fine on easier equations, but keeps making the same sign mistake when x is on both sides.</td></tr>
@@ -357,6 +359,8 @@
               <tr><td><b>Farah</b></td><td>10Y</td><td>Secure on everything so far and wants more. Brackets haven't been taught yet.</td></tr>
               <tr><td><b>Hana</b></td><td>10Y</td><td>Reads “=” as “the answer is”, not “both sides are equal”.</td></tr>
               <tr><td><b>Isla</b></td><td>10X</td><td>Asks for help before she has tried, and stops after one mistake. Says she is unsure even when she is right.</td></tr>
+              <tr><td><b>Bilal</b></td><td>10X</td><td>Ben's twin: exactly the same answers, but no agreed adjustments. He is there to show what Ben's adjustments change.</td></tr>
+              <tr><td><b>Fatima</b></td><td>10Y</td><td>Farah's twin: the same answers, no agreed adjustments, so the class's “don't jump ahead” rule applies to her in full.</td></tr>
               <tr><td><b>Jay</b></td><td>10X</td><td>Never asks for help and keeps going, but repeats the same wrong method. Very sure of answers that are wrong.</td></tr>
             </table>
             <p class="sub" style="margin-top:8px">Isla and Jay gave <b>exactly the same answers</b>. Only the way they worked is different. They are there to test whether a tutor can tell the difference.</p>
@@ -418,6 +422,30 @@
               <li><b>Only synthetic data leaves the prototype.</b> Everything sent to a tutor is about fictional pupils. If you ever connect this to real classroom data, that changes, and the tutor's data handling becomes part of the assessment.</li>
             </ul>
             <p class="sub">Technical detail, the exact message formats and the reasoning behind the design are on the <a href="#theory" data-page-link="theory">Theory</a> and <a href="#connect" data-page-link="connect">Connect a tutor</a> pages.</p>
+          </article>
+
+          <article class="card" id="h-adjustments">
+            <h3>Agreed adjustments: what a teacher requires the tutor to do for one pupil</h3>
+            <p>A class is never one pupil. Some are working well below the rest, some well ahead, and some have needs that a good teacher already knows about and plans for. The map can tell the tutor <em>where</em> a pupil is. It cannot and should not guess <em>why</em>. That is what this part is for.</p>
+            <p>It is the prototype's version of the thing a SENCO writes and a class teacher reads: how this pupil learns best, what helps, what to avoid. It is written by a person, confirmed with their name and a review date, and sent to the tutor as instructions it must follow.</p>
+            <h4>Three rules</h4>
+            <ul class="help-list">
+              <li><b>Never guessed.</b> Nothing here is worked out from a pupil's answers or how they behave. A teacher chooses it. (The “Learning behaviour” panel is different: that <em>is</em> worked out from answers, and it is only advice.)</li>
+              <li><b>Instructions, not labels.</b> The choices are things like “one step at a time”, “no hint before an attempt”, “may work beyond the class scheme”. There is no box for a diagnosis or a need type, on purpose. The tutor is told what to do, not what the pupil “is”.</li>
+              <li><b>Required, and dated.</b> In the briefing they appear as required, next to the advisory notes, and the two are never mixed. Each set has a review date; after it, the adjustments stop being sent until someone re-confirms them, which is how provision works in a school.</li>
+            </ul>
+            <h4>Try it</h4>
+            <ol class="help-steps">
+              <li>Open <b>Pupil progress</b> and choose <b>Ben</b>. His “Agreed adjustments” panel shows six, confirmed by his teacher with the SENCO.</li>
+              <li>Open <b>Tutor briefing</b> for Ben and press “Assemble &amp; ask tutor”. In the map's briefing, look for the blue-edged “Agreed adjustments (required)” block. The raw-records version gets the same adjustments, but as a teacher's note in the pile.</li>
+              <li>Now do the same for <b>Bilal</b>, who gave exactly the same answers and has no adjustments. Compare the two replies.</li>
+              <li>Do the same with <b>Farah</b> (may work ahead of the class) and her twin <b>Fatima</b>.</li>
+            </ol>
+            <h4>The test</h4>
+            <p>On the <b>Evaluate</b> page, the “Agreed adjustments” set asks each pair the same questions and adds a sixth mark: <b>did the reply honour the agreed adjustments</b>, and for a twin with none, did it avoid inventing any? Because each pair has identical answers, the difference between twins is the adjustments and nothing else.</p>
+            <div class="help-callout">
+              <b>What this is not.</b> It is not a way of identifying pupils with special educational needs, and it holds nothing about why a pupil has adjustments. In a real school the source would be the pupil's one-page profile or passport, and a person would still confirm each instruction before it reached a tutor. It also does nothing about the medium: a pupil who cannot read the reply needs read-aloud or symbols, which are features of the platform, not of the notes.
+            </div>
           </article>
 
           <article class="card" id="h-read">

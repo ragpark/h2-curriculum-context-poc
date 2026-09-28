@@ -106,6 +106,10 @@ create table if not exists learner_indicator (
 create table if not exists learner_construct (
   learner text, construct text, score real, n int, positives int, negatives int, status text,
   summary text, teacher_confirmed boolean default false, primary key (learner, construct));
+-- AGREED ADJUSTMENTS (teacher-authored support profile; never inferred)
+create table if not exists learner_adjustment (
+  learner text not null, adjustment text not null, confirmed_by text not null, confirmed_on date not null,
+  review_by date not null, note text, primary key (learner, adjustment));
 create table if not exists learner_misconception (
   learner text, misconception text, strength real, count int,
   primary key (learner, misconception));

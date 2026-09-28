@@ -6,6 +6,7 @@ facets=False → the baseline a tutor gets WITHOUT H2: raw activity log + text-s
 import json
 import re
 
+from . import adjustments as ADJ
 from . import align as A
 from . import behaviour as B
 from . import content as C
@@ -37,9 +38,11 @@ def _without_h2(p, cls, concept, message, mode):
             log.append(f"{e['source']}: \"{e['activity']}\" — {round(e['outcome'] * 100)}%{note}")
     query = message or (G.get().label(concept) if concept else "")
     # (the raw arm gets the same materials search and activity log in every subject)
+    note = ADJ.raw_note(p["id"])
     pack = {
         "mode": "without_h2",
         "pupil": {"name": p["name"], "class": p["class"]},
+        "teacher_notes": [note] if note else [],
         "recent_activity": log,
         "materials": C.search(cls["id"], query, k=3),
         "note": "No shared map: the topic, misconceptions, earlier topics and the teacher's method must be worked out from raw text.",
@@ -330,6 +333,7 @@ def _with_h2(p, cls, concept, message, mode):
             "preferred_method": pref["method"], "preferred_representation": pref["representation"],
         },
         "materials": mats,
+        "support_profile": ADJ.briefing_block(p["id"]),
         "how_to_support": B.briefing(p["id"]),
         "guidance": {
             "diagnosis": diagnosis,
@@ -358,5 +362,12 @@ def _with_h2(p, cls, concept, message, mode):
             + ". Writing skills are practised throughout the course, and any character, theme or context topic can be discussed using the parts studied."
             + " Pupils may have read ahead: you can discuss later parts of the play, but say they are coming up in class and link back to what has been studied. Prefer quotations from the parts studied.")
     pack["guidance"]["next_step"] = next_step(g, sm, focus, focus_secure, taught, planned, subject, edge, mentioned_coming)
+    sp = pack.get("support_profile")
+    if sp and any(a["do"].startswith("This pupil may be taught topics the class has not reached") for a in sp["adjustments"]):
+        pack["guidance"]["scope_rule"] = ("This pupil's agreed adjustments allow work beyond the class scheme: teach 'not_yet_taught' topics properly when "
+                                          "appropriate, naming the topic, rather than as a flagged preview.")
+        ns = pack["guidance"]["next_step"]
+        if ns and ns.get("action") in ("preview", "preview_requested"):
+            ns["action"] = "move_on"; ns["why"] = "agreed adjustments: this pupil may be taught ahead of the class scheme"
     pack["approx_tokens"] = len(json.dumps(pack)) // 4
     return pack

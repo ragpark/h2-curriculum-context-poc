@@ -365,6 +365,12 @@ async function renderMaterials() {
   const cg = $("#btn-cov-graph"); if (cg) cg.onclick = () => { S.overlay = "class:" + S.cls; show("graph"); };
   renderScheme();
 }
+function schemeNote(sw) {
+  if (!sw) return `<span class="badge">scheme of work: not recorded (older run)</span>`;
+  if (!sw.declared.length) return `<span class="badge">scheme of work: not declared</span>`;
+  if (!sw.not_declared.length) return `<span class="badge secure">scheme of work: declared (${esc(sw.declared.join(", "))})</span>`;
+  return `<span class="badge developing">scheme of work: declared for ${esc(sw.declared.join(", "))}, not for ${esc(sw.not_declared.join(", "))}</span>`;
+}
 const SW_STATUS = { agree: ["secure", "agrees"], partly: ["developing", "partly agrees"], plan_only: ["", "plan only"], materials_only: ["", "materials only"], method_differs: ["gap", "method differs"], differ: ["gap", "differs"], untagged: ["", "nothing recognised"] };
 async function renderScheme() {
   const el = $("#m-scheme");
@@ -697,7 +703,7 @@ async function renderTutorPicker() {
 async function renderTutorCompare() {
   const d = await api(`/api/eval/tutor/compare?suite=${S.suite}`);
   const arms = ["none", "raw", "h2"];
-  $("#ev-compare").innerHTML = d.tutors.length ? `<div class="tbl-wrap"><table class="t"><tr><th>Tutor</th><th>Last run</th>${arms.map((a) => `<th>${ARM_SHORT[a]}</th>`).join("")}<th>Map − raw</th><th>Map vs raw (W–T–L)</th></tr>${d.tutors.map((t) => { const dlt = +(t.by_arm.h2 - t.by_arm.raw).toFixed(2); const h = t.head_to_head; return `<tr><td><b>${esc(t.label)}</b><div class="sub">${esc(t.kind)}</div></td><td class="sub">${esc(t.finished || "")}</td>${arms.map((a) => `<td style="color:${ARM_COL[a]}"><b>${t.by_arm[a]}</b><span class="sub"> / ${t.max_total}</span></td>`).join("")}<td class="${dlt > 0.25 ? "ok" : dlt < -0.25 ? "bad" : ""}"><b>${dlt > 0 ? "+" : ""}${dlt}</b></td><td>${h.win}–${h.tie}–${h.loss}</td></tr>`; }).join("")}</table></div><div class="sub" style="margin-top:6px">Same scenarios, ground truth and judge for every row (${esc(d.suite_label || d.suite)}). Compare each tutor with and without the map before comparing tutors with each other: the ground truth encodes one pedagogy, and a tutor with a different one can score lower for reasons unrelated to the map.</div>` : `<div class="empty">No results yet on this set. Run the built-in tutor, or register and run another.</div>`;
+  $("#ev-compare").innerHTML = d.tutors.length ? `<div class="tbl-wrap"><table class="t"><tr><th>Tutor</th><th>Last run</th><th>Scheme of work</th>${arms.map((a) => `<th>${ARM_SHORT[a]}</th>`).join("")}<th>Map − raw</th><th>Map vs raw (W–T–L)</th></tr>${d.tutors.map((t) => { const dlt = +(t.by_arm.h2 - t.by_arm.raw).toFixed(2); const h = t.head_to_head; return `<tr><td><b>${esc(t.label)}</b><div class="sub">${esc(t.kind)}</div></td><td class="sub">${esc(t.finished || "")}</td><td>${schemeNote(t.scheme_of_work)}</td>${arms.map((a) => `<td style="color:${ARM_COL[a]}"><b>${t.by_arm[a]}</b><span class="sub"> / ${t.max_total}</span></td>`).join("")}<td class="${dlt > 0.25 ? "ok" : dlt < -0.25 ? "bad" : ""}"><b>${dlt > 0 ? "+" : ""}${dlt}</b></td><td>${h.win}–${h.tie}–${h.loss}</td></tr>`; }).join("")}</table></div><div class="sub" style="margin-top:6px">Same scenarios, ground truth and judge for every row (${esc(d.suite_label || d.suite)}). Compare each tutor with and without the map before comparing tutors with each other: the ground truth encodes one pedagogy, and a tutor with a different one can score lower for reasons unrelated to the map.</div>` : `<div class="empty">No results yet on this set. Run the built-in tutor, or register and run another.</div>`;
 }
 async function renderTutorList() {
   S.tutors = await api("/api/tutors");
@@ -739,7 +745,7 @@ function renderTutorEval(d) {
       <div class="sub" style="margin:8px 0"><b>Actual need (hand-written):</b> ${esc(r.need)}</div>
       <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">${arms.map((a) => `<div><div class="sub"><b style="color:${ARM_COL[a]}">${esc(d.arms[a])}</b> · ${r.arms[a].total}/${d.summary.max_total} · ${Object.entries(r.arms[a].scores).map(([k, v]) => `${CRIT[k].split(" ")[0]} ${v}`).join(", ")}</div><div class="reply" style="margin-top:6px;font-size:12.5px">${esc(r.arms[a].reply)}</div><div class="sub" style="margin-top:6px"><i>Judge: ${esc(r.arms[a].why[0])}</i></div></div>`).join("")}</div></details>`;
   }).join("");
-  $("#ev-tutor").innerHTML = `<div class="sub" style="margin-bottom:8px"><b>${esc(d.suite_label || "Development scenarios")}</b>${d.tutor && !d.tutor.builtin ? ` · tutor: <b>${esc(d.tutor.label)}</b> (${esc(d.tutor.kind)})` : ""} · last run ${esc(d.finished)} · ${esc(d.model)} · ${d.seconds}s · ${sm.scored_scenarios} scenarios${bf ? ` · the map on the same scenarios before the fix: <b>${bf.by_arm.h2.total}</b> / ${max}` : ""}</div>
+  $("#ev-tutor").innerHTML = `<div class="sub" style="margin-bottom:8px">${schemeNote(d.scheme_of_work)} <span class="sub">Coverage at run time. Runs made under different coverage are different experiments.</span></div><div class="sub" style="margin-bottom:8px"><b>${esc(d.suite_label || "Development scenarios")}</b>${d.tutor && !d.tutor.builtin ? ` · tutor: <b>${esc(d.tutor.label)}</b> (${esc(d.tutor.kind)})` : ""} · last run ${esc(d.finished)} · ${esc(d.model)} · ${d.seconds}s · ${sm.scored_scenarios} scenarios${bf ? ` · the map on the same scenarios before the fix: <b>${bf.by_arm.h2.total}</b> / ${max} (no scheme of work)` : ""}</div>
     <div class="note" style="margin-bottom:10px">Scores vary by about ±1 point between identical runs, so differences smaller than that are noise.</div>
     <div class="kpis" style="margin-bottom:12px">${tiles}<div class="kpi"><div class="v">${h.win}–${h.tie}–${h.loss}</div><div class="l">Map vs raw data: wins–ties–losses</div></div></div>
     <div class="grid g2"><div>${crit}</div><div>${cats}</div></div>

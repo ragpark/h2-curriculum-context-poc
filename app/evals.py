@@ -272,6 +272,8 @@ def start_tutor_suite(name: str = "dev", tutor_id: str = "builtin", replies: dic
             results = []
 
             crit = CRITERIA + tuple(s.get("extra_criteria", []))
+            from . import scheme as SW
+            scheme_state = {cid: bool(SW.get(cid)["weeks"]) for cid in s["classes"]}
 
             def one(sc):
                 r = _run_one(sc, s["classes"], pupils, crit, s.get("pupils"), tutor,
@@ -283,6 +285,8 @@ def start_tutor_suite(name: str = "dev", tutor_id: str = "builtin", replies: dic
                 results = list(ex.map(one, s["scenarios"]))
             out = {"suite": name, "suite_label": SUITE_LABELS[name], "model": llm.model(), "arms": ARM_LABELS, "criteria": crit,
                    "tutor": TU.public(tutor) if tutor["kind"] != "builtin" else tutor, "summary": _aggregate(results, crit),
+                   "scheme_of_work": {"declared": sorted(c for c, v in scheme_state.items() if v),
+                                      "not_declared": sorted(c for c, v in scheme_state.items() if not v)},
                    "results": results, "finished": time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()),
                    "seconds": round(time.time() - job["started"])}
             db.meta_set(_result_key(name, tutor_id), json.dumps(out))
@@ -372,6 +376,7 @@ def compare_tutors(name: str) -> dict:
         if r and r.get("summary"):
             sm = r["summary"]
             rows.append({"tutor": t["id"], "label": t["label"], "kind": t["kind"], "finished": r.get("finished"),
+                         "scheme_of_work": r.get("scheme_of_work"),
                          "by_arm": {a: sm["by_arm"][a]["total"] for a in ARMS}, "head_to_head": sm["head_to_head"]["h2_vs_raw"],
                          "max_total": sm["max_total"], "scored": sm["scored_scenarios"]})
     return {"suite": name, "suite_label": SUITE_LABELS.get(name), "tutors": rows}

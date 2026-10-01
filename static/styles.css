@@ -302,3 +302,43 @@ body:not([data-subject="english"]) .only-english{display:none}
 .quote-block { margin: 8px 0 10px; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--surface-2); font-size: 13.5px; line-height: 1.55; color: var(--text-2); }
 #h-howtest .help-table td:first-child { white-space: normal; min-width: 150px; }
 #h-howtest .help-table td { font-size: 13px; }
+
+/* ------------------------------------------------------------------ help: component architecture figures */
+#h-arch { --build: #B8670A; --build-soft: #FBEEDC; --use: var(--accent); --use-soft: var(--accent-soft); --store: #0F7B6C; --store-soft: #DDF2EE; --hair: var(--border); --panel: var(--surface); --soft: var(--surface-2); --muted: var(--text-2); }
+@media (prefers-color-scheme: dark) { #h-arch { --build: #E8A24A; --build-soft: #3A2C16; --store: #4FC3B0; --store-soft: #163531; } }
+#h-arch figure { margin: 0 0 18px; }
+#h-arch .diagram { overflow-x: auto; border: 1px solid var(--hair); background: var(--panel); border-radius: 6px; padding: 10px; }
+#h-arch svg { display: block; min-width: 1040px; width: 100%; height: auto; color: var(--text); font-family: inherit; }
+#h-arch svg text { font-size: 12.5px; fill: currentColor; }
+#h-arch svg .small { font-size: 11px; fill: var(--muted); }
+#h-arch svg .head { font-size: 13px; font-weight: 600; }
+#h-arch svg .lane { fill: var(--soft); stroke: none; }
+#h-arch svg .lane-t { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; fill: var(--muted); }
+#h-arch svg .actor { fill: var(--panel); stroke: currentColor; stroke-width: 1.2; }
+#h-arch svg .comp { fill: var(--panel); stroke: currentColor; stroke-width: 1.4; }
+#h-arch svg .comp.hi { stroke: var(--use); stroke-width: 2; }
+#h-arch svg .store { fill: var(--store-soft); stroke: var(--store); stroke-width: 1.4; }
+#h-arch svg .store-t { fill: var(--store); font-weight: 600; }
+#h-arch svg .ext { fill: none; stroke: currentColor; stroke-width: 1.1; stroke-dasharray: 3 3; }
+#h-arch svg .dep { stroke: currentColor; stroke-width: 1.1; fill: none; stroke-dasharray: 2 3; opacity: .75; }
+#h-arch svg .dep.hi { stroke: var(--use); opacity: 1; stroke-dasharray: 4 3; }
+#h-arch svg .b { stroke: var(--build); stroke-width: 2; fill: none; }
+#h-arch svg .u { stroke: var(--use); stroke-width: 2; fill: none; }
+#h-arch svg .rd { stroke-dasharray: 5 4; }
+#h-arch svg .bt { fill: var(--build); font-size: 11px; }
+#h-arch svg .ut { fill: var(--use); font-size: 11px; }
+#h-arch svg .bb { fill: var(--build-soft); stroke: var(--build); stroke-width: 1; }
+#h-arch svg .ub { fill: var(--use-soft); stroke: var(--use); stroke-width: 1; }
+#h-arch svg .num { font-size: 10px; font-weight: 600; }
+#h-arch svg .strip { fill: var(--use-soft); stroke: var(--use); stroke-width: 1; stroke-dasharray: 3 3; }
+#h-arch svg .strip-t, #h-arch svg .hi-t { fill: var(--use); }
+#h-arch figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; max-width: 85ch; }
+#h-arch .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { #h-arch .cols { grid-template-columns: 1fr; } }
+#h-arch .cols > div { min-width: 0; }
+#h-arch .help-table td { font-size: 13px; white-space: normal; vertical-align: top; }
+#h-arch .help-table td.b { border-left: 3px solid var(--build); padding-left: 8px; }
+#h-arch .help-table td.u { border-left: 3px solid var(--use); padding-left: 8px; }
+#h-arch .help-table td.s { border-left: 3px solid var(--store); padding-left: 8px; }
+#h-arch .help-callout ol { margin: 0; padding-left: 20px; }
+#h-arch .help-callout li + li { margin-top: 6px; }

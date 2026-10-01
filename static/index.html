@@ -314,6 +314,7 @@
           <a href="#help" data-scroll="h-results">How to read the test results</a>
           <a href="#help" data-scroll="h-howtest">How the test is run</a>
           <a href="#help" data-scroll="h-limits">What this can't tell you</a>
+          <a href="#help" data-scroll="h-arch">Component architecture</a>
           <a href="#help" data-scroll="h-glossary">Glossary</a>
         </nav>
 
@@ -588,6 +589,302 @@
           <article class="card" id="h-authoring">
             <h3>Want to make a map for another subject?</h3>
             <p>The <a href="#authoring" data-page-link="authoring">Authoring a map</a> page explains what goes into a map, who should write and review it, how to check it, and walks through one small unit from start to finish. It has a downloadable template and a checker you can paste a map into.</p>
+          </article>
+
+          <article class="card" id="h-arch">
+            <h3>How the prototype is put together: a component architecture</h3>
+            <p>Two figures. The first is the static picture: the people and systems that provide inputs, the six components of the mapper, the four data layers they keep apart, and the dependencies between them. The second draws the two flows on top: amber for building the map and the school's data, blue for the seconds between a pupil's message and the tutor's reply.</p>
+<figure>
+    <div class="diagram">
+      <svg viewBox="0 0 1240 700" role="img" aria-label="Static architecture. Top row of inputs: standards bodies (reference only), subject specialists, class teacher, teacher or SENCO, pupil, AI tutor. Middle: six components (authoring and validation, alignment service, ingestion, evidence recorder, learner model, context assembler) plus evaluation harness and integration surface. Bottom: four data layers (reference map, tags, evidence, learner state) and a teacher-authored adjustments store. Dotted arrows show dependencies.">
+<defs><marker id="d1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor" opacity=".8"/></marker><marker id="d1u" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--use)"/></marker></defs>
+<rect class="lane" x="10" y="14" width="1220" height="118" rx="6"/><text class="lane-t" x="22" y="34">Inputs · who provides what</text>
+<rect class="lane" x="10" y="146" width="1220" height="324" rx="6"/><text class="lane-t" x="22" y="166">Components · the curriculum mapper</text>
+<rect class="lane" x="10" y="490" width="1220" height="142" rx="6"/>
+<rect class="actor" x="24" y="46" width="180" height="80" rx="5" />
+<text class="head" x="114" y="68" text-anchor="middle">Subject specialists</text>
+<text class="small" x="114" y="86" text-anchor="middle">author, review, trial the map</text>
+<text class="small" x="114" y="102" text-anchor="middle">topics, links, misconceptions</text>
+<text class="small" x="114" y="118" text-anchor="middle">methods, representations</text>
+<rect class="ext" x="224" y="46" width="180" height="80" rx="5" />
+<text class="head" x="314" y="68" text-anchor="middle">Standards bodies</text>
+<text class="small" x="314" y="86" text-anchor="middle">national curriculum · spec</text>
+<text class="small" x="314" y="102" text-anchor="middle">referenced by the crosswalk</text>
+<text class="small" x="314" y="118" text-anchor="middle">never ingested</text>
+<rect class="actor" x="424" y="46" width="180" height="80" rx="5" />
+<text class="head" x="514" y="68" text-anchor="middle">Class teacher · materials</text>
+<text class="small" x="514" y="86" text-anchor="middle">dated lesson materials</text>
+<text class="small" x="514" y="102" text-anchor="middle">scheme of work (CSV)</text>
+<text class="small" x="514" y="118" text-anchor="middle">both are tagged on upload</text>
+<rect class="actor" x="624" y="46" width="180" height="80" rx="5" />
+<text class="head" x="714" y="68" text-anchor="middle">Class teacher · marks</text>
+<text class="small" x="714" y="86" text-anchor="middle">marked work, markbook</text>
+<text class="small" x="714" y="102" text-anchor="middle">misconception seen in class</text>
+<text class="small" x="714" y="118" text-anchor="middle">entered against the map</text>
+<rect class="actor" x="824" y="46" width="180" height="80" rx="5" />
+<text class="head" x="914" y="68" text-anchor="middle">Teacher / SENCO</text>
+<text class="small" x="914" y="86" text-anchor="middle">agreed adjustments</text>
+<text class="small" x="914" y="102" text-anchor="middle">fixed vocabulary of 20</text>
+<text class="small" x="914" y="118" text-anchor="middle">named, dated, review date</text>
+<rect class="actor" x="1024" y="46" width="180" height="80" rx="5" />
+<text class="head" x="1114" y="68" text-anchor="middle">AI tutor (any) + pupil</text>
+<text class="small" x="1114" y="86" text-anchor="middle">built-in · webhook · offline</text>
+<text class="small" x="1114" y="102" text-anchor="middle">reads one briefing per turn</text>
+<text class="small" x="1114" y="118" text-anchor="middle">may record the answer</text>
+<rect class="strip" x="24" y="176" width="1180" height="22" rx="3"/><text class="small strip-t" x="614" y="191" text-anchor="middle">Integration surface — MCP tools · REST · CASE v1.1 export (read-only) · tutor adapters (webhook, offline). Every input and output crosses this line.</text>
+<rect class="comp" x="24" y="216" width="180" height="96" rx="5" />
+<text class="head" x="114" y="238" text-anchor="middle">Authoring &amp; validation</text>
+<text class="small" x="114" y="256" text-anchor="middle">YAML template · validator</text>
+<text class="small" x="114" y="272" text-anchor="middle">versioned release</text>
+<text class="small" x="114" y="288" text-anchor="middle">CASE IDs minted on release</text>
+<text class="small" x="114" y="304" text-anchor="middle">a failing map is refused</text>
+<rect class="comp" x="224" y="216" width="180" height="96" rx="5" />
+<text class="head" x="314" y="238" text-anchor="middle">Alignment service</text>
+<text class="small" x="314" y="256" text-anchor="middle">any text → map IDs</text>
+<text class="small" x="314" y="272" text-anchor="middle">+ confidence, provenance</text>
+<text class="small" x="314" y="288" text-anchor="middle">keyword or model, either</text>
+<text class="small" x="314" y="304" text-anchor="middle">every ID checked on the map</text>
+<rect class="comp" x="424" y="216" width="180" height="96" rx="5" />
+<text class="head" x="514" y="238" text-anchor="middle">Ingestion</text>
+<text class="small" x="514" y="256" text-anchor="middle">materials → units → tags</text>
+<text class="small" x="514" y="272" text-anchor="middle">scheme → weeks → tags</text>
+<text class="small" x="514" y="288" text-anchor="middle">reconciled with materials</text>
+<text class="small" x="514" y="304" text-anchor="middle">derives coverage</text>
+<rect class="comp" x="624" y="216" width="180" height="96" rx="5" />
+<text class="head" x="714" y="238" text-anchor="middle">Evidence recorder</text>
+<text class="small" x="714" y="256" text-anchor="middle">answers, marks, events</text>
+<text class="small" x="714" y="272" text-anchor="middle">append-only</text>
+<text class="small" x="714" y="288" text-anchor="middle">stamped with source</text>
+<text class="small" x="714" y="304" text-anchor="middle">and map version</text>
+<rect class="comp" x="824" y="216" width="180" height="96" rx="5" />
+<text class="head" x="914" y="238" text-anchor="middle">Learner model</text>
+<text class="small" x="914" y="256" text-anchor="middle">a projection, never edited</text>
+<text class="small" x="914" y="272" text-anchor="middle">mastery per topic</text>
+<text class="small" x="914" y="288" text-anchor="middle">prerequisite propagation</text>
+<text class="small" x="914" y="304" text-anchor="middle">rebuilt from 3 through 1</text>
+<rect class="comp hi" x="1024" y="216" width="180" height="96" rx="5" />
+<text class="head hi-t" x="1114" y="238" text-anchor="middle">Context assembler</text>
+<text class="small" x="1114" y="256" text-anchor="middle">scope · learning edge</text>
+<text class="small" x="1114" y="272" text-anchor="middle">focus · next step</text>
+<text class="small" x="1114" y="288" text-anchor="middle">materials · adjustments</text>
+<text class="small" x="1114" y="304" text-anchor="middle">→ one briefing (JSON)</text>
+<rect class="comp" x="1024" y="350" width="180" height="84" rx="5" />
+<text class="head" x="1114" y="372" text-anchor="middle">Evaluation harness</text>
+<text class="small" x="1114" y="390" text-anchor="middle">scripted pupils, blind judge</text>
+<text class="small" x="1114" y="406" text-anchor="middle">three conditions, any tutor</text>
+<text class="small" x="1114" y="422" text-anchor="middle">records scheme-of-work state</text>
+<rect class="store" x="24" y="516" width="180" height="76" rx="5" />
+<text class="store-t" x="114" y="538" text-anchor="middle">1 · Reference map</text>
+<text class="small" x="114" y="556" text-anchor="middle">topics, links, misconceptions</text>
+<text class="small" x="114" y="572" text-anchor="middle">methods, quotations, acts</text>
+<text class="small" x="114" y="588" text-anchor="middle">publisher · per release</text>
+<rect class="store" x="424" y="516" width="180" height="76" rx="5" />
+<text class="store-t" x="514" y="538" text-anchor="middle">2 · Tags + coverage</text>
+<text class="small" x="514" y="556" text-anchor="middle">unit or week → map ID</text>
+<text class="small" x="514" y="572" text-anchor="middle">confidence, provenance</text>
+<text class="small" x="514" y="588" text-anchor="middle">school · per lesson</text>
+<rect class="store" x="624" y="516" width="180" height="76" rx="5" />
+<text class="store-t" x="714" y="538" text-anchor="middle">3 · Evidence</text>
+<text class="small" x="714" y="556" text-anchor="middle">every answer, mark, event</text>
+<text class="small" x="714" y="572" text-anchor="middle">append-only, source-stamped</text>
+<text class="small" x="714" y="588" text-anchor="middle">school · per answer</text>
+<rect class="store" x="824" y="516" width="180" height="76" rx="5" />
+<text class="store-t" x="914" y="538" text-anchor="middle">4 · Learner state</text>
+<text class="small" x="914" y="556" text-anchor="middle">mastery, misconceptions</text>
+<text class="small" x="914" y="572" text-anchor="middle">projection of 3 through 1</text>
+<text class="small" x="914" y="588" text-anchor="middle">platform · derived</text>
+<rect class="store" x="1024" y="516" width="180" height="76" rx="5" style="stroke-dasharray: 4 3"/>
+<text class="store-t" x="1114" y="538" text-anchor="middle">Agreed adjustments</text>
+<text class="small" x="1114" y="556" text-anchor="middle">authored, never inferred</text>
+<text class="small" x="1114" y="572" text-anchor="middle">instructions, not labels</text>
+<text class="small" x="1114" y="588" text-anchor="middle">expire at review date</text>
+<path class="dep" d="M114,126 L114,216" marker-end="url(#d1)"/>
+<path class="dep" d="M314,126 L314,142 L174,142 L174,216" marker-end="url(#d1)"/>
+<text class="small" x="184" y="139">crosswalk</text>
+<path class="dep" d="M514,126 L514,216" marker-end="url(#d1)"/>
+<path class="dep" d="M714,126 L714,216" marker-end="url(#d1)"/>
+<path class="dep" d="M1004,92 L1014,92 L1014,500 L1064,500 L1064,516" marker-end="url(#d1)"/>
+<text class="small" x="1019" y="470">direct: never passes</text><text class="small" x="1019" y="484">through the model</text>
+<path class="u" d="M1114,126 L1114,216" marker-end="url(#d1u)"/>
+<text class="ut" x="1106" y="162" text-anchor="end">briefing in, reply out</text>
+<path class="dep" d="M1114,350 L1114,312" marker-end="url(#d1)"/>
+<text class="small" x="1100" y="336" text-anchor="end">drives it, and any tutor</text>
+<path class="dep" d="M424,256 L404,256" marker-end="url(#d1)"/>
+<path class="dep" d="M804,256 L824,256" marker-end="url(#d1)"/>
+<path class="dep" d="M114,312 L114,516" marker-end="url(#d1)"/>
+<path class="dep" d="M514,312 L514,516" marker-end="url(#d1)"/>
+<path class="dep" d="M714,312 L714,516" marker-end="url(#d1)"/>
+<path class="dep" d="M914,312 L914,516" marker-end="url(#d1)"/>
+<path class="dep" d="M314,312 L314,440 L164,440 L164,516" marker-end="url(#d1)"/>
+<text class="small" x="174" y="436">reads vocabulary</text>
+<path class="dep hi" d="M1204,300 L1222,300 L1222,614 L60,614"/>
+<path class="dep hi" d="M84,614 L84,592" marker-end="url(#d1)"/>
+<path class="dep hi" d="M484,614 L484,592" marker-end="url(#d1)"/>
+<path class="dep hi" d="M884,614 L884,592" marker-end="url(#d1)"/>
+<path class="dep hi" d="M1144,614 L1144,592" marker-end="url(#d1)"/>
+<text class="small" x="614" y="628" text-anchor="middle">context assembler reads 1, 2, 4 and the adjustments on every turn · it never writes, and never reads 3 directly</text>
+<rect class="lane" x="16" y="497" width="470" height="18"/><text class="lane-t" x="22" y="510">Data layers · kept apart, each with its own owner and rate of change</text>
+<path class="dep" d="M24,656 L58,656" marker-end="url(#d1)"/><text class="small" x="66" y="660">depends on / writes to (must exist first)</text>
+<rect class="ext" x="300" y="648" width="26" height="16" rx="3"/><text class="small" x="334" y="660">outside the mapper: referenced, not ingested</text>
+<rect class="comp hi" x="600" y="648" width="26" height="16" rx="3"/><text class="small" x="634" y="660">the one component on the tutoring path</text>
+<rect class="store" x="880" y="648" width="26" height="16" rx="3" style="stroke-dasharray: 4 3"/><text class="small" x="914" y="660">authored by a person, never derived</text>
+<text class="small" x="24" y="684">Dependencies run downwards: nothing in a lower lane depends on anything above it, and the tutor depends on nothing in the mapper except the briefing it is handed.</text>
+</svg>
+    </div>
+    <figcaption>Figure 1. The static architecture. Inputs come from six kinds of actor; six components turn them into four data layers plus one authored store; dependencies point only downwards. The tutor sits outside the mapper and depends on a single output, the briefing.</figcaption>
+  </figure>
+<figure>
+    <div class="diagram">
+      <svg viewBox="0 0 1440 590" role="img" aria-label="The two flows over the same components. Build flow in amber: specialists author and release the map (B1, B2); teachers upload materials and a scheme, which the alignment service tags into coverage (B3, B4); teachers and other tutors record evidence, which rebuilds learner state (B5, B6); a SENCO confirms adjustments directly (B7). Use flow in blue: the pupil's message reaches the context assembler (U1), which reads the map, tags, learner state and adjustments (U2) and hands one briefing to the tutor (U3); the tutor replies to the pupil (U4) and may record the answer (U5), which re-enters the build flow at B5.">
+<defs><marker id="ab2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--build)"/></marker><marker id="ab2s" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10,0 L0,5 L10,10 z" fill="var(--build)"/></marker><marker id="au2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--use)"/></marker></defs>
+<rect class="actor" x="24" y="24" width="180" height="50" rx="5" />
+<text class="head" x="114" y="46" text-anchor="middle">Subject specialists</text>
+<text class="small" x="114" y="64" text-anchor="middle">author · review</text>
+<rect class="actor" x="424" y="24" width="380" height="50" rx="5"/>
+<text class="head" x="614" y="46" text-anchor="middle">Class teacher</text>
+<text class="small" x="614" y="64" text-anchor="middle">materials · scheme of work · marks</text>
+<rect class="actor" x="824" y="24" width="180" height="50" rx="5" />
+<text class="head" x="914" y="46" text-anchor="middle">Teacher / SENCO</text>
+<text class="small" x="914" y="64" text-anchor="middle">agreed adjustments</text>
+<rect class="actor" x="1024" y="24" width="180" height="50" rx="5" />
+<text class="head" x="1114" y="46" text-anchor="middle">AI tutor (any)</text>
+<text class="small" x="1114" y="64" text-anchor="middle">consumes the briefing</text>
+<rect class="actor" x="1224" y="24" width="180" height="50" rx="5" />
+<text class="head" x="1314" y="46" text-anchor="middle">Pupil</text>
+<text class="small" x="1314" y="64" text-anchor="middle">message · answers</text>
+<rect class="comp" x="24" y="170" width="180" height="56" rx="5" />
+<text class="head" x="114" y="192" text-anchor="middle">Authoring &amp; validation</text>
+<text class="small" x="114" y="210" text-anchor="middle">release</text>
+<rect class="comp" x="224" y="170" width="180" height="56" rx="5" />
+<text class="head" x="314" y="192" text-anchor="middle">Alignment service</text>
+<text class="small" x="314" y="210" text-anchor="middle">text → map IDs</text>
+<rect class="comp" x="424" y="170" width="180" height="56" rx="5" />
+<text class="head" x="514" y="192" text-anchor="middle">Ingestion</text>
+<text class="small" x="514" y="210" text-anchor="middle">materials · scheme</text>
+<rect class="comp" x="624" y="170" width="180" height="56" rx="5" />
+<text class="head" x="714" y="192" text-anchor="middle">Evidence recorder</text>
+<text class="small" x="714" y="210" text-anchor="middle">append</text>
+<rect class="comp" x="824" y="170" width="180" height="56" rx="5" />
+<text class="head" x="914" y="192" text-anchor="middle">Learner model</text>
+<text class="small" x="914" y="210" text-anchor="middle">projection</text>
+<rect class="comp hi" x="1024" y="170" width="180" height="56" rx="5" />
+<text class="head hi-t" x="1114" y="192" text-anchor="middle">Context assembler</text>
+<text class="small" x="1114" y="210" text-anchor="middle">one briefing per turn</text>
+<rect class="store" x="24" y="380" width="180" height="56" rx="5" />
+<text class="store-t" x="114" y="402" text-anchor="middle">1 · Reference map</text>
+<text class="small" x="114" y="420" text-anchor="middle">versioned</text>
+<rect class="store" x="424" y="380" width="180" height="56" rx="5" />
+<text class="store-t" x="514" y="402" text-anchor="middle">2 · Tags + coverage</text>
+<text class="small" x="514" y="420" text-anchor="middle">per lesson</text>
+<rect class="store" x="624" y="380" width="180" height="56" rx="5" />
+<text class="store-t" x="714" y="402" text-anchor="middle">3 · Evidence</text>
+<text class="small" x="714" y="420" text-anchor="middle">append-only</text>
+<rect class="store" x="824" y="380" width="180" height="56" rx="5" />
+<text class="store-t" x="914" y="402" text-anchor="middle">4 · Learner state</text>
+<text class="small" x="914" y="420" text-anchor="middle">derived</text>
+<rect class="store" x="1024" y="380" width="180" height="56" rx="5" style="stroke-dasharray: 4 3"/>
+<text class="store-t" x="1114" y="402" text-anchor="middle">Agreed adjustments</text>
+<text class="small" x="1114" y="420" text-anchor="middle">authored</text>
+<path class="b" d="M114,74 L114,170" marker-end="url(#ab2)"/><rect class="bb" x="122" y="109" width="20" height="15" rx="3"/><text class="num bt" x="132" y="120" text-anchor="middle">B1</text>
+<text class="bt" x="147" y="120">map file (YAML)</text>
+<path class="b" d="M114,226 L114,380" marker-end="url(#ab2)"/><rect class="bb" x="122" y="289" width="20" height="15" rx="3"/><text class="num bt" x="132" y="300" text-anchor="middle">B2</text>
+<text class="bt" x="147" y="300">validated release vN</text>
+<path class="b" d="M514,74 L514,170" marker-end="url(#ab2)"/><rect class="bb" x="522" y="109" width="20" height="15" rx="3"/><text class="num bt" x="532" y="120" text-anchor="middle">B3</text>
+<text class="bt" x="547" y="120">materials, scheme of work</text>
+<path class="b" d="M424,198 L404,198" marker-start="url(#ab2s)" marker-end="url(#ab2)"/>
+<text class="bt" x="414" y="248" text-anchor="middle">text ⇄ map IDs</text>
+<path class="b rd" d="M314,226 L314,330 L164,330 L164,380" marker-end="url(#ab2)"/>
+<text class="bt" x="174" y="326">reads vocabulary</text>
+<path class="b" d="M514,226 L514,380" marker-end="url(#ab2)"/><rect class="bb" x="522" y="289" width="20" height="15" rx="3"/><text class="num bt" x="532" y="300" text-anchor="middle">B4</text>
+<text class="bt" x="547" y="300">tags, coverage</text>
+<path class="b" d="M584,74 L584,110 L714,110 L714,170" marker-end="url(#ab2)"/><rect class="bb" x="722" y="89" width="20" height="15" rx="3"/><text class="num bt" x="732" y="100" text-anchor="middle">B5</text>
+<text class="bt" x="747" y="100">marked work, answers</text>
+<path class="b" d="M714,226 L714,380" marker-end="url(#ab2)"/><text class="bt" x="722" y="300">append</text>
+<path class="b" d="M804,198 L824,198" marker-end="url(#ab2)"/><text class="bt" x="814" y="248" text-anchor="middle">triggers</text>
+<path class="b" d="M914,226 L914,380" marker-end="url(#ab2)"/><rect class="bb" x="922" y="289" width="20" height="15" rx="3"/><text class="num bt" x="932" y="300" text-anchor="middle">B6</text>
+<text class="bt" x="947" y="300">rebuild</text>
+<text class="bt" x="947" y="313">(3 via 1)</text>
+<path class="b" d="M1004,50 L1014,50 L1014,340 L1064,340 L1064,380" marker-end="url(#ab2)"/><rect class="bb" x="1020" y="239" width="20" height="15" rx="3"/><text class="num bt" x="1030" y="250" text-anchor="middle">B7</text>
+<text class="bt" x="1045" y="250">confirmed by</text>
+<text class="bt" x="1045" y="263">a named person;</text>
+<text class="bt" x="1045" y="276">never inferred</text>
+<path class="u" d="M1224,42 L1204,42" marker-end="url(#au2)"/><text class="ut" x="1214" y="18" text-anchor="middle">U1 message</text>
+<path class="u" d="M1204,64 L1224,64" marker-end="url(#au2)"/><text class="ut" x="1214" y="90" text-anchor="middle">U4 reply</text>
+<path class="u" d="M1114,74 L1114,170" marker-end="url(#au2)"/><rect class="ub" x="1002" y="89" width="20" height="15" rx="3"/><text class="num ut" x="1012" y="100" text-anchor="middle">U3</text>
+<text class="ut" x="1027" y="100">briefing (JSON)</text>
+<path class="u rd" d="M1204,214 L1264,214 L1264,460 L60,460"/>
+<path class="u rd" d="M84,460 L84,436" marker-end="url(#au2)"/>
+<path class="u rd" d="M484,460 L484,436" marker-end="url(#au2)"/>
+<path class="u rd" d="M884,460 L884,436" marker-end="url(#au2)"/>
+<path class="u rd" d="M1144,460 L1084,436" marker-end="url(#au2)"/>
+<rect class="ub" x="1272" y="203" width="20" height="15" rx="3"/><text class="num ut" x="1282" y="214" text-anchor="middle">U2</text>
+<text class="ut" x="1297" y="214">reads 1, 2, 4 and</text>
+<text class="ut" x="1297" y="227">the adjustments;</text>
+<text class="ut" x="1297" y="240">never writes</text>
+<text class="ut" x="1297" y="253">(fixed shape,</text>
+<text class="ut" x="1297" y="266">no model call)</text>
+<path class="u rd" d="M1084,74 L1084,140 L1024,140 A10,10 0 0 0 1004,140 L744,140 L744,170" marker-end="url(#au2)"/>
+<rect class="ub" x="754" y="145" width="20" height="15" rx="3"/><text class="num ut" x="764" y="156" text-anchor="middle">U5</text>
+<text class="ut" x="779" y="156">record the answer (optional) → B5</text>
+<line class="b" x1="24" y1="500" x2="58" y2="500" marker-end="url(#ab2)"/><text class="small" x="66" y="504">build flow: how the map and the school's data come to exist (occasional, human-initiated)</text>
+<line class="u" x1="620" y1="500" x2="654" y2="500" marker-end="url(#au2)"/><text class="small" x="662" y="504">use flow: one tutoring turn (every message, seconds)</text>
+<line class="b rd" x1="24" y1="522" x2="58" y2="522"/><text class="small" x="66" y="526">dashed: a read, not a write</text>
+<text class="small" x="24" y="554">The two flows meet in one place: U5, where a tutor that records an answer re-enters the build flow at B5, so the next briefing it receives reflects it.</text>
+<text class="small" x="24" y="570">Model calls on the blue path: at most one, to read the pupil's message (with a rule-based fallback). The rest of U2 is deterministic lookups over the four layers.</text>
+</svg>
+    </div>
+    <figcaption>Figure 2. The two flows on the same components. The build flow (B1–B7) is occasional and mostly human-initiated; the use flow (U1–U5) runs on every pupil message and touches a single component. They meet only at U5.</figcaption>
+  </figure>
+            <h4>Inputs and outputs</h4>
+<div class="cols">
+    <div>
+      <table class="t help-table">
+        <tr><th>Input</th><th>From</th><th>Flow</th></tr>
+        <tr><td class="b">Map file: concepts, links, misconceptions, methods, quotations, acts, crosswalk</td><td>Subject specialists, after independent review</td><td>B1–B2</td></tr>
+        <tr><td class="b">National curriculum, specification</td><td>DfE, awarding body</td><td>Referenced via crosswalk; never ingested</td></tr>
+        <tr><td class="b">Dated teaching materials</td><td>Class teacher</td><td>B3–B4</td></tr>
+        <tr><td class="b">Scheme of work (CSV, optional)</td><td>Teacher or head of department</td><td>B3–B4, reconciled with materials</td></tr>
+        <tr><td class="b">Marked work, markbook entries, item answers, process events</td><td>Teacher; any platform or tutor</td><td>B5–B6</td></tr>
+        <tr><td class="b">Agreed adjustments</td><td>Teacher or SENCO, named and dated</td><td>B7, direct</td></tr>
+        <tr><td class="u">Pupil message, optionally a named concept</td><td>Pupil, through any tutor</td><td>U1</td></tr>
+      </table>
+    </div>
+    <div>
+      <table class="t help-table">
+        <tr><th>Output</th><th>To</th><th>Flow</th></tr>
+        <tr><td class="u">Briefing (JSON): focus, learner state on it, class scope, materials, required adjustments, guidance</td><td>The tutor, each turn</td><td>U3</td></tr>
+        <tr><td class="u">Raw pack: the same facts as an unorganised pile</td><td>Evaluation only (the control condition)</td><td>U3 with organisation off</td></tr>
+        <tr><td class="s">Class coverage: taught, planned, acts reached</td><td>Briefing; the UI</td><td>B4</td></tr>
+        <tr><td class="s">Learner view: mastery, misconceptions, behaviour patterns</td><td>Briefing; the UI; teacher (patterns only once confirmed)</td><td>B6</td></tr>
+        <tr><td class="s">CASE v1.1 export; MCP tools; REST</td><td>Other systems</td><td>Integration surface</td></tr>
+        <tr><td class="s">Evaluation results per suite and tutor, with coverage state recorded</td><td>Evaluate page; results files</td><td>Harness</td></tr>
+      </table>
+    </div>
+  </div>
+            <h4>Dependencies, in the order they must be satisfied</h4>
+<table class="t help-table">
+    <tr><th>#</th><th>Component</th><th>Cannot run without</th><th>Why</th></tr>
+    <tr><td>1</td><td>Reference map</td><td>Specialists; the validator passing</td><td>Everything else keys on map IDs. A map that fails structural checks is refused at start-up.</td></tr>
+    <tr><td>2</td><td>Alignment service</td><td>The map (1)</td><td>It tags against the map's vocabulary and rejects any ID not on it.</td></tr>
+    <tr><td>3</td><td>Ingestion</td><td>Alignment (2); a class</td><td>Coverage is derived from tags. Untagged materials tell the briefing nothing about scope.</td></tr>
+    <tr><td>4</td><td>Evidence recorder</td><td>The map (1); alignment (2) for untagged activities</td><td>Item answers arrive tagged at source; marked work carries teacher-given IDs; markbook titles are tagged by the service.</td></tr>
+    <tr><td>5</td><td>Learner model</td><td>Evidence (4) and the map (1)</td><td>A pure projection with no data of its own. Delete it and it is recreated.</td></tr>
+    <tr><td>6</td><td>Context assembler</td><td>Layers 1, 2, 4 and adjustments</td><td>Degrades gracefully: with no evidence it still gives scope and method; with no scheme it infers planned topics from future-dated materials.</td></tr>
+    <tr><td>7</td><td>Tutor</td><td>The briefing (6)</td><td>Nothing depends on the tutor. It is the one component that can be swapped without touching the rest.</td></tr>
+    <tr><td>8</td><td>Evaluation harness</td><td>All of the above, plus hand-written scenarios and a judge model</td><td>Drives 6 and 7 under controlled conditions and records coverage state so runs are comparable.</td></tr>
+  </table>
+            <h4>Four rules the pictures encode</h4>
+<div class="help-callout">
+    <ol>
+      <li><b>The tutor is a consumer.</b> Nothing in the mapper depends on it; it depends on the briefing (U3) and may write back (U5). Replace it and nothing else changes.</li>
+      <li><b>A turn is read-only until the tutor chooses to record.</b> Assembly (U2) never writes to any layer.</li>
+      <li><b>Only two things are ever inferred by a model:</b> tags (the alignment service) and the reading of the pupil's message. Agreed adjustments (B7) bypass inference by design.</li>
+      <li><b>Learner state is disposable.</b> Delete it and B6 recreates it from evidence and the current map. That is what makes a map release safe: tags migrate, evidence is untouched, state is rebuilt.</li>
+    </ol>
+  </div>
+            <h4>What is deliberately absent</h4>
+<p>No component infers anything about a pupil beyond topic mastery, error patterns and recent working habits. There is no trigger engine that decides when to intervene unprompted, no event stream from a platform, and no outcome measurement over time. Those are what an ambient system would add, and they would be new consumers of the same layers, not new stores.</p>
+            <p class="sub">The <a href="#theory" data-page-link="theory">Theory</a> page gives the technical version of each component; the sequence of one tutoring turn (the blue flow, step by step) is described under <a href="#help" data-scroll="h-howtest">How the test is run</a>.</p>
           </article>
 
           <article class="card" id="h-theory">

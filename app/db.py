@@ -70,6 +70,12 @@ alter table class add column if not exists subject text not null default 'maths'
 create table if not exists pupil (id text primary key, name text, class text);
 create table if not exists material (id text primary key, class text, week int, title text, body text, ingested boolean default false);
 
+-- SCHEME OF WORK (teacher's declared plan per class; school data, never merged into the graph)
+create table if not exists scheme_week (
+  class text not null, week int not null, title text, objectives text, key_content text, approach text, resources text, assessment text,
+  concepts jsonb not null default '[]', method text, sections jsonb not null default '[]', provenance text, graph_version text,
+  source text, uploaded_at timestamptz default now(), primary key (class, week));
+
 -- CONTENT INDEX (tenant-scoped; H3)
 create table if not exists content_unit (
   id text primary key, material_id text, class text, week int, idx int,

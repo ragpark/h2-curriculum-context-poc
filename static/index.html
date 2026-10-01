@@ -128,13 +128,19 @@
             </div>
           </div>
           <div id="m-list"></div>
+          <div class="card" id="m-scheme-card" style="margin-top:16px">
+            <h3>Scheme of work <span class="badge" style="vertical-align:middle">optional</span></h3>
+            <p class="sub">The teacher's plan for this class, week by week. Upload it as a CSV; each week is tagged against the map and compared with what the materials already say, so you can see where the plan and the classroom record disagree before accepting it. The plan then supplies what's coming (and, in English, which acts the class will reach) even where no material exists yet.</p>
+            <div id="m-scheme"></div>
+          </div>
         </div>
         <div class="stack">
           <div class="card">
             <h3>Class coverage</h3>
-            <p class="sub">Worked out from tagged, dated materials. The tutor uses this to stay within what's been taught.</p>
+            <p class="sub">Worked out from tagged, dated materials, corroborated by the scheme of work if one has been uploaded. The tutor uses this to stay within what's been taught.</p>
             <div id="m-coverage"></div>
           </div>
+
           <div class="card">
             <h3>Try the tagger</h3>
             <p class="sub">Paste any teaching text. You can add it to the class as a new material.</p>
@@ -303,6 +309,7 @@
           <a href="#help" data-scroll="h-english">English: Macbeth</a>
           <a href="#help" data-scroll="h-independent">Testing a different tutor</a>
           <a href="#help" data-scroll="h-adjustments">Agreed adjustments</a>
+          <a href="#help" data-scroll="h-scheme">Uploading a scheme of work</a>
           <a href="#help" data-scroll="h-read">How to read the colours and labels</a>
           <a href="#help" data-scroll="h-results">How to read the test results</a>
           <a href="#help" data-scroll="h-howtest">How the test is run</a>
@@ -445,6 +452,28 @@
             <p>On the <b>Evaluate</b> page, the “Agreed adjustments” set asks each pair the same questions and adds a sixth mark: <b>did the reply honour the agreed adjustments</b>, and for a twin with none, did it avoid inventing any? Because each pair has identical answers, the difference between twins is the adjustments and nothing else.</p>
             <div class="help-callout">
               <b>What this is not.</b> It is not a way of identifying pupils with special educational needs, and it holds nothing about why a pupil has adjustments. In a real school the source would be the pupil's one-page profile or passport, and a person would still confirm each instruction before it reached a tutor. It also does nothing about the medium: a pupil who cannot read the reply needs read-aloud or symbols, which are features of the platform, not of the notes.
+            </div>
+          </article>
+
+          <article class="card" id="h-scheme">
+            <h3>Uploading a scheme of work (optional)</h3>
+            <p>Normally the prototype works out what a class has covered from the teacher's materials: it reads each dated worksheet and labels it. That has a gap. A worksheet shows what was done <em>that lesson</em>; it doesn't say what's planned for the weeks ahead, and in English it doesn't say how far through the play the class has read unless the worksheet happens to mention it. The scheme of work fills that gap.</p>
+            <h4>What it is here</h4>
+            <p>A spreadsheet, one row per week, saved as a CSV file. The columns are what a head of department would already have: <code>class, week, title, learning_objectives, key_content, teaching_approach, resources, assessment</code>. Only the week and one text column are needed. There is an exemplar for each of the four classes on the Teacher's materials page; download one to see the layout, or upload it as it is.</p>
+            <h4>What happens when you upload one</h4>
+            <ol class="help-steps">
+              <li><b>Each week is labelled</b> against the map, exactly as a worksheet would be: the topics it covers, the teaching method it names, and (in English) the acts it reaches.</li>
+              <li><b>Each week is compared with the materials</b> for that week. You see one of: <b>agrees</b> (same topics), <b>partly agrees</b> (one names a topic the other doesn't), <b>method differs</b> (the plan says one method, the worksheets use another), <b>plan only</b> (no materials for that week yet), or <b>materials only</b> (worksheets for a week the plan doesn't mention).</li>
+              <li><b>You check the labels and untick any that are wrong</b>, then accept. The keyword labeller in particular can be fooled by a sentence like “we do not use the balance method”; a person catches that in seconds.</li>
+            </ol>
+            <h4>How the prototype then uses it</h4>
+            <ul class="help-list">
+              <li><b>The classroom record wins for the past.</b> If the plan says a topic was taught in week 3 but no worksheet shows it, the topic is not counted as taught. Worksheets are evidence; a plan is an intention.</li>
+              <li><b>The plan supplies the future.</b> Topics named for weeks still to come count as “planned”, so the tutor can say “that's coming in week 6” even before the teacher has written that week's worksheet.</li>
+              <li><b>In English, the plan says how far the class has read.</b> If the scheme says Acts 3 and 4 are read in week 4, the tutor treats them as studied from then on, even if no worksheet mentions them. Before this feature, class 11F looked as though it had only reached Act 2, because its worksheets never named a later act.</li>
+            </ul>
+            <div class="help-callout">
+              <b>Why this is optional.</b> Many departments have a scheme of work as a document; many don't keep it in a form a machine can read. The prototype works without one. With one, its idea of what a class has covered is closer to the teacher's own.
             </div>
           </article>
 

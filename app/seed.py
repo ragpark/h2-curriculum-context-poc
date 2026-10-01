@@ -145,7 +145,7 @@ def subject_of_pupil(pupil_id: str) -> str:
     return r["subject"] if r else "maths"
 
 
-SEED_VERSION = "7"  # bump when fixtures change; the database is reseeded on next start
+SEED_VERSION = "8"  # bump when fixtures change; the database is reseeded on next start
 
 
 def reset():
@@ -154,6 +154,7 @@ def reset():
     load_fixtures()
     from . import adjustments as ADJ
     db.ex("delete from learner_adjustment")
+    db.ex("delete from scheme_week")
     ADJ.seed_profiles()
     db.meta_set("seeded", "yes")
     import datetime

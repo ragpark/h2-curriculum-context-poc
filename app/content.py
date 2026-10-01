@@ -89,14 +89,29 @@ def coverage(class_id: str) -> dict:
         bucket = taught if r["week"] <= c["current_week"] else planned
         bucket[cid] = min(bucket.get(cid, 99), r["week"])
     planned = {k: v for k, v in planned.items() if k not in taught}
+    # The teacher's declared scheme of work (if uploaded) corroborates the plan: a topic it names for a future week is
+    # 'planned' even with no material yet, and one it names for a past week is 'taught' only if materials agree
+    # (the classroom record wins over the plan for what has actually happened).
+    from . import scheme as SW
+    decl = SW.declared(class_id)
+    for cid, wk in decl["concepts"].items():
+        if cid in taught:
+            continue
+        if wk > c["current_week"]:
+            planned[cid] = min(planned.get(cid, 99), wk)
+        elif cid not in planned:
+            planned.setdefault(cid, wk)  # declared as taught, no material: shown as planned-for-that-week, not taught
     out = {"class": c, "taught": [g.ref(k, week=v) for k, v in sorted(taught.items(), key=lambda x: x[1])],
-           "planned": [g.ref(k, week=v) for k, v in sorted(planned.items(), key=lambda x: x[1])]}
+           "planned": [g.ref(k, week=v) for k, v in sorted(planned.items(), key=lambda x: x[1])],
+           "scheme_declared": bool(decl["concepts"] or decl["sections"])}
     secs = db.q("""select a.target, min(u.week) week from alignment a join content_unit u on u.id=a.subject
                    where u.class=%s and a.facet='section' group by a.target""", (class_id,))
     if secs or g.sections(c["subject"]):
         # Which parts of the text has the class studied? A section is 'studied' once any taught lesson covers it.
         # A play is read in order, so every act up to the furthest one a taught lesson reached counts as studied.
         first = {r["target"]: r["week"] for r in secs}
+        for sid, wk in decl["sections"].items():  # the plan's acts count: reading is scheduled, not evidenced by worksheets
+            first[sid] = min(first.get(sid, 99), wk)
         order = {n["id"]: (n.get("extra") or {}).get("order", 0) for n in g.sections(c["subject"])}
         reached = max([order[t] for t, w in first.items() if w <= c["current_week"] and t in order] or [0])
         out["sections_studied"] = [g.ref(n["id"], week=first.get(n["id"])) for n in g.sections(c["subject"]) if order[n["id"]] <= reached]

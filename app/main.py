@@ -18,6 +18,7 @@ from . import evals as E
 from . import graph as G
 from . import learner as L
 from . import llm
+from . import scheme as SW
 from . import seed as S
 from . import tutor as T
 from . import tutors as TU
@@ -234,6 +235,53 @@ def add_material(m: MaterialIn):
     mid = "mat:custom-" + str(db.q1("select count(*)+1 n from material where id like 'mat:custom-%%'")["n"])
     db.ex("insert into material(id,class,week,title,body) values(%s,%s,%s,%s,%s)", (mid, m.class_id, m.week, m.title, m.body))
     return C.ingest(mid, m.mode)
+
+
+class SchemePreviewIn(BaseModel):
+    csv_text: str
+    class_id: str | None = None
+    mode: str | None = None
+
+
+@app.post("/api/scheme/preview")
+def scheme_preview(body: SchemePreviewIn):
+    if len(body.csv_text) > 200_000:
+        raise HTTPException(413, "file too large (200 KB limit)")
+    return SW.preview(body.csv_text, body.class_id, body.mode)
+
+
+class SchemeAcceptIn(BaseModel):
+    weeks: list[dict]
+    source: str | None = None
+
+
+@app.put("/api/classes/{class_id}/scheme")
+def scheme_accept(class_id: str, body: SchemeAcceptIn):
+    if not db.q1("select 1 from class where id=%s", (class_id,)):
+        raise KeyError(class_id)
+    return SW.accept(class_id, body.weeks, body.source)
+
+
+@app.get("/api/classes/{class_id}/scheme")
+def scheme_get(class_id: str):
+    return SW.get(class_id)
+
+
+@app.delete("/api/classes/{class_id}/scheme")
+def scheme_clear(class_id: str):
+    SW.clear(class_id)
+    return SW.get(class_id)
+
+
+@app.get("/api/schemes/exemplar/{name}")
+def scheme_exemplar(name: str):
+    files = {"10X": "sow_10X_maths_linear_equations.csv", "10Y": "sow_10Y_maths_linear_equations.csv",
+             "11E": "sow_11E_english_macbeth.csv", "11F": "sow_11F_english_macbeth.csv"}
+    if name not in files:
+        raise HTTPException(404, "unknown exemplar")
+    p = Path(__file__).resolve().parent.parent / "seed" / "schemes" / files[name]
+    return PlainTextResponse(p.read_text(), media_type="text/csv; charset=utf-8",
+                             headers={"content-disposition": f'attachment; filename="{files[name]}"'})
 
 
 @app.get("/api/classes/{class_id}/coverage")

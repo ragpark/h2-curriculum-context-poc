@@ -363,6 +363,49 @@ async function renderMaterials() {
     <div class="tags">${Object.entries(methods).sort((a, b) => b[1] - a[1]).map(([id, n]) => tag("method", id, null, { label: `${lab(id)} ×${n}` })).join("") || '<span class="sub">none</span>'}</div>
     <div style="margin-top:10px"><button class="btn sm" id="btn-cov-graph">View on graph</button></div>`;
   const cg = $("#btn-cov-graph"); if (cg) cg.onclick = () => { S.overlay = "class:" + S.cls; show("graph"); };
+  renderScheme();
+}
+const SW_STATUS = { agree: ["secure", "agrees"], partly: ["developing", "partly agrees"], plan_only: ["", "plan only"], materials_only: ["", "materials only"], method_differs: ["gap", "method differs"], differ: ["gap", "differs"], untagged: ["", "nothing recognised"] };
+async function renderScheme() {
+  const el = $("#m-scheme");
+  const cur = await api(`/api/classes/${S.cls}/scheme`);
+  const upload = `<div class="row" style="gap:8px;flex-wrap:wrap;align-items:center">
+      <input type="file" id="sw-file" accept=".csv,text/csv" style="font-size:12px">
+      <button class="btn sm" id="btn-sw-exemplar">Load the exemplar for ${esc(S.cls)}</button>
+      <button class="btn primary" id="btn-sw-preview">Tag and compare</button>
+    </div>
+    <div class="sub" style="margin-top:6px">CSV with a header row: <code>class, week, title, learning_objectives, key_content, teaching_approach, resources, assessment</code>. Only <code>week</code> and one text column are required. <a href="/api/schemes/exemplar/${esc(S.cls)}" download>Download the exemplar</a> to see the layout.</div>
+    <div id="sw-preview" style="margin-top:10px"></div>`;
+  el.innerHTML = (cur.weeks.length ? `<div class="note" style="margin-bottom:10px"><b>Scheme accepted</b> · ${cur.weeks.length} weeks${cur.source ? ` · from ${esc(cur.source)}` : ""} · tagged by ${esc(cur.weeks[0].provenance)}
+      <div class="tbl-wrap" style="margin-top:8px"><table class="t">${cur.weeks.map((w) => `<tr><td class="mono" style="width:40px">W${w.week}</td><td><b>${esc(w.title || "")}</b><div class="tags" style="margin-top:4px">${w.concepts.map((c) => tag("concept", c.id, c.confidence, { label: c.label })).join("")}${w.method ? tag("method", w.method.id) : ""}${w.sections.map((s) => tag("section", s.id, null, { label: s.label })).join("")}</div></td></tr>`).join("")}</table></div>
+      <div style="margin-top:8px"><button class="btn sm" id="btn-sw-clear">Remove the scheme</button></div></div>` : "") + upload;
+  const file = $("#sw-file"), out = $("#sw-preview");
+  let text = "";
+  file.onchange = async () => { const f = file.files[0]; if (f) { text = await f.text(); out.innerHTML = `<div class="sub">${esc(f.name)} loaded. Press “Tag and compare”.</div>`; } };
+  $("#btn-sw-exemplar").onclick = async () => { text = await api(`/api/schemes/exemplar/${S.cls}`); out.innerHTML = `<div class="sub">Exemplar loaded. Press “Tag and compare”.</div>`; };
+  const cl = $("#btn-sw-clear"); if (cl) cl.onclick = (e) => busy(e.currentTarget, async () => { await api(`/api/classes/${S.cls}/scheme`, { method: "DELETE" }); await renderMaterials(); toast("Scheme removed"); });
+  $("#btn-sw-preview").onclick = (e) => busy(e.currentTarget, async () => {
+    if (!text) throw new Error("Choose a CSV file or load the exemplar first");
+    const d = await api("/api/scheme/preview", { method: "POST", body: { csv_text: text, class_id: S.cls, mode: S.mode } });
+    if (d.class !== S.cls) throw new Error(`That file is for class ${d.class}; switch to that class first`);
+    S.swPreview = d;
+    const byWeek = Object.fromEntries(d.weeks.map((w) => [w.week, w]));
+    out.innerHTML = `<div class="sub" style="margin:4px 0 6px"><b>${d.weeks.length} weeks tagged.</b> Untick any tag that is wrong before accepting. The classroom record always wins for what has already been taught; the plan supplies what is coming.</div>
+      <div class="tbl-wrap"><table class="t"><tr><th>Week</th><th>Plan</th><th>Tags (untick to drop)</th><th>Compared with materials</th></tr>
+      ${d.reconciliation.map((r) => { const w = byWeek[r.week]; const st = SW_STATUS[r.status] || ["", r.status]; return `<tr>
+        <td class="mono">W${r.week}</td>
+        <td><b>${esc(r.title || "")}</b>${r.materials.length ? `<div class="sub">materials: ${r.materials.map(esc).join("; ")}</div>` : ""}</td>
+        <td>${w ? `<div class="topic-picks" style="max-height:none;border:none;padding:0">${w.tags.concepts.map((c) => `<label><input type="checkbox" data-w="${r.week}" data-k="concept" value="${esc(c.id)}"${c.confidence >= 0.5 ? " checked" : ""}>${esc(c.label)} <span class="sub">${c.confidence}</span></label>`).join("")}${w.tags.method ? `<label><input type="checkbox" data-w="${r.week}" data-k="method" value="${esc(w.tags.method.id)}"${w.tags.method.confidence >= 0.5 ? " checked" : ""}><span class="tag method" style="padding:0 4px">method</span> ${esc(w.tags.method.label)}</label>` : ""}${w.tags.sections.map((s) => `<label><input type="checkbox" data-w="${r.week}" data-k="section" value="${esc(s.id)}" checked>${esc(s.label)}</label>`).join("")}</div>` : '<span class="sub">—</span>'}</td>
+        <td>${badge(st[0] || "faded").replace(/>[^<]*</, `>${st[1]}<`)}<div class="sub" style="margin-top:3px">${esc(r.detail)}</div></td></tr>`; }).join("")}</table></div>
+      <div style="margin-top:10px;display:flex;gap:8px"><button class="btn primary" id="btn-sw-accept">Accept this scheme for ${esc(S.cls)}</button></div>`;
+    $("#btn-sw-accept").onclick = (e2) => busy(e2.currentTarget, async () => {
+      const keep = {};
+      out.querySelectorAll("input[type=checkbox]").forEach((x) => { (keep[x.dataset.w] ??= { concept: new Set(), method: new Set(), section: new Set() })[x.dataset.k].add(x.checked ? x.value : null); });
+      const weeks = S.swPreview.weeks.map((w) => { const k = keep[w.week] || { concept: new Set(), method: new Set(), section: new Set() }; return { ...w, tags: { ...w.tags, concepts: w.tags.concepts.filter((c) => k.concept.has(c.id)).map((c) => ({ ...c, confidence: Math.max(c.confidence, 0.5) })), method: w.tags.method && k.method.has(w.tags.method.id) ? w.tags.method : null, sections: w.tags.sections.filter((s) => k.section.has(s.id)) } }; });
+      await api(`/api/classes/${S.cls}/scheme`, { method: "PUT", body: { weeks, source: (file.files[0] && file.files[0].name) || "exemplar" } });
+      await refreshStatus(); await renderMaterials(); toast("Scheme accepted; coverage updated");
+    });
+  });
 }
 function renderAlignResult(r) {
   const tags = [...r.concepts.map((c) => tag("concept", c.id, c.confidence)), r.method ? tag("method", r.method.id, r.method.confidence) : "", r.representation ? tag("representation", r.representation.id, r.representation.confidence) : "", ...r.misconceptions.map((m) => tag("misconception", m.id, m.confidence))].join("");

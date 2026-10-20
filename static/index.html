@@ -321,6 +321,7 @@
           <a href="#help" data-scroll="h-read">How to read the colours and labels</a>
           <a href="#help" data-scroll="h-results">How to read the test results</a>
           <a href="#help" data-scroll="h-howtest">How the test is run</a>
+          <a href="#help" data-scroll="h-review">Due for review and the demo clock</a>
           <a href="#help" data-scroll="h-limits">What this can't tell you</a>
           <a href="#help" data-scroll="h-arch">Component architecture</a>
           <a href="#help" data-scroll="h-glossary">Glossary</a>
@@ -581,6 +582,26 @@
 
             <div class="help-callout">
               <b>Why this matters for anyone judging the results.</b> The marking scheme above is where the prototype's idea of “good tutoring” is written down. If you would score “method” or “scope” differently, that table is the place to disagree, and the Evaluate page's numbers should be read with your disagreement in mind. Changing the scheme would make earlier results incomparable, which is why it has been kept fixed.
+            </div>
+          </article>
+
+          <article class="card" id="h-review">
+            <h3>Due for review: reminding the tutor what the pupil should recall</h3>
+            <p>Pupils forget. A topic that was secure in week 1 and never touched again is not secure for ever. So each briefing now carries a short <b>due for review</b> list: earlier topics the pupil is due to recall, which the tutor may use as a one-question warm-up when it does not get in the way of what the pupil asked. It is advice, not an instruction, and the tutor is told never to describe the pupil by it.</p>
+            <h4>How a topic becomes due</h4>
+            <ul class="help-list">
+              <li>Every topic the pupil has answered directly has a <b>level</b> and a gap before the next check: 1, 3, 7, 14, 30 or 60 days. Only the pupil's own answers on that topic count, not the "probably fine" credit a later topic gives an earlier one.</li>
+              <li>A first correct answer puts the topic at level 1. A correct answer <em>after</em> the due date moves it up a level and lengthens the gap. A correct answer <em>before</em> the due date just moves the dates on. A wrong answer drops it to level 0 and counts a lapse.</li>
+              <li>A wrong answer that the map pins on a different topic (the pupil's known error pattern) is not held against this one, exactly as on the progress estimates, so the two never disagree.</li>
+            </ul>
+            <h4>What gets into the briefing</h4>
+            <p>Only topics the class has been taught, that the pupil has answered directly, that are due, that are not the topic of this turn, and that the pupil is <b>secure</b> or <b>developing</b> on; gaps are a teaching job, not a recall job. They are ranked by how overdue they are relative to their gap, with earlier topics that the current topic builds on counted one-and-a-half times. Ties go to a topic from a different week of the scheme. Three at most; the list can be empty. The reason given is about the topic ("last recalled correctly 5 weeks ago"), never about the pupil.</p>
+            <h4>Seeing it, and moving the clock</h4>
+            <p>The Evidence page has a <b>Due for review</b> card with the whole schedule. The prototype has a <b>demo clock</b> on the Overview page: move it forward 7 or 21 days and the briefing is built as if that time had passed, so topics fall due and agreed adjustments expire at their review date. The class's week does not move. Three pupils (Amara, Ben and Priya) have histories spread over several weeks so there is something to see; Ben has one lapse.</p>
+            <h4>Recording a recall</h4>
+            <p>A tutor that asks a warm-up question can record the answer with its topic, marked as tagged by the tutor rather than a teacher (it is trusted a little less than a teacher's mark and more than a guess from the wording), and with a <b>retrieval</b> note saying who prompted it. The schedule updates at once, so the next briefing reflects it.</p>
+            <div class="help-callout">
+              <b>Comparing test results across this change.</b> The briefing is now version 2 and about 240 tokens longer, and the raw classroom data gains a "(5 weeks ago)" on each line. Tutor-test runs recorded before this change are not strictly comparable with runs after it; the map itself is unchanged.
             </div>
           </article>
 
@@ -931,6 +952,9 @@
               <dt>Version of the notes (an “arm”)</dt><dd>In the tutor test the same pupil asks the same question three times, and each time the tutor is given a different set of notes: none, a pile of raw records, or the map's briefing. Each of those is one version, or “condition”. Researchers borrow the word “arm” from medical trials, where a study has a treatment arm and a control arm. The gap between the “map” version and the “raw records” version is the number the whole prototype exists to measure.</dd>
               <dt>Unseen questions</dt><dd>Questions written and locked away before the prototype was changed, like an exam paper the candidate hasn't seen. Nothing could have been tuned to pass them, so these are the fair scores. (Researchers call this a “held-out” set.)</dd>
               <dt>AI marker</dt><dd>A second AI that marks the tutor's replies against notes written in advance, without knowing which version of the tutor wrote them.</dd>
+              <dt>Due for review</dt><dd>An earlier topic the pupil is due to recall. Correct recalls after the due date lengthen the gap before the next one; a wrong answer resets it. Advice to the tutor, never a label for the pupil.</dd>
+              <dt>Lapse</dt><dd>A wrong answer on a topic the pupil had previously got right.</dd>
+              <dt>Demo clock</dt><dd>A control on the Overview page that moves the prototype's idea of "today" forward, so you can see briefings as they would look weeks later. It does not change which week the class is in.</dd>
               <dt>Map version</dt><dd>The map gets updated from time to time, like a new edition of a textbook. Old answers still count after an update.</dd>
               <dt>Links to other curricula</dt><dd>How a topic on the map matches up with, for example, the GCSE subject content.</dd>
               <dt>Made up (synthetic)</dt><dd>Invented for testing. No real pupils, classes or teachers are involved.</dd>

@@ -101,6 +101,11 @@ create index if not exists evidence_learner on evidence (learner, id);
 create table if not exists learner_state (
   learner text, concept text, mastery real, n_direct int, n_inferred int, status text,
   primary key (learner, concept));
+-- RETENTION (derived projection — rebuildable from evidence; when each topic is due for recall)
+create table if not exists review_state (
+  learner text not null, concept text not null, level int not null, interval_days int not null,
+  last_success timestamptz, last_seen timestamptz, due_at timestamptz, lapses int not null default 0, reviews int not null default 0,
+  primary key (learner, concept));
 -- LEARNING BEHAVIOUR (process events -> episode indicators -> construct patterns)
 create table if not exists behaviour_event (
   id bigserial primary key, learner text not null, episode bigint not null, item text, concepts jsonb,

@@ -55,6 +55,9 @@ def ensure_demo_state():
     for sc in S.scenarios():
         if db.q1("select count(*) n from evidence where learner=%s", (sc["pupil"],))["n"] == 0:
             run_scenario(sc["id"])
+    # a projection added after the evidence was recorded (e.g. review_state) is empty until rebuilt
+    if db.q1("select count(*) n from review_state")["n"] == 0 and db.q1("select count(*) n from evidence")["n"]:
+        L.reproject_all()
 
 
 def run_scenario(sid: str, mode: str | None = None) -> dict:

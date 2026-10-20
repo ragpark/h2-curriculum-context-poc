@@ -4,10 +4,13 @@ from . import clock
 from . import db
 from . import behaviour as B
 from . import graph as G
+from . import retention as R
 from . import seed as S
 
 SECURE, DEVELOPING = 0.7, 0.4
 MC_ACTIVE = 0.5
+# Evidence a tutor tags itself (provenance 'tutor') is weighted between the alignment service and a teacher.
+TUTOR_W, TUTOR_BASE = 0.8, 0.4
 
 
 def _norm(s):
@@ -17,8 +20,9 @@ def _norm(s):
 def record(learner: str, *, source: str, item: str | None = None, response: str | None = None,
            activity: str | None = None, score: float | None = None, mode: str | None = None,
            process: list[dict] | None = None, concepts: list[str] | None = None,
-           misconception: str | None = None, days_ago: float | None = None) -> dict:
-    """days_ago backdates the evidence (synthetic histories only): ts = clock.now() - days_ago."""
+           misconception: str | None = None, days_ago: float | None = None, provenance: str | None = None) -> dict:
+    """days_ago backdates the evidence (synthetic histories only): ts = clock.now() - days_ago.
+    provenance='tutor' with concepts: the tutor, not a teacher, said which topics the answer covered."""
     g = G.get()
     ts = clock.ago(days_ago) if days_ago else clock.now()
     p = db.q1("select * from pupil where id=%s", (learner,))
@@ -33,7 +37,7 @@ def record(learner: str, *, source: str, item: str | None = None, response: str 
         bad = [c for c in concepts if c not in g.nodes or g.nodes[c]["type"] != "concept"]
         if bad:
             raise ValueError(f"unknown topics: {bad}")
-        prov, conf = "teacher", 1.0
+        prov, conf = ("tutor" if provenance == "tutor" else "teacher"), 1.0
         outcome = float(score if score is not None else 0.5)
     elif item:
         misconception = None
@@ -73,10 +77,12 @@ def project(learner: str) -> None:
     def st(c):
         return state.setdefault(c, {"m": 0.5, "n": 0, "ni": 0})
 
-    for e in db.q("select * from evidence where learner=%s order by id", (learner,)):
-        w = 1.0 if e["concept_provenance"] in ("source", "teacher") else 0.6 * e["confidence"]
+    rows = db.q("select * from evidence where learner=%s order by id", (learner,))
+    for e in rows:
+        w = (1.0 if e["concept_provenance"] in ("source", "teacher") else
+             TUTOR_W if e["concept_provenance"] == "tutor" else 0.6 * e["confidence"])
         # A teacher's mark on a piece of work carries more information than one right/wrong answer
-        base = 0.6 if e["concept_provenance"] == "teacher" else 0.4
+        base = 0.6 if e["concept_provenance"] == "teacher" else TUTOR_BASE if e["concept_provenance"] == "tutor" else 0.4
         mc_id = g.resolve(e["misconception"]) if e["misconception"] else None
         for raw in e["concepts"]:
             c = g.resolve(raw)
@@ -105,6 +111,22 @@ def project(learner: str) -> None:
         db.ex("insert into learner_state values(%s,%s,%s,%s,%s,%s)", (learner, c, round(s["m"], 3), s["n"], s["ni"], status(s["m"], s["n"])))
     for mid, m in mcs.items():
         db.ex("insert into learner_misconception values(%s,%s,%s,%s)", (learner, mid, round(m["strength"], 3), m["count"]))
+    # retention: a second projection over the same log, with the same credit-assignment rule
+    rs = R.schedule([{"id": e["id"], "ts": e["ts"], "outcome": e["outcome"], "concepts": [g.resolve(c) for c in e["concepts"]],
+                      "misconception": g.resolve(e["misconception"]) if e["misconception"] else None} for e in rows],
+                    clock.now(), g.affects)
+    db.ex("delete from review_state where learner=%s", (learner,))
+    for c, s in rs.items():
+        db.ex("insert into review_state(learner,concept,level,interval_days,last_success,last_seen,due_at,lapses,reviews) values(%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+              (learner, c, s["level"], s["interval_days"], s["last_success"], s["last_seen"], s["due_at"], s["lapses"], s["reviews"]))
+
+
+def reproject_all() -> int:
+    """Rebuild every pupil's projections from the log (after a change to how they are derived, or a new projection)."""
+    ids = [r["learner"] for r in db.q("select distinct learner from evidence")]
+    for lid in ids:
+        project(lid)
+    return len(ids)
 
 
 def status(m, n_direct):
@@ -132,6 +154,18 @@ def view(learner: str) -> dict:
                       "confidence": e["confidence"], "misconception": g.ref(e["misconception"]) if e["misconception"] else None,
                       "graph_version": e["graph_version"], "ts": e["ts"].isoformat(), "process": B.process_summary(e["id"])} for e in ev],
     }
+
+
+def review_state(learner: str) -> dict[str, dict]:
+    """The retention projection as stored, with 'due' and 'overdue_days' computed against the clock."""
+    now = clock.now()
+    out = {}
+    for r in db.q("select * from review_state where learner=%s", (learner,)):
+        r = dict(r)
+        r["due"] = r["due_at"] is not None and r["due_at"] <= now
+        r["overdue_days"] = round((now - r["due_at"]).total_seconds() / 86400, 1) if r["due_at"] else None
+        out[r["concept"]] = r
+    return out
 
 
 def state_map(learner: str) -> dict[str, dict]:

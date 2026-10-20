@@ -340,6 +340,12 @@ def learner(lid: str):
     return L.view(lid)
 
 
+@app.get("/api/learners/{lid}/review")
+def learner_review(lid: str):
+    """The retention projection: which topics are due for recall, and the schedule behind it."""
+    return L.review_view(lid)
+
+
 @app.get("/api/behaviour/framework")
 def behaviour_framework():
     return B.framework()

@@ -15,7 +15,10 @@ from . import db
 from . import graph as G
 from . import learner as L
 from . import llm
+from . import retention as R
 from . import seed as S
+
+BRIEFING_VERSION = "2"  # bumped when the briefing's shape changes (v2: as_of, due_for_review); the map itself is unchanged
 
 
 def assemble(learner: str, *, concept: str | None = None, message: str | None = None,
@@ -30,13 +33,15 @@ def assemble(learner: str, *, concept: str | None = None, message: str | None = 
 def _without_h2(p, cls, concept, message, mode):
     items = {i["id"]: i for i in db.q("select id, prompt from item")}
     log = []
+    now = clock.now()
     for e in db.q("select * from evidence where learner=%s order by id desc limit 8", (p["id"],)):
+        when = f" ({R.relative(e['ts'], now)})"  # the raw pack gets the same time information as the briefing
         if e["item"]:
             proc = B.process_summary(e["id"])
-            log.append(f"{e['source']}: \"{items[e['item']]['prompt']}\" → \"{e['response']}\" ({'correct' if e['outcome'] >= 0.5 else 'incorrect'})" + (f" [{proc}]" if proc else ""))
+            log.append(f"{e['source']}: \"{items[e['item']]['prompt']}\" → \"{e['response']}\" ({'correct' if e['outcome'] >= 0.5 else 'incorrect'})" + (f" [{proc}]" if proc else "") + when)
         else:
             note = f" — teacher's comment: \"{G.get().label(e['misconception'])}\"" if e["misconception"] else ""
-            log.append(f"{e['source']}: \"{e['activity']}\" — {round(e['outcome'] * 100)}%{note}")
+            log.append(f"{e['source']}: \"{e['activity']}\" — {round(e['outcome'] * 100)}%{note}{when}")
     query = message or (G.get().label(concept) if concept else "")
     # (the raw arm gets the same materials search and activity log in every subject)
     note = ADJ.raw_note(p["id"])
@@ -263,6 +268,27 @@ def next_step(g, sm, focus, focus_secure, taught: dict, planned: dict, subject: 
     return {"action": "stretch", "concept": g.ref(focus), "why": "harder questions on the same topic; nothing further in the class's scheme yet"}
 
 
+DUE_RULE = ("Advisory. Use at most one, as a short warm-up recall question, and only when it doesn't get in the way of "
+            "what the pupil asked. Never describe the pupil by these.")
+
+
+def due_for_review(g, learner: str, focus: str, ns: dict | None, taught: dict, sm: dict) -> dict:
+    """Earlier topics this pupil is due to recall (spaced retrieval). Eligibility and ranking live in retention.select_due."""
+    now = clock.now()
+    review = L.review_state(learner)
+    status = {c: s["status"] for c, s in sm.items()}
+    nxt = (ns or {}).get("concept", {}).get("id") if ns else None
+    chosen, boost = R.select_due(review, status, taught, focus, nxt, g.prereqs)
+    items = []
+    for c in chosen:
+        r = review[c]
+        items.append({**g.ref(c), "taught_week": taught[c],
+                      "last_success": r["last_success"].date().isoformat() if r["last_success"] else None,
+                      "interval_days": r["interval_days"], "overdue_days": int(r["overdue_days"]),
+                      "why": R.why(r, c in boost, now)})
+    return {"rule": DUE_RULE, "as_of": now.date().isoformat(), "items": items}
+
+
 def _with_h2(p, cls, concept, message, mode):
     g = G.get()
     subject = cls["subject"]
@@ -317,6 +343,7 @@ def _with_h2(p, cls, concept, message, mode):
         "mode": "with_h2",
         "graph_version": g.version_for(subject),
         "as_of": clock.today().isoformat(),
+        "briefing_version": BRIEFING_VERSION,
         "request": {"intent": (read or {}).get("intent"), "message_topic": g.label(read["concept"]) if read and read.get("concept") else None},
         "focus": {**g.ref(focus), "chosen_because": how, "crosswalk": g.crosswalk.get(focus, [])},
         "learner": {
@@ -364,6 +391,7 @@ def _with_h2(p, cls, concept, message, mode):
             + ". Writing skills are practised throughout the course, and any character, theme or context topic can be discussed using the parts studied."
             + " Pupils may have read ahead: you can discuss later parts of the play, but say they are coming up in class and link back to what has been studied. Prefer quotations from the parts studied.")
     pack["guidance"]["next_step"] = next_step(g, sm, focus, focus_secure, taught, planned, subject, edge, mentioned_coming)
+    pack["due_for_review"] = due_for_review(g, p["id"], focus, pack["guidance"]["next_step"], taught, sm)
     sp = pack.get("support_profile")
     if sp and any(a["do"].startswith("This pupil may be taught topics the class has not reached") for a in sp["adjustments"]):
         pack["guidance"]["scope_rule"] = ("This pupil's agreed adjustments allow work beyond the class scheme: teach 'not_yet_taught' topics properly when "

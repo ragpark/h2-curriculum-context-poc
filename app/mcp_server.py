@@ -77,3 +77,11 @@ def record_evidence(learner_id: str, source: str, item_id: str = "", response: s
                     activity=activity or None, score=None if score < 0 else score, process=process,
                     concepts=concept_ids or None, misconception=misconception_id or None,
                     provenance=provenance or None)
+
+
+@mcp.tool()
+def get_review_schedule(learner_id: str) -> dict:
+    """The pupil's spaced-retrieval schedule: topics due for a recall check (most overdue first) and those not yet
+    due, each with its level, interval, last correct recall, due date and lapses. Built from direct evidence only.
+    The briefing's 'due_for_review' is the short, ranked form of this; use this tool to see everything."""
+    return L.review_view(learner_id)

@@ -58,6 +58,13 @@
               <button class="btn primary" id="btn-prepare">Run the whole demo</button>
               <button class="btn" id="btn-reset">Reset</button>
             </div>
+            <div class="row" style="margin-top:12px;align-items:center;flex-wrap:wrap;gap:8px">
+              <span class="sub">Demo clock: <b id="clock-today"></b> <span id="clock-offset"></span></span>
+              <button class="btn" id="btn-clock-7">+7 days</button>
+              <button class="btn" id="btn-clock-21">+21 days</button>
+              <button class="btn" id="btn-clock-reset">Back to today</button>
+            </div>
+            <p class="sub" style="margin-top:6px">Moving the clock forward shows what a briefing looks like weeks after the evidence was recorded: topics fall due for review and agreed adjustments expire at their review date. The class's week is not moved.</p>
           </div>
           <div class="card">
             <h3>Four layers, kept separate</h3>
@@ -178,6 +185,7 @@
             <div class="card"><h3>Progress by topic</h3><p class="sub">Estimates from the pupil's own answers, plus weaker evidence inferred from later topics</p><div id="e-states"></div></div>
             <div class="card"><h3>Misconceptions</h3><p class="sub">Strength builds with each diagnosed error and fades with later successes</p><div id="e-mcs"></div></div>
           </div>
+          <div class="card"><h3>Due for review</h3><p class="sub" id="e-review-sub">Earlier topics the pupil is due to recall. Each correct recall after the due date lengthens the gap; a wrong one resets it.</p><div id="e-review"></div></div>
           <div class="card" id="e-adj"></div>
           <div class="card" id="e-beh"></div>
           <div class="card"><h3>Pupil answers log</h3><p class="sub">Only ever added to. Every row records its source, how it was tagged and the map version.</p><div class="tbl-wrap" id="e-log"></div></div>

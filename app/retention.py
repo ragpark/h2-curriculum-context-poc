@@ -54,3 +54,54 @@ def schedule(events: list[dict], now: dt.datetime, affects: dict[str, list[str]]
         s["due"] = s["due_at"] is not None and s["due_at"] <= now
         s["overdue_days"] = (now - s["due_at"]).total_seconds() / 86400 if s["due_at"] else None
     return st
+
+
+# ------------------------------------------------------------------ choosing what to put in a briefing
+BOOST = 1.5  # prerequisites of the focus or of the next step matter more
+
+
+def select_due(review: dict[str, dict], status: dict[str, str], taught: dict[str, int], focus: str | None,
+               next_concept: str | None, prereqs: dict[str, list], limit: int = 3) -> tuple[list[str], set[str]]:
+    """Which due topics a briefing should mention, in order. Pure: everything comes in as dicts.
+    review:  {concept: {due, overdue_days, interval_days, ...}} (review_state with the clock applied)
+    status:  {concept: learner status}      taught: {concept: scheme week}     prereqs: {concept: [(prerequisite, weight)]}
+    Eligible: taught to the class, direct evidence (every review row has some), due, not the focus, secure or developing.
+    Rank by overdue_days / interval_days, ×BOOST for prerequisites of the focus or the next step; ties go to a topic from
+    a different scheme week than the focus, then the earlier week."""
+    boost = {p for p, _ in prereqs.get(focus, [])} if focus else set()
+    if next_concept:
+        boost |= {p for p, _ in prereqs.get(next_concept, [])}
+    cands = [c for c, r in review.items()
+             if c in taught and r.get("due") and c != focus and status.get(c) in ("secure", "developing")]
+    focus_week = taught.get(focus) if focus else None
+
+    def key(c):
+        r = review[c]
+        score = (r["overdue_days"] / r["interval_days"]) * (BOOST if c in boost else 1.0)
+        return (-score, taught[c] == focus_week, taught[c])
+
+    return sorted(cands, key=key)[:limit], boost
+
+
+def relative(then: dt.datetime, now: dt.datetime) -> str:
+    """'today', 'yesterday', '5 days ago', '3 weeks ago' — for prose in a briefing or a raw pack."""
+    d = (now.date() - then.date()).days
+    if d <= 0:
+        return "today"
+    if d == 1:
+        return "yesterday"
+    if d < 14:
+        return f"{d} days ago"
+    return f"{d // 7} weeks ago"
+
+
+def why(r: dict, boosted: bool, now: dt.datetime) -> str:
+    """One short reason, about the topic and never about the pupil."""
+    bits = []
+    if r.get("lapses"):
+        bits.append("slipped once before" if r["lapses"] == 1 else f"slipped {r['lapses']} times before")
+    if r.get("last_success"):
+        bits.append(f"last recalled correctly {relative(r['last_success'], now)}")
+    if boosted:
+        bits.append("a prerequisite of the current focus or next step")
+    return "; ".join(bits) if bits else "due for a recall check"

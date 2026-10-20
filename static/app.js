@@ -68,8 +68,22 @@ async function loadGraph() {
   S.labels = {};
   for (const k of ["concepts", "misconceptions", "methods", "representations", "sections"]) for (const n of S.graph[k] || []) S.labels[n.id] = n.label;
 }
+async function refreshClock() {
+  const c = await api("/api/admin/clock");
+  if ($("#clock-today")) {
+    $("#clock-today").textContent = c.today;
+    $("#clock-offset").textContent = c.offset_days ? `(${c.offset_days > 0 ? "+" : ""}${c.offset_days} days from the real date)` : "(the real date)";
+  }
+}
+
+async function setClock(body) {
+  await api("/api/admin/clock", { method: "POST", body: JSON.stringify(body) });
+  await refreshClock();
+}
+
 async function refreshStatus() {
   S.status = await api("/api/status");
+  refreshClock().catch(() => {});
   const st = S.status, c = st.counts;
   $("#chips").innerHTML = [
     `<span class="chip ok"><span class="dot"></span>Map ${esc(S.graph.version)}</span>`,
@@ -423,6 +437,16 @@ function renderAlignResult(r) {
 }
 
 /* ------------------------------------------------------------------ evidence (H1) */
+function renderReview(rv) {
+  const rows = [...rv.due, ...rv.not_due];
+  $("#e-review-sub").textContent = `As of ${rv.as_of} · ${rv.due.length} due · intervals ${rv.intervals.join(", ")} days by level. Built from the pupil's direct answers only; the clock can be moved from the Overview page.`;
+  $("#e-review").innerHTML = rows.length ? `<table class="t"><tr><th>Topic</th><th>Status</th><th>Level</th><th>Last correct</th><th>Due</th><th>Lapses</th></tr>${rows.map((r) => `<tr>
+    <td>${esc(r.label)}</td><td>${badge(r.status)}</td><td class="mono">${r.level} <span class="sub">(${r.interval_days}d)</span></td>
+    <td class="sub">${r.last_success ? r.last_success.slice(0, 10) : "never"}</td>
+    <td>${r.due_at ? (r.due ? `<b>due</b> <span class="sub">${Math.round(r.overdue_days)}d overdue</span>` : `<span class="sub">${r.due_at.slice(0, 10)}</span>`) : `<span class="sub">no correct answer yet</span>`}</td>
+    <td class="mono">${r.lapses}</td></tr>`).join("")}</table>` : `<div class="empty">No direct evidence yet</div>`;
+}
+
 async function renderEvidence() {
   $("#e-pupils").innerHTML = S.pupils.map((p) => { const sc = S.scenarios.find((s) => s.pupil === p.id); return `<button class="pupil ${p.id === S.pupil ? "on" : ""}" data-p="${p.id}"><b>${esc(p.name)}</b><span>Class ${esc(p.class)} · ${esc(sc ? sc.title : "")}</span></button>`; }).join("");
   document.querySelectorAll("[data-p]").forEach((b) => (b.onclick = () => { S.pupil = b.dataset.p; S.lastExplain = null; renderEvidence(); }));
@@ -468,6 +492,7 @@ async function renderEvidence() {
   $("#e-states").innerHTML = lv.state.length ? `<table class="t">${lv.state.map((s) => `<tr><td>${esc(s.label)}</td><td>${badge(s.status)}</td><td style="width:90px">${bar(s.mastery, statusColor(s.status))}<div class="sub">${pct(s.mastery)}</div></td><td class="sub" title="direct / inferred evidence">${s.n_direct}d · ${s.n_inferred}i</td></tr>`).join("")}</table>` : `<div class="empty">No estimates yet</div>`;
   renderBehaviour(await api(`/api/learners/${S.pupil}/behaviour`));
   renderAdjustments(await api(`/api/learners/${S.pupil}/adjustments`));
+  renderReview(await api(`/api/learners/${S.pupil}/review`));
   $("#e-mcs").innerHTML = lv.misconceptions.length ? lv.misconceptions.map((m) => `<div style="margin-bottom:12px">${tag("misconception", m.id)} ${m.active ? badge("gap").replace(">gap<", ">active<") : badge("faded")}
       <div class="row" style="align-items:center;margin-top:6px"><div style="flex:1">${bar(m.strength, "var(--mc)")}</div><span class="sub">strength ${pct(m.strength)} · seen ${m.count}×</span></div>
       <div class="sub" style="margin-top:4px">Affects: ${m.affects.map((c) => esc(c.label)).join(", ")}</div></div>`).join("") : `<div class="empty">None diagnosed</div>`;
@@ -816,6 +841,9 @@ function bindStatic() {
   document.querySelectorAll("[data-page-link]").forEach((a) => (a.onclick = (e) => { e.preventDefault(); show(a.dataset.pageLink); }));
   document.querySelectorAll("[data-go-help]").forEach((a) => (a.onclick = (e) => { e.preventDefault(); show("help"); }));
   $("#btn-prepare").onclick = (e) => busy(e.currentTarget, async () => { await api("/api/demo/prepare", { method: "POST" }); await refreshStatus(); toast("Materials tagged and scenarios recorded"); show("context"); });
+  $("#btn-clock-7").onclick = (e) => busy(e.currentTarget, async () => { await setClock({ advance_days: 7 }); toast("Clock moved forward 7 days"); });
+  $("#btn-clock-21").onclick = (e) => busy(e.currentTarget, async () => { await setClock({ advance_days: 21 }); toast("Clock moved forward 21 days"); });
+  $("#btn-clock-reset").onclick = (e) => busy(e.currentTarget, async () => { await setClock({ reset: true }); toast("Clock back to the real date"); });
   $("#btn-reset").onclick = (e) => busy(e.currentTarget, async () => { await api("/api/admin/reset", { method: "POST" }); await loadGraph(); S.sel = null; S.overlay = "none"; S.lastExplain = null; S.ctxDone = S.evalDone = false; await refreshStatus(); toast("Demo reset to graph 2026.2 with no alignments or evidence"); show("overview"); });
   $("#btn-release").onclick = (e) => busy(e.currentTarget, async () => {
     const r = await api("/api/admin/release", { method: "POST" });

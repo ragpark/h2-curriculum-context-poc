@@ -168,6 +168,23 @@ def review_state(learner: str) -> dict[str, dict]:
     return out
 
 
+def review_view(learner: str) -> dict:
+    """Full review schedule for inspection: due topics first, most overdue at the top."""
+    g = G.get()
+    sm = state_map(learner)
+    rows = []
+    for c, r in review_state(learner).items():
+        rows.append({**g.ref(c), "status": sm[c]["status"] if c in sm else "no evidence",
+                     "level": r["level"], "interval_days": r["interval_days"],
+                     "last_success": r["last_success"].isoformat() if r["last_success"] else None,
+                     "last_seen": r["last_seen"].isoformat() if r["last_seen"] else None,
+                     "due_at": r["due_at"].isoformat() if r["due_at"] else None,
+                     "due": r["due"], "overdue_days": r["overdue_days"], "lapses": r["lapses"], "reviews": r["reviews"]})
+    rows.sort(key=lambda x: (not x["due"], -(x["overdue_days"] if x["overdue_days"] is not None else -1e9)))
+    return {"learner": learner, "as_of": clock.today().isoformat(), "intervals": R.INTERVALS,
+            "due": [x for x in rows if x["due"]], "not_due": [x for x in rows if not x["due"]]}
+
+
 def state_map(learner: str) -> dict[str, dict]:
     return {s["concept"]: s for s in db.q("select * from learner_state where learner=%s", (learner,))}
 

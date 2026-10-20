@@ -1,5 +1,6 @@
 """H1 pipeline: evidence → (align if untagged) → append-only store → learner-model projection with graph propagation."""
 from . import align as A
+from . import clock
 from . import db
 from . import behaviour as B
 from . import graph as G
@@ -16,8 +17,10 @@ def _norm(s):
 def record(learner: str, *, source: str, item: str | None = None, response: str | None = None,
            activity: str | None = None, score: float | None = None, mode: str | None = None,
            process: list[dict] | None = None, concepts: list[str] | None = None,
-           misconception: str | None = None) -> dict:
+           misconception: str | None = None, days_ago: float | None = None) -> dict:
+    """days_ago backdates the evidence (synthetic histories only): ts = clock.now() - days_ago."""
     g = G.get()
+    ts = clock.ago(days_ago) if days_ago else clock.now()
     p = db.q1("select * from pupil where id=%s", (learner,))
     if not p:
         raise KeyError(learner)
@@ -50,11 +53,11 @@ def record(learner: str, *, source: str, item: str | None = None, response: str 
         conf = min([c["confidence"] for c in alignment["concepts"]] or [0.0])
         prov = alignment["provenance"]
         outcome = float(score if score is not None else 0.5)
-    row = db.q1("""insert into evidence(learner,tenant,source,item,activity,response,outcome,concepts,concept_provenance,confidence,misconception,graph_version)
-                   values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning id, ts""",
-                (learner, p["class"], source, item, activity, response, outcome, db.J(concepts), prov, conf, misconception, g.version_for(subject)))
+    row = db.q1("""insert into evidence(learner,tenant,source,item,activity,response,outcome,concepts,concept_provenance,confidence,misconception,graph_version,ts)
+                   values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) returning id, ts""",
+                (learner, p["class"], source, item, activity, response, outcome, db.J(concepts), prov, conf, misconception, g.version_for(subject), ts))
     # learning behaviour is interpreted against the pupil's knowledge BEFORE this answer, so derive it first
-    beh = B.ingest(learner, row["id"], item, concepts, source, process)
+    beh = B.ingest(learner, row["id"], item, concepts, source, process, ts=ts)
     project(learner)
     return {"evidence_id": row["id"], "behaviour": beh, "outcome": outcome, "concepts": [g.ref(c) for c in concepts],
             "concept_provenance": prov, "confidence": conf,

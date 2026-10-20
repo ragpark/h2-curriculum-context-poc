@@ -22,6 +22,7 @@ from . import scheme as SW
 from . import seed as S
 from . import tutor as T
 from . import tutors as TU
+from . import clock
 from . import validate as VAL
 from . import versioning as V
 from .mcp_server import mcp
@@ -516,3 +517,26 @@ def release():
 def reset():
     S.reset()
     return status()
+
+
+# ---------------------------------------------------------------- clock (demo time: real time plus an offset in days)
+class ClockIn(BaseModel):
+    advance_days: int | None = None
+    set: str | None = None
+    reset: bool = False
+
+
+@app.get("/api/admin/clock")
+def clock_get():
+    return clock.state()
+
+
+@app.post("/api/admin/clock")
+def clock_set(c: ClockIn):
+    if c.reset:
+        return clock.reset()
+    if c.set:
+        return clock.set_date(c.set)
+    if c.advance_days is not None:
+        return clock.advance(c.advance_days)
+    raise HTTPException(400, "give advance_days, set (YYYY-MM-DD) or reset")

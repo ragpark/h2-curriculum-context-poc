@@ -9,6 +9,7 @@ import re
 from . import adjustments as ADJ
 from . import align as A
 from . import behaviour as B
+from . import clock
 from . import content as C
 from . import db
 from . import graph as G
@@ -315,6 +316,7 @@ def _with_h2(p, cls, concept, message, mode):
     pack = {
         "mode": "with_h2",
         "graph_version": g.version_for(subject),
+        "as_of": clock.today().isoformat(),
         "request": {"intent": (read or {}).get("intent"), "message_topic": g.label(read["concept"]) if read and read.get("concept") else None},
         "focus": {**g.ref(focus), "chosen_because": how, "crosswalk": g.crosswalk.get(focus, [])},
         "learner": {

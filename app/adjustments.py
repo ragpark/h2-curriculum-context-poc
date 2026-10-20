@@ -11,6 +11,7 @@ from pathlib import Path
 
 import yaml
 
+from . import clock
 from . import db
 
 SEED = Path(__file__).resolve().parent.parent / "seed"
@@ -56,7 +57,7 @@ def clear_profile(pupil: str) -> None:
 def profile(pupil: str, today: dt.date | None = None) -> dict:
     """The pupil's adjustments, split into current and expired (past review date)."""
     v = vocab()
-    today = today or dt.date.today()
+    today = today or clock.today()
     rows = db.q("select * from learner_adjustment where learner=%s", (pupil,))
     order = {i: n for n, i in enumerate(v["order"])}
     rows.sort(key=lambda r: order.get(r["adjustment"], 99))

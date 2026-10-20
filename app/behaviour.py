@@ -15,6 +15,7 @@ from pathlib import Path
 
 import yaml
 
+from . import clock
 from . import db
 from . import graph as G
 
@@ -98,16 +99,18 @@ def derive(learner: str, events: list[dict], concepts: list[str]) -> list[tuple[
     return out
 
 
-def ingest(learner: str, episode: int, item: str | None, concepts: list[str], source: str, process: list[dict] | None) -> dict:
-    """Store observable events (except session-only affect), then derive this episode's indicators."""
+def ingest(learner: str, episode: int, item: str | None, concepts: list[str], source: str, process: list[dict] | None, ts=None) -> dict:
+    """Store observable events (except session-only affect), then derive this episode's indicators.
+    ts: when the episode happened (defaults to the clock's now)."""
+    ts = ts or clock.now()
     if not process:
         return {"stored": 0, "discarded_session_only": 0, "indicators": []}
     kept = [e for e in process if e.get("type") != "affect"]
     discarded = len(process) - len(kept)
     for e in kept:
         payload = {k: v for k, v in e.items() if k not in ("type", "t")}
-        db.ex("insert into behaviour_event(learner,episode,item,concepts,type,t,payload,source) values(%s,%s,%s,%s,%s,%s,%s,%s)",
-              (learner, episode, item, db.J(concepts), e["type"], e.get("t", 0), db.J(payload), source))
+        db.ex("insert into behaviour_event(learner,episode,item,concepts,type,t,payload,source,ts) values(%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+              (learner, episode, item, db.J(concepts), e["type"], e.get("t", 0), db.J(payload), source, ts))
     inds = derive(learner, [{"type": e["type"], "t": e.get("t", 0), **e} for e in kept], concepts)
     f = fw()
     for iid, detail in inds:

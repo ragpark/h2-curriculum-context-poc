@@ -61,14 +61,19 @@ def align_text(text: str, subject: str = "maths") -> dict:
 
 @mcp.tool()
 def record_evidence(learner_id: str, source: str, item_id: str = "", response: str = "", activity: str = "", score: float = -1,
-                    process: list[dict] | None = None, concept_ids: list[str] | None = None, misconception_id: str = "") -> dict:
+                    process: list[dict] | None = None, concept_ids: list[str] | None = None, misconception_id: str = "",
+                    provenance: str = "") -> dict:
     """Record a pupil's answer. Either item_id + response (a question tagged to the map) or activity + score 0–1
     (untagged; the tagging service interprets it). Optional 'process': events observed while answering, e.g.
     [{"type":"hint_requested","t":3},{"type":"attempt","t":40,"answer":"x = 4","correct":true},{"type":"confidence","t":42,"rating":2}].
     Types: attempt, hint_requested, answer_revised, checked, plan_stated, confidence (1-4), abandoned, affect (session only, never stored).
     For marked written work (e.g. an English paragraph), give activity + score + concept_ids (the topics it covered)
     and optionally misconception_id (e.g. 'mc:english/retelling').
-    Updates the pupil's progress and learning-behaviour patterns."""
+    A tutor tagging an answer itself (activity + score + concept_ids) should pass provenance='tutor'; it is weighted
+    between the tagging service and a teacher. A 'retrieval' process event ({"type":"retrieval","concept":"...",
+    "prompted_by":"tutor"}) records that the answer was a recall of an earlier topic.
+    Updates the pupil's progress, learning-behaviour patterns and review schedule."""
     return L.record(learner_id, source=source, item=item_id or None, response=response or None,
                     activity=activity or None, score=None if score < 0 else score, process=process,
-                    concepts=concept_ids or None, misconception=misconception_id or None)
+                    concepts=concept_ids or None, misconception=misconception_id or None,
+                    provenance=provenance or None)

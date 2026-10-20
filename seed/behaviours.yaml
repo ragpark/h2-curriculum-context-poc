@@ -58,6 +58,7 @@ events:
   - {type: confidence, fields: [rating]}        # 1 (guessing) to 4 (certain)
   - {type: abandoned, fields: []}
   - {type: affect, fields: [signal]}            # e.g. frustration. SESSION ONLY: never stored.
+  - {type: retrieval, fields: [concept, prompted_by]}  # a recall of an earlier topic; prompted_by: tutor | quiz | teacher. Stored; no indicators derived yet.
 
 retention:
   session_only: "Emotional signals (affect). Used in the moment, discarded at ingestion, never stored."

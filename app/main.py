@@ -318,12 +318,15 @@ class EvidenceIn(BaseModel):
     process: list[dict] | None = None
     concepts: list[str] | None = None
     misconception: str | None = None
+    provenance: str | None = None  # 'tutor' when a tutor, not a teacher, tagged the concepts
 
 
 @app.post("/api/evidence")
 def evidence(e: EvidenceIn):
+    if e.provenance not in (None, "tutor"):
+        raise HTTPException(400, "provenance may only be 'tutor' (teacher-marked work needs no provenance)")
     r = L.record(e.learner, source=e.source, item=e.item, response=e.response, activity=e.activity, score=e.score, mode=e.mode,
-                 process=e.process, concepts=e.concepts, misconception=e.misconception)
+                 process=e.process, concepts=e.concepts, misconception=e.misconception, provenance=e.provenance)
     return {"recorded": r, "learner": L.view(e.learner)}
 
 

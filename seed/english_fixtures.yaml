@@ -118,11 +118,11 @@ scenarios:
     pupil: pupil:priya
     story: "Strong on quotations and context facts, but her paragraphs explain what happens rather than how Shakespeare presents it, and name techniques without their effect."
     events:
-      - {source: "Class quiz", activity: "Quotation retrieval quiz: Acts 1–2", concepts: [sk-quotation, ch-macbeth], score: 0.9}
-      - {source: "Class quiz", activity: "Context quiz: James I, the Gunpowder Plot and witchcraft", concepts: [ctx-james, ctx-gunpowder, ctx-witchcraft], score: 0.85}
-      - {source: "Teacher marking", activity: "Paragraph: How does Shakespeare present Macbeth's ambition in 'Stars, hide your fires'?", concepts: [th-ambition, ch-macbeth, sk-language], score: 0.35, misconception: mc:english/retelling}
-      - {source: "Teacher marking", activity: "Paragraph: blood imagery in Act 2 Scene 2", concepts: [lf-blood, th-guilt, sk-language], score: 0.4, misconception: mc:english/feature-spotting}
-      - {source: "Teacher marking", activity: "Paragraph: Lady Macbeth in Act 1 Scene 5", concepts: [ch-lady, sk-language], score: 0.4, misconception: mc:english/retelling}
+      - {source: "Class quiz", activity: "Quotation retrieval quiz: Acts 1–2", concepts: [sk-quotation, ch-macbeth], score: 0.9, days_ago: 30}
+      - {source: "Class quiz", activity: "Context quiz: James I, the Gunpowder Plot and witchcraft", concepts: [ctx-james, ctx-gunpowder, ctx-witchcraft], score: 0.85, days_ago: 24}
+      - {source: "Teacher marking", activity: "Paragraph: How does Shakespeare present Macbeth's ambition in 'Stars, hide your fires'?", concepts: [th-ambition, ch-macbeth, sk-language], score: 0.35, misconception: mc:english/retelling, days_ago: 16}
+      - {source: "Teacher marking", activity: "Paragraph: blood imagery in Act 2 Scene 2", concepts: [lf-blood, th-guilt, sk-language], score: 0.4, misconception: mc:english/feature-spotting, days_ago: 9}
+      - {source: "Teacher marking", activity: "Paragraph: Lady Macbeth in Act 1 Scene 5", concepts: [ch-lady, sk-language], score: 0.4, misconception: mc:english/retelling, days_ago: 3}
   - id: bolts-on-context
     title: "Good analysis, but context bolted on and characters as real people"
     pupil: pupil:tom

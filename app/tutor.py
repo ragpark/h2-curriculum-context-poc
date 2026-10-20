@@ -64,5 +64,6 @@ def run_scenario(sid: str, mode: str | None = None) -> dict:
     for e in sc["events"]:
         out.append(L.record(sc["pupil"], source=e["source"], item=e.get("item"), response=e.get("response"),
                             activity=e.get("activity"), score=e.get("score"), mode=mode, process=e.get("process"),
-                            concepts=e.get("concepts") or None, misconception=e.get("misconception")))
+                            concepts=e.get("concepts") or None, misconception=e.get("misconception"),
+                            days_ago=e.get("days_ago")))
     return {"scenario": sc, "recorded": out, "learner": L.view(sc["pupil"])}

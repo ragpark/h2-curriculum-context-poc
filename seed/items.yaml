@@ -121,30 +121,36 @@ scenarios:
     title: "Sign-transfer pattern on both-sides equations"
     pupil: pupil:amara
     story: "Secure on inverse operations and two-step equations, but repeatedly moves terms across the equals sign without changing the operation."
+    # days_ago backdates each step (ts = clock.now() - days_ago). Order is kept: later steps are never earlier in time.
+    # Week 1: inverse operations and one-step equations, secured and not seen since. Week 2: two-step. Week 3: like
+    # terms. Week 4 (this week): both sides, where the sign-transfer error shows.
     events:
-      - {source: "Homework platform", item: item:inv-1, response: "5"}
-      - {source: "Homework platform", item: item:inv-2, response: "add 7"}
-      - {source: "Homework platform", item: item:one-1, response: "x = 5"}
-      - {source: "Homework platform", item: item:two-1, response: "x = 4"}
-      - {source: "Homework platform", item: item:two-2, response: "x = 7"}
-      - {source: "Homework platform", item: item:clt-1, response: "3x + 7"}
-      - {source: "Vendor X tutor", item: item:bs-1, response: "x = 5"}
-      - {source: "Vendor X tutor", item: item:bs-2, response: "x = 1.2"}
-      - {source: "Vendor X tutor", item: item:bs-1, response: "x = 9/7"}
-      - {source: "Vendor X tutor", item: item:bs-3, response: "x = 4"}
-      - {source: "Teacher markbook", activity: "Algebra 3 homework — solving equations with x on both sides", score: 0.45}
+      - {source: "Homework platform", item: item:inv-1, response: "5", days_ago: 38}
+      - {source: "Homework platform", item: item:inv-2, response: "add 7", days_ago: 36}
+      - {source: "Homework platform", item: item:one-1, response: "x = 5", days_ago: 35}
+      - {source: "Homework platform", item: item:two-1, response: "x = 4", days_ago: 28}
+      - {source: "Homework platform", item: item:two-2, response: "x = 7", days_ago: 27}
+      - {source: "Homework platform", item: item:clt-1, response: "3x + 7", days_ago: 20}
+      - {source: "Vendor X tutor", item: item:bs-1, response: "x = 5", days_ago: 9}
+      - {source: "Vendor X tutor", item: item:bs-2, response: "x = 1.2", days_ago: 7}
+      - {source: "Vendor X tutor", item: item:bs-1, response: "x = 9/7", days_ago: 5}
+      - {source: "Vendor X tutor", item: item:bs-3, response: "x = 4", days_ago: 3}
+      - {source: "Teacher markbook", activity: "Algebra 3 homework — solving equations with x on both sides", score: 0.45, days_ago: 1}
   - id: brackets-gap
     title: "Secure on equations, gap in expanding brackets"
     pupil: pupil:ben
     story: "Solves equations well but only multiplies the first term in a bracket and struggles with negatives."
+    # Backdated over four weeks. The directed-numbers item in week 2 was right; the same topic was wrong again in
+    # week 4: one lapse, so the retention projection has something to show.
     events:
-      - {source: "Homework platform", item: item:two-1, response: "x = 4"}
-      - {source: "Homework platform", item: item:bs-1, response: "x = 3"}
-      - {source: "Homework platform", item: item:bs-2, response: "x = 3"}
-      - {source: "Vendor X tutor", item: item:exp-1, response: "3x + 2"}
-      - {source: "Vendor X tutor", item: item:exp-2, response: "−2x − 6"}
-      - {source: "Vendor X tutor", item: item:dir-1, response: "−6"}
-      - {source: "Vendor X tutor", item: item:br-1, response: "x = 19/3"}
+      - {source: "Homework platform", item: item:two-1, response: "x = 4", days_ago: 30}
+      - {source: "Homework platform", item: item:dir-2, response: "9", days_ago: 25}
+      - {source: "Homework platform", item: item:bs-1, response: "x = 3", days_ago: 22}
+      - {source: "Homework platform", item: item:bs-2, response: "x = 3", days_ago: 21}
+      - {source: "Vendor X tutor", item: item:exp-1, response: "3x + 2", days_ago: 10}
+      - {source: "Vendor X tutor", item: item:exp-2, response: "−2x − 6", days_ago: 9}
+      - {source: "Vendor X tutor", item: item:dir-1, response: "−6", days_ago: 8}
+      - {source: "Vendor X tutor", item: item:br-1, response: "x = 19/3", days_ago: 2}
   - id: new-starter
     title: "New to the strand"
     pupil: pupil:chloe
@@ -178,14 +184,17 @@ scenarios:
     title: "Same answers as Ben, no agreed adjustments"
     pupil: pupil:bilal
     story: "Identical evidence to Ben. He has no adjustments profile. He exists so the effect of Ben's adjustments can be measured on its own."
+    # Backdated over four weeks. The directed-numbers item in week 2 was right; the same topic was wrong again in
+    # week 4: one lapse, so the retention projection has something to show.
     events:
-      - {source: "Homework platform", item: item:two-1, response: "x = 4"}
-      - {source: "Homework platform", item: item:bs-1, response: "x = 3"}
-      - {source: "Homework platform", item: item:bs-2, response: "x = 3"}
-      - {source: "Vendor X tutor", item: item:exp-1, response: "3x + 2"}
-      - {source: "Vendor X tutor", item: item:exp-2, response: "−2x − 6"}
-      - {source: "Vendor X tutor", item: item:dir-1, response: "−6"}
-      - {source: "Vendor X tutor", item: item:br-1, response: "x = 19/3"}
+      - {source: "Homework platform", item: item:two-1, response: "x = 4", days_ago: 30}
+      - {source: "Homework platform", item: item:dir-2, response: "9", days_ago: 25}
+      - {source: "Homework platform", item: item:bs-1, response: "x = 3", days_ago: 22}
+      - {source: "Homework platform", item: item:bs-2, response: "x = 3", days_ago: 21}
+      - {source: "Vendor X tutor", item: item:exp-1, response: "3x + 2", days_ago: 10}
+      - {source: "Vendor X tutor", item: item:exp-2, response: "−2x − 6", days_ago: 9}
+      - {source: "Vendor X tutor", item: item:dir-1, response: "−6", days_ago: 8}
+      - {source: "Vendor X tutor", item: item:br-1, response: "x = 19/3", days_ago: 2}
   - id: secure-and-ahead-twin
     title: "Same answers as Farah, no agreed adjustments"
     pupil: pupil:fatima
